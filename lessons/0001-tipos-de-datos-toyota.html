@@ -18,15 +18,15 @@
     <a href="../ToyotaCorolla.csv">CSV</a></p>
   </header>
 
-  <h2>1 · De símbolos a sabiduría (la escalera DIKW)</h2>
+  <h2>1 · De símbolos a sabiduría (la escalera <abbr title="DIKW: Data, Information, Knowledge, Wisdom — datos, información, conocimiento, sabiduría">DIKW</abbr>)</h2>
   <p>Se dice que <strong>“los datos son el nuevo petróleo”</strong>: el valor no está en el crudo,
-  sino en refinarlo. Y se aplica una <strong>Ley de Moore pero en los datos</strong>: cada año generamos,
+  sino en refinarlo. Y se aplica una <strong><abbr title="Ley de Moore: la capacidad de cómputo se duplica cada ~2 años; acá se usa como analogía del crecimiento explosivo de los datos">Ley de Moore</abbr> pero en los datos</strong>: cada año generamos,
   guardamos y procesamos órdenes de magnitud más datos que el anterior. Por eso existe esta materia.</p>
   <p>La escalera, de abajo hacia arriba:</p>
   <ul>
     <li><strong>Datos.</strong> Símbolos crudos, sin procesar. Simplemente existen; no tienen significado más
     allá de su existencia. Pueden estar en cualquier forma, usable o no. Ejemplo: el número <code>46986</code>
-    suelto en el CSV no dice nada.</li>
+    suelto en el <abbr title="CSV: archivo de texto con valores separados por comas; cada fila es un caso">CSV</abbr> no dice nada.</li>
     <li><strong>Información.</strong> Datos organizados, estructurados o contextualizados para darles significado.
     Agrega contexto, relevancia y comprensión. Ejemplo: <code>KM = 46986</code> en la fila de un Corolla diésel de 23 meses:
     ya describe algo observado y medido. Una columna a la que no se le puede dar contexto no genera valor.</li>
@@ -47,7 +47,7 @@
   <p>Por la <strong>abundancia de datos</strong>:</p>
   <ul>
     <li>Abaratamiento y aumento de la capacidad de <strong>almacenamiento y recopilación</strong>.</li>
-    <li><strong>Nuevas fuentes</strong>: IoT, redes sociales, digitalización del comercio y de los registros médicos.</li>
+    <li><strong>Nuevas fuentes</strong>: <abbr title="IoT: Internet of Things; objetos cotidianos conectados (sensores, autos, relojes) que generan datos">IoT</abbr>, redes sociales, digitalización del comercio y de los registros médicos.</li>
     <li>Las organizaciones empiezan a <strong>guardar todo tipo de datos</strong> y a reconocer su valor estratégico.</li>
   </ul>
   <p>Nuestro caso: 1436 autos × 37 columnas ya alcanzan para equivocarse de muchas formas instructivas.
@@ -59,19 +59,19 @@ print(df.shape)  # (1436, 37)</code></pre>
   <h2>3 · El win: clasificar cada columna Toyota en su tipo</h2>
   <table>
     <tr><th>Tipo</th><th>Columnas ejemplo (valor real)</th><th>Cómo reconocerlo</th></tr>
-    <tr><td><strong>Numérica continua</strong></td>
+    <tr><td><strong><abbr title="Continua: acepta cualquier valor dentro de un rango, decimales incluidos (ej. 9900.50)">Numérica continua</abbr></strong></td>
       <td><code>Price</code> (13.500; mediana ≈ 9.900, media ≈ 10.731),
       <code>KM</code> (46.986; mediana ≈ 63.390)</td>
-      <td>Acepta cualquier valor en un rango (decimales incluidos). El boxplot tiene sentido.</td></tr>
-    <tr><td><strong>Numérica discreta / ordinal</strong></td>
+      <td>Acepta cualquier valor en un rango (decimales incluidos). El <abbr title="Boxplot: gráfico de caja; de un vistazo muestra mediana, cuartiles y atípicos">boxplot</abbr> tiene sentido.</td></tr>
+    <tr><td><strong><abbr title="Discreta: solo valores contables y separados, típicamente enteros; ordinal suma un orden natural (enero < febrero)">Numérica discreta / ordinal</abbr></strong></td>
       <td><code>Age_08_04</code> (23 meses; 77 valores distintos),
       <code>Mfg_Month</code> (10; solo 1–12)</td>
-      <td>Solo enteros contables u ordenados. <code>Mfg_Month</code> además es ordinal: enero &lt; febrero &lt; …</td></tr>
-    <tr><td><strong>Categórica</strong></td>
+      <td>Solo enteros contables u ordenados. <code>Mfg_Month</code> además es <abbr title="Ordinal: categorías con un orden natural, como los meses del año">ordinal</abbr>: enero &lt; febrero &lt; …</td></tr>
+    <tr><td><strong><abbr title="Categórica: etiquetas sin aritmética válida; no se pueden sumar ni promediar">Categórica</abbr></strong></td>
       <td><code>Fuel_Type</code> (Diesel; Petrol 1264 / Diesel 155 / CNG 17),
       <code>Model</code> (“TOYOTA Corolla 2.0 D4D…”, 147 filas con <code>?</code> inicial)</td>
-      <td>Etiquetas sin aritmética válida. <code>Fuel_Type</code> es nominal y está desbalanceada (U8).</td></tr>
-    <tr><td><strong>Binaria 0/1</strong></td>
+      <td>Etiquetas sin aritmética válida. <code>Fuel_Type</code> es <abbr title="Nominal: etiquetas sin orden ni aritmética válida (nafta, diésel, gas)">nominal</abbr> y está <abbr title="Desbalanceada: una categoría concentra la gran mayoría (Petrol: 1264 de 1436)">desbalanceada</abbr> (U8).</td></tr>
+    <tr><td><strong><abbr title="Binaria: solo dos estados posibles; 1 = presencia y 0 = ausencia">Binaria 0/1</abbr></strong></td>
       <td><code>Airco</code> (1: hay 730, 0: hay 706),
       <code>ABS</code> (1: hay 1168, 0: hay 268)</td>
       <td>Solo dos estados: presencia/ausencia de equipamiento. Base de reglas de asociación (U9).</td></tr>
@@ -86,18 +86,18 @@ print(df["Fuel_Type"].value_counts())
 # Petrol    1264
 # Diesel     155
 # CNG         17</code></pre>
-  <p class="meta">Nota: con 1436 filas y 37 columnas el CSV no trae celdas vacías; la suciedad viene
+  <p class="meta">Nota: con 1436 filas y 37 columnas el <abbr title="CSV: archivo de texto con valores separados por comas; cada fila es un caso">CSV</abbr> no trae celdas vacías; la suciedad viene
   codificada (<code>?</code>, <code>KM=1</code>, rarezas en <code>cc/Doors/Gears</code>). Detalle en el
   <a href="../reference/toyota-data-dictionary.html">diccionario Toyota</a>.</p>
 
   <h2>4 · Figura: boxplots de Price y KM</h2>
-  <p>El boxplot es el gráfico honesto para una continua: mediana, cuartiles, bigotes y outliers de un vistazo.
+  <p>El <abbr title="Boxplot: gráfico de caja; de un vistazo muestra mediana, cuartiles y atípicos">boxplot</abbr> es el gráfico honesto para una continua: <abbr title="Mediana: el valor del medio con los datos ordenados">mediana</abbr>, <abbr title="Cuartiles: cortes que dividen los datos ordenados en cuatro partes iguales">cuartiles</abbr>, <abbr title="Bigotes (whiskers): líneas que salen de la caja hasta los valores no atípicos más extremos">bigotes</abbr> y <abbr title="Outliers: valores extremos que se alejan del resto">outliers</abbr> de un vistazo.
   Réplica de la Parte 1 del <a href="../reference/analisis-ejemplo-ols.html">análisis OLS de ejemplo</a>:</p>
   <figure>
     <img src="../assets/img/toyota/0001-tipos-de-datos-toyota-fig1.png" alt="Boxplots de KM y Price del dataset Toyota Corolla">
     <figcaption>Fig. 1 — Boxplots de <code>KM</code> (izq.) y <code>Price</code> (der.). Ambas son continuas con
     cola alta: outliers de precio (&gt; 20.000, hasta 32.500) y de kilometraje (&gt; 150.000, hasta 243.000).
-    La mediana (≈ 9.900 € y ≈ 63.390 km) resume mejor que la media.</figcaption>
+    La <abbr title="Mediana: el valor del medio con los datos ordenados; no la mueven los extremos">mediana</abbr> (≈ 9.900 € y ≈ 63.390 km) resume mejor que la <abbr title="Media: el promedio aritmético; los valores extremos la arrastran">media</abbr>.</figcaption>
   </figure>
   <p>Snippet generador (pandas + seaborn; el mismo que corre el script del curso):</p>
   <pre><code>import pandas as pd
@@ -118,24 +118,24 @@ fig.savefig("../assets/img/toyota/0001-tipos-de-datos-toyota-fig1.png", dpi=100)
   <h2>5 · Desafíos del análisis (y el gráfico más importante de la materia)</h2>
   <p>Con los tipos claros, estos son los <strong>principales desafíos</strong> que nos acompañarán todo el curso:</p>
   <ul>
-    <li>Cantidad insuficiente de datos de entrenamiento.</li>
-    <li>Datos de entrenamiento no representativos (sampling sesgado).</li>
+    <li>Cantidad insuficiente de <abbr title="Datos de entrenamiento (train): los casos con los que el modelo aprende">datos de entrenamiento</abbr>.</li>
+    <li>Datos de entrenamiento no representativos (<abbr title="Sampling: muestreo; elegir qué casos entran al análisis. Si no representa, sesga todo">sampling</abbr> sesgado).</li>
     <li>Datos de mala calidad (el <code>?</code> de <code>Model</code>, los <code>KM=1</code>).</li>
-    <li>Features irrelevantes (columnas basura que el OLS de referencia excluye).</li>
-    <li><strong>Overfitting</strong>: memorizar el entrenamiento (siempre hay un grado; lo grave es pasarse).</li>
-    <li><strong>Underfitting</strong>: modelo tan simple que ni aprende el entrenamiento.</li>
-    <li><strong>Bias–variance tradeoff</strong>: el equilibrio entre ambos. 👇</li>
+    <li><abbr title="Features: variables predictoras; las columnas que entran al modelo">Features</abbr> irrelevantes (columnas basura que el <abbr title="OLS: mínimos cuadrados ordinarios; el método clásico para ajustar una regresión lineal">OLS</abbr> de referencia excluye).</li>
+    <li><strong><abbr title="Overfitting: sobreajuste; el modelo memoriza el entrenamiento y falla con datos nuevos">Overfitting</abbr></strong>: memorizar el entrenamiento (siempre hay un grado; lo grave es pasarse).</li>
+    <li><strong><abbr title="Underfitting: subajuste; el modelo es tan simple que ni siquiera aprende el entrenamiento">Underfitting</abbr></strong>: modelo tan simple que ni aprende el entrenamiento.</li>
+    <li><strong><abbr title="Bias–variance tradeoff: dilema sesgo-varianza; bajar uno suele subir el otro, el óptimo está en el medio">Bias–variance tradeoff</abbr></strong>: el equilibrio entre ambos. 👇</li>
   </ul>
 
   <h3>El tradeoff sesgo–varianza, bien explicado</h3>
   <p>Para un punto nuevo, el error esperado de un modelo se descompone en tres piezas:</p>
   <p><strong>Error esperado = Sesgo² + Varianza + Error irreducible.</strong></p>
   <ul>
-    <li><strong>Sesgo (bias):</strong> cuánto se equivoca el modelo <em>en promedio</em>, por ser demasiado rígido.
+    <li><strong><abbr title="Sesgo (bias): error sistemático por rigidez del modelo; se equivoca parecido siempre">Sesgo (bias)</abbr>:</strong> cuánto se equivoca el modelo <em>en promedio</em>, por ser demasiado rígido.
     Modelo “tonto pero estable”. Ejemplo Toyota: predecir siempre 9.900 € (la mediana) sin mirar <code>KM</code>.</li>
-    <li><strong>Varianza (variance):</strong> cuánto <em>salta</em> la predicción si entreno con otra muestra.
+    <li><strong><abbr title="Varianza (variance): cuánto cambia la predicción si entreno con otra muestra">Varianza (variance)</abbr>:</strong> cuánto <em>salta</em> la predicción si entreno con otra muestra.
     Modelo “nervioso”. Ejemplo: un árbol gigante que memoriza cada <code>KM</code> exacto del entrenamiento.</li>
-    <li><strong>Error irreducible:</strong> ruido del mundo que ningún modelo quita (dos autos idénticos en
+    <li><strong><abbr title="Error irreducible: ruido del mundo que ningún modelo puede eliminar; es el piso del error">Error irreducible</abbr>:</strong> ruido del mundo que ningún modelo quita (dos autos idénticos en
     papel se venden a distinto precio). Es el piso de la gráfica.</li>
   </ul>
   <figure>
@@ -188,14 +188,14 @@ fig.savefig("../assets/img/toyota/0001-tipos-de-datos-toyota-fig1.png", dpi=100)
   <p><strong>Para profundizar (1 fuente):</strong>
   McKinney, <em>Python for Data Analysis</em> — capítulos de tipos de datos, pandas y limpieza
   (<a href="https://wesmckinney.com/book/">wesmckinney.com/book</a>, también en <a href="../index.html">RESOURCES.md</a> del índice).
-  Es la referencia del curso para todo lo que hoy verificaste con <code>select_dtypes</code> y
-  <code>value_counts</code>.</p>
+  Es la referencia del curso para todo lo que hoy verificaste con <code><abbr title="select_dtypes: método de pandas que filtra las columnas por tipo (numéricas, texto, …)">select_dtypes</abbr></code> y
+  <code><abbr title="value_counts: método de pandas que cuenta cuántos casos hay por categoría">value_counts</abbr></code>.</p>
   <p>¿Algo no quedó claro? <strong>Preguntame al agente</strong>: qué parte de la escalera dato → sabiduría,
   qué columna te cuesta clasificar, o cómo leer la U del tradeoff en tu propio modelo. Esa pregunta vale más que releer.</p>
 
   <nav class="lesson-nav">
     <a href="../index.html">← Índice (no hay anterior: es la 0001)</a>
-    <a href="0002-placeholder.html" title="Próxima lección (pendiente)">Siguiente: 0002 (pendiente) →</a>
+    <a href="../index.html" title="La lección 0002 aún no existe">Siguiente: 0002 (pendiente) →</a>
   </nav>
   <p class="meta">Ver también: <a href="../index.html">índice del curso</a> ·
   <a href="../reference/toyota-data-dictionary.html">diccionario Toyota</a> ·

@@ -9,44 +9,97 @@
 <body>
 <main>
   <header class="course">
-    <p class="kicker">Referencia · imprime bien · fuente: ToyotaCorolla.csv</p>
-    <h1>Diccionario del dataset Toyota Corolla</h1>
-    <p>1436 filas × 37 columnas. Precios de Toyota Corolla usados. Sin celdas vacías:
-    la suciedad viene codificada (<code>?</code>, <code>KM=1</code>, rarezas en <code>cc/Doors/Gears</code>).
-    Es el hilo conductor de todas las lecciones.</p>
+    <p class="kicker">Referencia · fuente: ToyotaCorolla.csv</p>
+    <h1>El dataset Toyota Corolla, descrito</h1>
+    <p>Son 1436 autos usados Toyota Corolla puestos a la venta, cada uno con 37 datos:
+    su precio, su kilometraje, su antigüedad, su combustible, su potencia y una larga lista
+    de equipamiento. Durante todo el curso vamos a trabajar siempre sobre esta misma tabla,
+    así que vale la pena conocerla a fondo antes de empezar.</p>
     <p class="meta"><a href="../index.html">← Índice</a> · <a href="../ToyotaCorolla.csv">CSV</a></p>
   </header>
 
-  <h2>Columnas clave por unidad</h2>
+  <p>Cuando en clase vimos <code>df.info()</code>, lo que hacía era presentarnos el dataset:
+  cuántas filas tiene, cuántas columnas, de qué tipo es cada una y si hay valores vacíos.
+  Y <code>df.describe()</code> nos daba el resumen numérico de cada columna:
+  cuántos valores hay (<abbr title="count: cantidad de valores no vacíos en la columna">count</abbr>),
+  el promedio (<abbr title="mean: el promedio aritmético de los valores">mean</abbr>),
+  cuánto se dispersan los valores alrededor del promedio
+  (<abbr title="std: desviación estándar, mide cuánto se alejan típicamente los valores del promedio">std</abbr>),
+  el valor más chico (<abbr title="min: el valor más pequeño de la columna">min</abbr>),
+  los cortes del 25 %, 50 % y 75 % (los
+  <abbr title="Cuartiles: valores que dividen los datos ordenados en cuatro partes iguales">cuartiles</abbr>;
+  el del 50 % es la <abbr title="Mediana: el valor del medio cuando los datos están ordenados">mediana</abbr>)
+  y el valor más grande (<abbr title="max: el valor más grande de la columna">max</abbr>).
+  Esta página es exactamente eso: el <code>info()</code> y el <code>describe()</code> del dataset,
+  explicados con palabras.</p>
+
+  <h2>Las columnas, una por una</h2>
   <table>
-    <tr><th>Columna</th><th>Tipo</th><th>Notas (qué explotar)</th></tr>
-    <tr><td><code>Price</code></td><td>numérica continua</td><td>Target principal. Rango 4.350–32.500, mediana ~9.900. EDA, regresión, clustering.</td></tr>
-    <tr><td><code>KM</code></td><td>numérica continua</td><td>Predictor estrella (coef. negativo en OLS). Rango 1–243.000; valores <code>1</code> = atípicos/outliers.</td></tr>
-    <tr><td><code>Age_08_04</code></td><td>numérica (meses)</td><td>Antigüedad. Colineal con <code>Mfg_Year/Mfg_Month</code>: el notebook ejemplo la excluye.</td></tr>
-    <tr><td><code>Fuel_Type</code></td><td>categórica</td><td>Petrol 1264 / Diesel 155 / CNG 17. Desbalanceo para clasificación y barplots.</td></tr>
-    <tr><td><code>Model</code></td><td>texto</td><td>147 filas empiezan con <code>?</code> (~10%). Caso canónico de wrangling + regex (U2).</td></tr>
-    <tr><td><code>HP, Weight, Quarterly_Tax, Guarantee_Period, BOVAG_Guarantee, Automatic_airco, Powered_Windows, Mfg_Month</code></td><td>numéricas/binarias</td><td>Las ~9 predictoras del OLS de referencia (R² ≈ 0,74). Base de U5/U6.</td></tr>
-    <tr><td><code>Airco, ABS, Airbag_1/2, Boardcomputer, CD_Player, …</code></td><td>binarias 0/1</td><td>Equipamiento para ítems frecuentes y Apriori (U9).</td></tr>
-    <tr><td><code>cc, Doors, Gears, Cylinders</code></td><td>numéricas discretas</td><td>Rarezas: <code>cc=16000</code>, <code>Doors=2</code> (2 casos), <code>Gears</code> 3/4/5/6. Limpieza (U2).</td></tr>
-    <tr><td><code>Id</code> y columnas de <code>columnas_basura</code> del notebook</td><td>identificadores / constantes</td><td>Se excluyen del modelado (ver referencia OLS). Incluyen <code>Met_Color, Airbag_*</code> y dummies de equipamiento casi constantes.</td></tr>
+    <tr><th>Columna</th><th>Qué es</th><th>Tipo</th></tr>
+    <tr><td><code>Id</code></td><td>Número de fila, del 1 al 1436. Solo sirve para identificar, no para analizar.</td><td>identificador</td></tr>
+    <tr><td><code>Model</code></td><td>Versión y carrocería del auto en texto (por ejemplo, "1.6 16V VVT I 5DR SOL").</td><td>texto</td></tr>
+    <tr><td><code>Price</code></td><td>Precio de venta. Es nuestra variable estrella: casi todo el curso intenta explicarla o predecirla.</td><td>numérica continua</td></tr>
+    <tr><td><code>Age_08_04</code></td><td>Antigüedad del auto en meses contada hasta agosto de 2004.</td><td>numérica</td></tr>
+    <tr><td><code>Mfg_Month</code> / <code>Mfg_Year</code></td><td>Mes y año de fabricación. Dicen lo mismo que la antigüedad pero por separado.</td><td>numérica discreta</td></tr>
+    <tr><td><code>KM</code></td><td>Kilómetros recorridos. El otro gran protagonista: a más kilómetros, menor precio.</td><td>numérica continua</td></tr>
+    <tr><td><code>Fuel_Type</code></td><td>Combustible: Petrol, Diesel o <abbr title="CNG: compressed natural gas, gas natural comprimido">CNG</abbr>.</td><td>categórica</td></tr>
+    <tr><td><code>HP</code></td><td>Potencia del motor en caballos de fuerza.</td><td>numérica discreta</td></tr>
+    <tr><td><code>cc</code></td><td>Cilindrada del motor en centímetros cúbicos.</td><td>numérica discreta</td></tr>
+    <tr><td><code>Doors</code></td><td>Cantidad de puertas.</td><td>numérica discreta</td></tr>
+    <tr><td><code>Cylinders</code></td><td>Cantidad de cilindros. Vale 4 en los 1436 autos: no aporta información.</td><td>constante</td></tr>
+    <tr><td><code>Gears</code></td><td>Cantidad de marchas de la caja de cambios.</td><td>numérica discreta</td></tr>
+    <tr><td><code>Quarterly_Tax</code></td><td>Impuesto trimestral que paga el auto.</td><td>numérica</td></tr>
+    <tr><td><code>Weight</code></td><td>Peso del auto en kilos.</td><td>numérica</td></tr>
+    <tr><td><code>Mfr_Guarantee</code> / <code>BOVAG_Guarantee</code> / <code>Guarantee_Period</code></td><td>Si tiene garantía de fábrica, del consorcio BOVAG y por cuántos meses.</td><td>binarias / numérica</td></tr>
+    <tr><td><code>Met_Color</code>, <code>Automatic</code>, <code>ABS</code>, <code>Airbag_1</code>, <code>Airbag_2</code>, <code>Airco</code>, <code>Automatic_airco</code>, <code>Boardcomputer</code>, <code>CD_Player</code>, <code>Central_Lock</code>, <code>Powered_Windows</code>, <code>Power_Steering</code>, <code>Radio</code>, <code>Radio_cassette</code>, <code>Mistlamps</code>, <code>Sport_Model</code>, <code>Backseat_Divider</code>, <code>Metallic_Rim</code>, <code>Tow_Bar</code></td><td>Equipamiento: valen 1 si el auto lo tiene y 0 si no.</td><td>binarias</td></tr>
+  </table>
+  <p>No hay celdas vacías en todo el archivo: las 1436 filas están completas en las 37 columnas.</p>
+
+  <h2>El resumen numérico (nuestro <code>describe()</code>)</h2>
+  <table>
+    <tr><th>Columna</th><th>count</th><th>mean</th><th>std</th><th>min</th><th>25 %</th><th>50 %</th><th>75 %</th><th>max</th></tr>
+    <tr><td><code>Price</code></td><td>1436</td><td>10.731</td><td>3626</td><td>4350</td><td>8450</td><td>9900</td><td>11.950</td><td>32.500</td></tr>
+    <tr><td><code>Age_08_04</code></td><td>1436</td><td>55,9</td><td>18,6</td><td>1</td><td>44</td><td>61</td><td>70</td><td>80</td></tr>
+    <tr><td><code>Mfg_Month</code></td><td>1436</td><td>5,5</td><td>3,4</td><td>1</td><td>3</td><td>5</td><td>8</td><td>12</td></tr>
+    <tr><td><code>Mfg_Year</code></td><td>1436</td><td>1999,6</td><td>1,5</td><td>1998</td><td>1998</td><td>1999</td><td>2001</td><td>2004</td></tr>
+    <tr><td><code>KM</code></td><td>1436</td><td>68.533</td><td>37.493</td><td>1</td><td>43.000</td><td>63.451</td><td>87.083</td><td>243.000</td></tr>
+    <tr><td><code>HP</code></td><td>1436</td><td>101,5</td><td>15,0</td><td>69</td><td>90</td><td>110</td><td>110</td><td>192</td></tr>
+    <tr><td><code>cc</code></td><td>1436</td><td>1577</td><td>424</td><td>1300</td><td>1400</td><td>1600</td><td>1600</td><td>16.000</td></tr>
+    <tr><td><code>Doors</code></td><td>1436</td><td>4,0</td><td>1,0</td><td>2</td><td>3</td><td>4</td><td>5</td><td>5</td></tr>
+    <tr><td><code>Gears</code></td><td>1436</td><td>5,0</td><td>0,2</td><td>3</td><td>5</td><td>5</td><td>5</td><td>6</td></tr>
+    <tr><td><code>Quarterly_Tax</code></td><td>1436</td><td>87,1</td><td>41,1</td><td>19</td><td>69</td><td>85</td><td>85</td><td>283</td></tr>
+    <tr><td><code>Weight</code></td><td>1436</td><td>1072,5</td><td>52,6</td><td>1000</td><td>1040</td><td>1070</td><td>1085</td><td>1615</td></tr>
+    <tr><td><code>Guarantee_Period</code></td><td>1436</td><td>3,8</td><td>3,0</td><td>3</td><td>3</td><td>3</td><td>3</td><td>36</td></tr>
   </table>
 
-  <h2>Suciedad conocida (cheat-sheet)</h2>
-  <ul>
-    <li><strong><code>Model</code> con <code>?</code>:</strong> limpiar con <code>str.lstrip('?')</code> + regex de versión/carrocería.</li>
-    <li><strong><code>KM=1</code>:</strong> decidir: ¿error de carga o auto nuevo? Documentar el criterio (outliers, U2).</li>
-    <li><strong><code>Fuel_Type=CNG</code> (17 casos):</strong> categoría rara; cuidado con estratificación en clasificación.</li>
-    <li><strong>Sin nulos reales:</strong> U4 inyecta missingness artificial con semilla fija y la documenta.</li>
-  </ul>
+  <h2>Qué nos está diciendo esta tabla</h2>
+  <p>El auto típico del dataset cuesta alrededor de 9900 (la mediana) y tiene unos 63.000 kilómetros.
+  Pero fijate en los extremos: hay autos de 4350 y otros de 32.500, y kilometrajes desde 1
+  (autos prácticamente sin rodar… o errores de carga, ya lo discutiremos) hasta 243.000.
+  Esa amplitud es una buena noticia: con tanta variedad, los patrones que encontremos
+  van a ser más sólidos.</p>
+  <p>La antigüedad promedio ronda los 56 meses (casi 5 años) y los años de fabricación van de 1998
+  a 2004, lo esperable en autos usados. El peso se mueve en una franja angosta (la mitad de los
+  autos pesa entre 1040 y 1085 kilos), así que no esperes que el peso explique grandes
+  diferencias de precio por sí solo.</p>
+  <p>Hay columnas que casi no varían y por eso aportan poco: <code>Cylinders</code> vale 4 siempre,
+  <code>Gears</code> vale 5 en 1390 de los 1436 autos, y <code>Guarantee_Period</code> vale 3 en
+  la enorme mayoría. Cuando una columna es casi constante, ningún algoritmo puede sacarle
+  provecho, así que el análisis de ejemplo directamente las deja afuera.</p>
 
-  <h2>Cómo citar este dataset en cada lección</h2>
-  <pre><code>import pandas as pd
-df = pd.read_csv("../ToyotaCorolla.csv")  # desde lessons/
-print(df.shape)  # (1436, 37)</code></pre>
+  <h2>Las categorías (lo que <code>describe()</code> no muestra)</h2>
+  <p>El resumen numérico no dice nada de las columnas de texto, así que las contamos aparte.
+  Por combustible: 1264 nafteros (Petrol), 155 diésel (Diesel) y apenas 17 a gas (CNG).
+  Ese desbalance va a ser importante cuando clasifiquemos: predecir bien una categoría
+  con tan pocos ejemplos es todo un desafío.</p>
+  <p>En <code>Model</code> hay 147 filas que empiezan con el signo <code>?</code>, como
+  "?TOYOTA Corolla 2.0 D4D…". Es un defecto de carga del archivo original y será nuestro
+  caso de estudio para limpieza de texto. En puertas dominan los 5 puertas (674) y 3 puertas
+  (622), con 138 de 4 puertas y apenas 2 registros de 2 puertas.</p>
 
   <nav class="lesson-nav">
     <a href="../index.html">← Índice</a>
-    <a href="analisis-ejemplo-ols.html">Análisis OLS de ejemplo →</a>
+    <a href="analisis-ejemplo-ols.html">Análisis de ejemplo →</a>
   </nav>
 </main>
 </body>

@@ -9,82 +9,84 @@
 <body>
 <main>
   <header class="course">
-    <p class="kicker">ISI · 5to año · Aprender haciendo · Solo Python</p>
+    <p class="kicker"><abbr title="Ingeniería en Sistemas de Información">ISI</abbr> · 5to año · Aprender haciendo · Solo Python</p>
     <h1>Introducción al Análisis de Datos</h1>
-    <p>Lecciones cortas en español. Un dataset hilo conductor: <code>ToyotaCorolla.csv</code> (1436 autos, 37 columnas).
+    <p>Lecciones cortas. Un dataset hilo conductor: <code>ToyotaCorolla.csv</code> (1436 autos, 37 columnas).
     Cada lección incluye al menos una figura <strong>generada con Python</strong> y código runnable.</p>
     <p class="meta">Programa: <a href="PROGRAMA.md">PROGRAMA.md</a> · Dataset: <a href="ToyotaCorolla.csv">ToyotaCorolla.csv</a> ·
     Referencia: <a href="reference/toyota-data-dictionary.html">diccionario Toyota</a> ·
-    <a href="reference/analisis-ejemplo-ols.html">análisis OLS de ejemplo</a></p>
+    <a href="reference/analisis-ejemplo-ols.html">análisis de ejemplo</a></p>
   </header>
-
-  <div class="callout">Estado: 1 lección publicada (0001, Unidad 1). Próxima: 0002.</div>
 
   <h2>Recorrido por unidades</h2>
   <ol class="units">
     <li>
       <h3>Unidad 1 · ¿Qué son los datos?</h3>
-      <p>Tipos de datos, sampling, boxplot / barplot / histogramas con <code>Price</code>, <code>KM</code>, <code>Fuel_Type</code>.</p>
-      <ul><li>Sugeridas: <code>lessons/0001-*.html</code> a <code>0003-*.html</code></li>
-      <li>Publicadas: <a href="lessons/0001-tipos-de-datos-toyota.html">0001 · Tipos de datos con Toyota Corolla</a></li></ul>
+      <p>Tipos de datos, <abbr title="Muestreo: elegir una parte representativa de los datos para analizar">sampling</abbr>,
+      <abbr title="Análisis exploratorio de datos: mirar los datos con gráficos y resúmenes antes de modelar">EDA</abbr> visual
+      (<abbr title="Gráfico de caja: muestra mediana, cuartiles y valores atípicos">boxplot</abbr>,
+      barras, histogramas) con <code>Price</code>, <code>KM</code>, <code>Fuel_Type</code>.</p>
+      <ul><li><a href="lessons/0001-tipos-de-datos-toyota.html">0001 · Tipos de datos con Toyota Corolla</a></li></ul>
     </li>
     <li>
       <h3>Unidad 2 · Exploración de datos</h3>
-      <p>Wrangling + regex sobre <code>Model</code> con <code>?</code>, nulos/atípicos, outliers (<code>KM=1</code>, <code>cc</code> raros, <code>Doors=2</code>).</p>
-      <ul><li>Sugeridas: <code>0004</code>–<code>0006</code></li></ul>
+      <p>Limpieza, <abbr title="Wrangling: transformar datos crudos en un formato limpio y analizable">wrangling</abbr> +
+      <abbr title="Expresiones regulares: patrones para buscar y limpiar texto">regex</abbr> sobre <code>Model</code>,
+      valores nulos y atípicos, <abbr title="Outliers: valores extremos que se alejan del resto">outliers</abbr>.</p>
+      <ul><li class="meta">Aún no hay lecciones en esta unidad.</li></ul>
     </li>
     <li>
       <h3>Unidad 3 · Visualización de datos</h3>
-      <p>Principios, color, uni/multivariado, foco-contexto, grafos/redes, mapas. Todo con <code>Price vs KM</code>.</p>
-      <ul><li>Sugeridas: <code>0007</code>–<code>0009</code></li></ul>
+      <p>Principios de visualización, teoría del color, datos uni y multivariados, foco y contexto,
+      grafos y redes, mapas. Todo con <code>Price vs KM</code>.</p>
+      <ul><li class="meta">Aún no hay lecciones en esta unidad.</li></ul>
     </li>
     <li>
       <h3>Unidad 4 · Datos faltantes e imputación</h3>
-      <p>Listwise/pairwise, media/constante, HotDecks, KNN, modelos. Missingness inyectada y documentada (el CSV no trae vacíos).</p>
-      <ul><li>Sugeridas: <code>0010</code>–<code>0012</code></li></ul>
+      <p><abbr title="Listwise: descartar filas con algún faltante; pairwise: usar los datos disponibles en cada cálculo">Listwise y pairwise</abbr>,
+      sustitución por la media, <abbr title="Hot deck: rellenar un faltante copiando el valor de un caso parecido">hot deck</abbr>,
+      <abbr title="KNN: k vecinos más cercanos, se usa para imputar o clasificar según los casos más parecidos">KNN</abbr>,
+      imputación con modelos.</p>
+      <ul><li class="meta">Aún no hay lecciones en esta unidad.</li></ul>
     </li>
     <li>
       <h3>Unidad 5 · Selección de variables y regularización</h3>
-      <p>Best Subset, Lasso, Ridge, SCAD sobre las variables del OLS de referencia.</p>
-      <ul><li>Sugeridas: <code>0013</code>–<code>0015</code></li></ul>
+      <p><abbr title="Best subset: probar combinaciones de variables para quedarse con la mejor">Best subset</abbr>,
+      <abbr title="Lasso: regularización que puede llevar coeficientes a cero y así elegir variables">Lasso</abbr>,
+      <abbr title="Ridge: regularización que achica los coeficientes sin eliminarlos">Ridge</abbr>,
+      <abbr title="SCAD: penalización que castiga menos a los coeficientes grandes">SCAD</abbr>.</p>
+      <ul><li class="meta">Aún no hay lecciones en esta unidad.</li></ul>
     </li>
     <li>
       <h3>Unidad 6 · Regresión lineal simple y múltiple</h3>
-      <p>Correlación vs regresión, simple, múltiple, polinomial, GLM/robusta/bayesiana. Réplica por partes del OLS + regresión parcial de <code>KM</code>.</p>
-      <ul><li>Sugeridas: <code>0016</code>–<code>0018</code></li></ul>
+      <p>Correlación vs regresión, regresión simple, múltiple y polinomial,
+      <abbr title="GLM: modelos lineales generalizados, extienden la regresión a otros tipos de respuesta">GLM</abbr>,
+      regresión robusta y bayesiana. Réplica por partes del análisis de ejemplo.</p>
+      <ul><li class="meta">Aún no hay lecciones en esta unidad.</li></ul>
     </li>
     <li>
-      <h3>Unidad 7 · Clustering</h3>
-      <p>Distancias, jerárquico, K-Means, DBSCAN, validación, PCA/PCR con <code>Price/KM/Weight/HP</code>.</p>
-      <ul><li>Sugeridas: <code>0019</code>–<code>0021</code></li></ul>
+      <h3>Unidad 7 · Agrupamientos (<abbr title="Clustering: agrupar casos parecidos sin usar etiquetas previas">clustering</abbr>)</h3>
+      <p>Distancias y similaridad, métodos jerárquicos, K-Means, DBSCAN, validación de grupos,
+      <abbr title="PCA: análisis de componentes principales, reduce dimensiones para visualizar">PCA</abbr>.</p>
+      <ul><li class="meta">Aún no hay lecciones en esta unidad.</li></ul>
     </li>
     <li>
       <h3>Unidad 8 · Clasificación</h3>
-      <p>KNN, logística, Naive Bayes, árboles/RF/boosting, SVM, comparación. Target desbalanceado (<code>Fuel_Type</code>).</p>
-      <ul><li>Sugeridas: <code>0022</code>–<code>0024</code></li></ul>
+      <p><abbr title="KNN: clasifica según la mayoría de los k casos más parecidos">KNN</abbr>,
+      regresión logística, Naive Bayes, árboles de decisión,
+      <abbr title="Random forest: bosque de muchos árboles que votan">random forest</abbr>,
+      boosting, <abbr title="SVM: máquina de vectores de soporte, busca la mejor frontera entre clases">SVM</abbr>,
+      comparación de algoritmos.</p>
+      <ul><li class="meta">Aún no hay lecciones en esta unidad.</li></ul>
     </li>
     <li>
       <h3>Unidad 9 · Ítems frecuentes</h3>
-      <p>Soporte, monotonicidad, reglas de asociación, Apriori sobre equipamiento binario (<code>Airco, ABS, Airbag_*</code>…).</p>
-      <ul><li>Sugeridas: <code>0025</code>–<code>0027</code></li></ul>
+      <p><abbr title="Soporte: cuántas veces aparece un conjunto de ítems respecto del total">Soporte</abbr>,
+      <abbr title="Monotonicidad: si un conjunto es frecuente, sus subconjuntos también lo son">monotonicidad</abbr>,
+      reglas de asociación, algoritmo Apriori sobre el equipamiento de los autos.</p>
+      <ul><li class="meta">Aún no hay lecciones en esta unidad.</li></ul>
     </li>
   </ol>
-
-  <h2>Lecciones publicadas</h2>
-  <p class="meta">Se listan aquí automáticamente a medida que se generan (numeración secuencial <code>NNNN-slug.html</code>).</p>
-  <ul id="lesson-index">
-    <li><a href="lessons/0001-tipos-de-datos-toyota.html">0001 · Tipos de datos con Toyota Corolla</a>
-      <span class="meta">— Unidad 1: shape (1436, 37), continuas/discretas/categóricas/binarias + tradeoff sesgo–varianza.</span></li>
-  </ul>
-
-  <h2>Cómo está organizado</h2>
-  <ul>
-    <li><code>lessons/NNNN-slug.html</code> — lecciones autocontenidas (una por win).</li>
-    <li><code>assets/styles.css</code> — estilo compartido. <code>assets/img/toyota/</code> — PNGs generados.</li>
-    <li><code>scripts/make_figures.py</code> — regenera figuras: <code>python scripts/make_figures.py --only &lt;slug&gt;</code>.</li>
-    <li><code>reference/</code> — diccionario del dataset + análisis OLS de ejemplo.</li>
-    <li><code>learning-records/</code> — qué se consolidó y por qué cambia lo siguiente.</li>
-  </ul>
 </main>
 </body>
 </html>

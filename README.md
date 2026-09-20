@@ -26,7 +26,9 @@ enlazando `../assets/styles.css`. Prompt tipo:
 > `ToyotaCorolla.csv`, enlazando `../assets/styles.css`, con ≥1 figura PNG en
 > `assets/img/toyota/` + snippet generador, quiz de 3–4 opciones del mismo largo con
 > feedback inmediato, 1 fuente primaria de `RESOURCES.md`, nav prev/next + índice,
-> sin CSS/JS reutilizable inline.
+> sin CSS/JS reutilizable inline. Tono para principiantes (explicaciones largas,
+> cada concepto cuando aparece) y `<abbr title="definición breve">` en toda
+> abreviatura y término clave nuevo.
 
 Reglas (ver `NOTES.md`): ~3 lecciones cortas por unidad como sugerencia (no hard limit),
 ruta al dataset `../ToyotaCorolla.csv`, figuras ~1200 px con títulos/ejes en español,

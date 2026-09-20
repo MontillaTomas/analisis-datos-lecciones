@@ -131,6 +131,12 @@ nav.lesson-nav {
   color: var(--muted);
 }
 
+abbr[title], dfn {
+  text-decoration: underline dotted;
+  text-underline-offset: 2px;
+  cursor: help;
+}
+
 @media print {
   main, .wrap { max-width: 100%; padding: 0; }
   nav.lesson-nav, .quiz label { break-inside: avoid; }

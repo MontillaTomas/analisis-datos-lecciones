@@ -3,34 +3,68 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Análisis OLS de ejemplo — referencia</title>
+  <title>Análisis de ejemplo: predecir el precio — referencia</title>
   <link rel="stylesheet" href="../assets/styles.css">
 </head>
 <body>
 <main>
   <header class="course">
-    <p class="kicker">Referencia · patrón canónico · réplica por partes en U6</p>
-    <h1>Análisis de ejemplo: OLS sobre Toyota Corolla</h1>
-    <p>Condensado del notebook de ejemplo. Flujo en tres partes con <code>VAR_X = KM</code>, <code>VAR_Y = Price</code>.
-    Las lecciones de regresión replican cada parte con su figura generada.</p>
+    <p class="kicker">Referencia · patrón canónico · réplica por partes en la Unidad 6</p>
+    <h1>Análisis de ejemplo: predecir el precio de un Corolla usado</h1>
+    <p>Esta es la historia completa del análisis que recorre todo el curso:
+    queremos entender de qué depende el precio de un Toyota Corolla usado y, si es posible,
+    predecirlo. La contamos acá de punta a punta y en la Unidad 6 la repetimos paso a paso,
+    una lección por cada parte. No necesitás saber nada de antemano: cada concepto se explica
+    cuando aparece.</p>
     <p class="meta"><a href="../index.html">← Índice</a> ·
     <a href="toyota-data-dictionary.html">Diccionario Toyota</a> ·
     <a href="../ToyotaCorolla.csv">CSV</a></p>
   </header>
 
-  <h2>Parte 1 — EDA: boxplots + pairplot de KM y Price</h2>
+  <h2>La pregunta y el plan</h2>
+  <p>La pregunta de negocio es simple: ¿qué hace que un Corolla usado valga más o menos?
+  El plan del análisis tiene tres partes. Primero miramos los datos con gráficos
+  (<abbr title="EDA: análisis exploratorio de datos, mirar los datos antes de modelar">EDA</abbr>).
+  Después construimos un modelo matemático que relaciona el precio con las características
+  del auto (<abbr title="OLS: mínimos cuadrados ordinarios, el método clásico para ajustar una regresión lineal">regresión OLS</abbr>).
+  Y al final verificamos si ese modelo es confiable (diagnóstico). Cada parte responde una pregunta
+  distinta: ¿cómo son los datos?, ¿qué fórmula los explica?, ¿podemos creerle a la fórmula?</p>
+
+  <h2>Parte 1 — Mirar antes de calcular</h2>
+  <p>Antes de cualquier fórmula hay que mirar. Graficamos la distribución del kilometraje y del precio
+  con <abbr title="Boxplot: gráfico de caja, muestra mediana, cuartiles y valores atípicos">boxplots</abbr>:
+  la caja marca dónde está la mitad central de los autos, la línea del medio es la mediana
+  y los puntos sueltos son los valores extremos. Si el precio tiene puntos muy por encima,
+  ya sabemos que existen autos de lujo o sobrevaluados que el modelo deberá manejar.</p>
   <pre><code>import pandas as pd, matplotlib.pyplot as plt, seaborn as sns
 df = pd.read_csv("../ToyotaCorolla.csv")
 df_eda = df.dropna(subset=["KM", "Price"])
 fig, axes = plt.subplots(1, 2, figsize=(12, 4))
 sns.boxplot(y=df_eda["KM"], ax=axes[0], color="skyblue");  axes[0].set_title("Boxplot de KM")
 sns.boxplot(y=df_eda["Price"], ax=axes[1], color="lightgreen"); axes[1].set_title("Boxplot de Price")
-plt.tight_layout(); plt.show()
-sns.pairplot(df_eda[["KM", "Price"]], height=4, diag_kind="kde")</code></pre>
+plt.tight_layout(); plt.show()</code></pre>
+  <p>Después cruzamos ambas variables con un <code>pairplot</code>: un diagrama de dispersión de
+  precio contra kilómetros más las distribuciones de cada una. Acá aparece la primera gran
+  historia del dataset: los puntos bajan hacia la derecha, es decir, a más kilómetros, menor
+  precio. Esa relación negativa es la que el modelo va a intentar cuantificar con un número exacto.</p>
+  <pre><code>sns.pairplot(df_eda[["KM", "Price"]], height=4, diag_kind="kde")</code></pre>
   <div class="callout">Figura esperada: <code>assets/img/toyota/NNNN-*-fig*.png</code> generada con
   <code>python scripts/make_figures.py --only &lt;slug&gt;</code> (plantilla <code>fig_u1_boxplot_price_km</code>).</div>
 
-  <h2>Parte 2 — OLS múltiple con feature selection</h2>
+  <h2>Parte 2 — La fórmula que explica el precio</h2>
+  <p>La <abbr title="Regresión lineal: técnica que ajusta una fórmula del tipo precio = base + coef₁·KM + coef₂·peso + …">regresión lineal</abbr>
+  propone una fórmula: el precio es una base más una contribución por cada característica
+  (kilómetros, peso, potencia, impuestos…). El método <abbr title="OLS: mínimos cuadrados ordinarios, elige los coeficientes que minimizan los errores al cuadrado">OLS</abbr>
+  elige los coeficientes que hacen que la fórmula se equivoque lo menos posible en los 1436 autos.</p>
+  <p>Pero antes de ajustar hay que elegir con qué columnas trabajar
+  (<abbr title="Feature selection: elegir qué columnas entran al modelo y cuáles se descartan">feature selection</abbr>).
+  Primero nos quedamos solo con las columnas numéricas, porque el texto como <code>Model</code>
+  no entra en una fórmula. Después sacamos las columnas que no aportan: el <code>Id</code>
+  (es solo un número de fila), las que son casi constantes (como <code>Cylinders</code>, que vale 4
+  siempre) y la antigüedad <code>Age_08_04</code>, que dice casi lo mismo que el año de fabricación
+  y confundiría al modelo al estar duplicada. Esa lista de descartes vive en el código como
+  <code>columnas_basura</code>. Por último rellenamos los huecos que queden con el promedio de cada
+  columna (<code>fillna(mean)</code>), que es la imputación más simple posible.</p>
   <pre><code>import statsmodels.api as sm, numpy as np
 cols_numericas = df.select_dtypes(include=[np.number]).columns
 df_limpio = df[cols_numericas].copy()
@@ -43,18 +77,59 @@ df_limpio = df_limpio.drop(columns=[c for c in columnas_basura if c in df_limpio
 df_limpio = df_limpio.fillna(df_limpio.mean())
 y = df_limpio["Price"]; X = df_limpio.drop(columns=["Price"])
 modelo = sm.OLS(y, sm.add_constant(X)).fit()
-print(modelo.summary())  # R² ≈ 0.74, AIC/BIC incluidos</code></pre>
-  <p>Resultado de referencia: 1436 obs., R² 0,741 / ajustado 0,740, <code>KM</code> con coef. ≈ −0,046 (p≈0),
-  VIF alto (Cond. No. ≈ 2,3e+06 → multicolinealidad a discutir en U5/U6).</p>
+print(modelo.summary())</code></pre>
+  <p>El <code>summary()</code> es el boletín del modelo. Lo importante, en criollo:
+  el <abbr title="R²: proporción de la variación del precio que la fórmula logra explicar, de 0 a 1">R²</abbr>
+  es 0,741, o sea que la fórmula explica el 74 % de las diferencias de precio entre autos;
+  el 26 % restante queda librado a factores que no tenemos (estado de conservación, color de moda,
+  apuro del vendedor…). Cada coeficiente se lee así: el de <code>KM</code> es ≈ −0,046, lo que significa
+  que cada kilómetro extra resta unos 4,6 centavos al precio, o sea unos 46 por cada 10.000 km.
+  Y la columna <code>P&gt;|t|</code> dice si ese efecto es real o pudo salir por azar: valores cercanos
+  a 0 (como los de <code>KM</code>, <code>Weight</code> o <code>Automatic_airco</code>) indican efectos
+  sólidos, mientras que <code>Mfg_Month</code> con 0,087 está en zona dudosa.</p>
+  <p>El resumen también trae dos números para comparar modelos:
+  el <abbr title="AIC: criterio de información de Akaike, mide qué tan bien ajusta el modelo penalizando la complejidad; más bajo es mejor">AIC</abbr>
+  y el <abbr title="BIC: criterio de información bayesiano, como el AIC pero castiga más los modelos con muchas variables; más bajo es mejor">BIC</abbr>.
+  Cuantas menos variables uses para explicar lo mismo, mejores (más bajos) salen estos números.
+  Y hay una advertencia honesta al pie: el número de condición es enorme (≈ 2,3e+06), señal de
+  <abbr title="Multicolinealidad: cuando dos o más variables dicen casi lo mismo y el modelo no logra repartir el mérito entre ellas">multicolinealidad</abbr>,
+  es decir, variables que cuentan historias parecidas. Por eso la Unidad 5 existe: elegir bien las
+  variables es tan importante como ajustar el modelo.</p>
 
-  <h2>Parte 3 — Diagnóstico profundo</h2>
+  <h2>Parte 3 — ¿Podemos creerle a la fórmula?</h2>
+  <p>Un modelo siempre se equivoca un poco en cada auto; a esos errores se los llama
+  <abbr title="Residuos: la diferencia entre el precio real y el precio que predice la fórmula, auto por auto">residuos</abbr>.
+  El diagnóstico consiste en estudiar esos errores: si son chicos, parejos y sin patrones raros,
+  la fórmula es confiable. Si esconden un patrón, nos están avisando qué le falta al modelo.</p>
+  <p>Primer chequeo: el histograma de residuos tiene que parecerse a una campana centrada en cero
+  (errores chicos y simétricos), y el
+  <abbr title="QQ plot: gráfico que compara los errores con una distribución normal; si los puntos siguen la recta, todo bien">QQ plot</abbr>
+  tiene que seguir la recta diagonal. Si los puntos se despegan en los extremos, hay más valores
+  extremos de los esperados. Segundo chequeo: el gráfico de residuos contra predicciones tiene que
+  verse como una nube pareja alrededor del cero, sin forma de embudo ni curva. Si el embudo se abre
+  hacia la derecha, los autos caros se predicen peor que los baratos y el modelo necesita un ajuste.</p>
   <pre><code>residuos, predicciones = modelo.resid, modelo.fittedvalues
-# hist + QQ + residuos vs fitted
-# scale-location (raíz |resid. estudentizados| vs fitted, curva lowess)
-# leverage vs residuos (burbuja = distancia de Cook)
-# regresión parcial aislada de KM: sm.graphics.plot_partregress(...)</code></pre>
-  <p>Cada gráfico va a una lección de U6 con interpretación de negocio
-  (qué le dice al que fija precios de usados).</p>
+# histograma de residuos + QQ plot + residuos vs predicciones
+# scale-location: raíz de |residuos estudentizados| vs predicciones, con curva lowess
+# leverage vs residuos, con burbuja = distancia de Cook</code></pre>
+  <p>Tercer chequeo: no todos los autos pesan lo mismo en el ajuste. El
+  <abbr title="Leverage: cuánto tira cada auto de la fórmula; los autos raros tiran más">leverage</abbr>
+  mide cuánto tira cada auto de la fórmula, y la
+  <abbr title="Distancia de Cook: mide cuánto cambiaría la fórmula si sacáramos ese auto; valores grandes = auto muy influyente">distancia de Cook</abbr>
+  combina eso con el tamaño de su error: un auto con error grande Y mucho leverage (burbuja grande
+  y lejos del centro) puede estar deformando toda la fórmula él solo, y hay que mirarlo con lupa.
+  Quizás sea un auto mal cargado, o quizás sea un caso legítimo pero especial.</p>
+  <p>Último chequeo, el más lindo: la
+  <abbr title="Regresión parcial: muestra el efecto de una variable aislada, como si todas las demás estuvieran fijas">regresión parcial</abbr>
+  de <code>KM</code>. Es un gráfico que aísla el efecto del kilometraje como si todos los autos
+  tuvieran el mismo peso, la misma potencia y el mismo equipamiento. Si la nube sigue bajando,
+  el efecto del kilometraje es genuino y no un espejismo causado por otra variable
+  (por ejemplo, que los autos viejos tengan más kilómetros Y menos equipamiento).</p>
+  <pre><code>sm.graphics.plot_partregress(endog=y, exog_i=X_con_constante["KM"],
+  exog_others=X_con_constante[otras_variables], obs_labels=False, ax=ax)</code></pre>
+  <p>Cada uno de estos gráficos tiene su propia lección en la Unidad 6, con su figura generada
+  y su interpretación de negocio: qué le dirías al dueño de la concesionaria a partir de lo que
+  el gráfico muestra.</p>
 
   <nav class="lesson-nav">
     <a href="toyota-data-dictionary.html">← Diccionario Toyota</a>

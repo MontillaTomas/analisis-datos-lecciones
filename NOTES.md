@@ -8,4 +8,7 @@
 - Granularidad: varias lecciones cortas por unidad (~3 como sugerencia, no hard limit). Un win por lección + quiz con feedback inmediato.
 - Referencia canónica de flujo OLS+diagnóstico: `reference/analisis-ejemplo-ols.html` (derivado del notebook de ejemplo). Las lecciones de regresión lo replican por partes.
 - Particularidades conocidas del CSV (ver `reference/toyota-data-dictionary.html`): `Model` con `?` inicial (~147 filas), `KM=1` sospechosos, `Fuel_Type` desbalanceado (Petrol/Diesel/CNG), rarezas en `cc`/`Doors`/`Gears`. Sin celdas vacías: la missingness de U4 se inyecta artificialmente y se documenta.
+- Tono: explicar como a alguien sin conocimientos previos; explicaciones un poco más largas,
+  cada concepto se presenta cuando aparece. Abreviaturas y términos clave siempre con
+  `<abbr title="definición breve">` para ver el significado al pasar el cursor.
 - Pages: deploy desde branch `main`, carpeta `/root`. `.nojekyll` presente.
