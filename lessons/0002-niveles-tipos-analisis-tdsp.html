@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>0002 · Niveles, tipos de análisis y metodologías — Unidad 1</title>
+  <link rel="stylesheet" href="../assets/styles.css">
+</head>
+<body>
+<main>
+  <header class="course">
+    <p class="kicker">Unidad 1 · ¿Qué son los datos? · Lección 0002</p>
+    <h1>Niveles de decisión, tipos de análisis y cómo ordenar el trabajo</h1>
+    <p><strong>Win de hoy:</strong> ubicar cualquier pregunta sobre <code>ToyotaCorolla.csv</code> en su
+    nivel de decisión (operativo, táctico, estratégico, predictivo/prescriptivo), en su tipo de análisis
+    (exploratorio, diagnóstico, predictivo, prescriptivo) y en su metodología
+    (<abbr title="TDSP: Team Data Science Process, metodología ágil e iterativa de Microsoft (2016)">TDSP</abbr>),
+    con ejemplos reales y figuras generadas con Python.</p>
+    <p class="meta"><a href="../index.html">← Índice</a> ·
+    <a href="0001-tipos-de-datos-toyota.html">← 0001 Tipos de datos</a> ·
+    <a href="../reference/toyota-data-dictionary.html">Diccionario Toyota</a> ·
+    <a href="../ToyotaCorolla.csv">CSV</a></p>
+  </header>
+
+  <h2>1 · Qué es la ciencia de datos (sin humo)</h2>
+  <p>La <strong>ciencia de datos</strong> es la fusión de dos campos: <strong>datos</strong> y <strong>ciencia</strong>.
+  <abbr title="Datos: cualquier cosa real o imaginaria que se puede observar, medir o registrar">Datos</abbr> es
+  cualquier cosa real o imaginaria que se puede observar y registrar: el precio de un Corolla, su kilometraje,
+  pero también una opinión o una imagen. <abbr title="Ciencia: estudio sistemático del mundo físico y natural con métodos testeables">Ciencia</abbr>
+  es el estudio sistemático del mundo físico y natural con métodos testeables, es decir, con procedimientos que
+  otros pueden repetir y refutar. Juntando ambas ideas: la ciencia de datos es el <strong>estudio sistemático de
+  los datos y la derivación de conocimiento usando métodos testeables para hacer predicciones acerca del universo</strong>.</p>
+  <p>Es un proceso complejo porque involucra muchos
+  <abbr title="Stakeholders: personas o grupos que afectan al proyecto o se ven afectados por él, para bien o para mal">stakeholders</abbr>:
+  quien vende el auto, quien lo compra, quien financia, quien regula, quien programa. Cada stakeholder afecta y se ve
+  afectado positiva y negativamente. Por eso existen las <strong>metodologías</strong>: esquemas para mantener el orden,
+  organizar el trabajo y no perderse entre fuentes de datos, objetivos y personas. Todas comparten las mismas piezas
+  (entendimiento del negocio, entendimiento de los datos, preparación, modelado, evaluación, puesta en producción),
+  solo cambia el énfasis.</p>
+  <div class="callout">Idea guía: sin método, 1436 filas × 37 columnas son ruido. Con método, son respuestas por nivel:
+  qué auto aceptar hoy, qué segmento empujar este trimestre, dónde estará el negocio en 3 años.</div>
+
+  <h2>2 · Los niveles de aplicación: la organización manda</h2>
+  <p>El análisis de datos obedece la estructura de una organización. No se analiza en el vacío: se analiza para alguien
+  que decide a cierto plazo y con cierto alcance. Los tres <strong>niveles tradicionales</strong> son:</p>
+  <ul>
+    <li><strong><abbr title="Nivel operativo: decisiones diarias sobre casos individuales, aquí y ahora">Nivel operativo</abbr>.</strong>
+    Operaciones diarias, caso por caso. Ejemplo Toyota: ¿acepto este Corolla diésel de 63.000 km a 10.500 €?
+    Acá viven el <abbr title="KM: kilometraje, kilómetros recorridos por el auto">KM</abbr> exacto, el
+    <abbr title="Price: precio de venta del auto usado, en euros">Price</abbr> pedido y el equipamiento fila por fila.</li>
+    <li><strong><abbr title="Nivel táctico: decisiones de mediano plazo que planifican estrategias por segmentos">Nivel táctico</abbr>.</strong>
+    Mediano plazo, planifica estrategias por segmentos. Ejemplo: los autos del tramo joven (hasta ~48 meses) se venden en
+    promedio a <strong>≈ 14.312 €</strong>, los del tramo medio a <strong>≈ 9.658 €</strong> y los viejos a
+    <strong>≈ 8.093 €</strong>. Con ese dato se decide qué segmento stockear, qué margen pedir, qué garantía ofrecer.</li>
+    <li><strong><abbr title="Nivel estratégico: decisiones de largo plazo sobre el rumbo del negocio">Nivel estratégico</abbr>.</strong>
+    Largo plazo, rumbo del negocio. Ejemplo: el precio medio sube con el año de fabricación (1998: ≈ 7.926 €;
+    2000: ≈ 10.728 €; 2004: ≈ 22.324 €). Esa pendiente dice dónde va el mercado y qué autos conviene buscar hoy
+    para vender mañana.</li>
+  </ul>
+  <p>Hay un cuarto plano que cruza a los tres: el <strong>nivel predictivo y prescriptivo</strong>. Usa modelos para saber
+  dónde vamos a estar respecto a los 3 niveles. Son las <strong>predicciones</strong>: si sé que cada 10.000 km restan
+  ≈ 551 € (lo mediremos en la lección 0003), puedo proyectar el operativo (cuánto ofrecer), el táctico (qué segmento
+  será rentable) y el estratégico (cómo envejece mi stock). El nivel específico no reemplaza a los tradicionales: los
+  alimenta.</p>
+  <figure>
+    <img src="../assets/img/toyota/0002-niveles-tipos-analisis-tdsp-fig1.png" alt="Tres paneles: scatter KM vs precio, precio medio por tramo de edad y precio medio por año de fabricación">
+    <figcaption>Fig. 1 — El mismo <abbr title="CSV: archivo de texto con valores separados por comas; cada fila es un auto">CSV</abbr>
+    leído en tres niveles. Izq.: operativo, cada punto es un auto (<code>KM</code> vs <code>Price</code>, muestra de 600).
+    Centro: táctico, precio medio por tramo de antigüedad (joven ≈ 14.312 €, media ≈ 9.658 €, vieja ≈ 8.093 €).
+    Der.: estratégico, precio medio por año de fabricación (crece de ≈ 7.926 € en 1998 a ≈ 22.324 € en 2004).</figcaption>
+  </figure>
+  <p>Snippet generador (el mismo que corre el script del curso):</p>
+  <pre><code>import pandas as pd
+df = pd.read_csv("../ToyotaCorolla.csv")  # desde lessons/
+tramos = pd.qcut(df["Age_08_04"], 3, labels=["joven", "media", "vieja"])
+print(df.assign(tramo=tramos).groupby("tramo", observed=True)["Price"].mean().round(0))
+# joven  14312.0 / media  9658.0 / vieja  8093.0
+print(df.groupby("Mfg_Year")["Price"].mean().round(0))
+# 1998 7926 / 2000 10728 / 2004 22324 ...</code></pre>
+  <p>Regenerar cuando quieras:</p>
+  <pre><code>python scripts/make_figures.py --only niveles-tipos-analisis-tdsp</code></pre>
+
+  <h2>3 · Los cuatro tipos de análisis (con el mismo auto)</h2>
+  <p>Todo lo que haremos en la materia cae en cuatro tipos. Aprendelos con un solo Corolla en mente:</p>
+  <table>
+    <tr><th>Tipo</th><th>Pregunta que responde</th><th>Ejemplo Toyota</th></tr>
+    <tr><td><strong><abbr title="EDA: Exploratory Data Analysis, análisis exploratorio; mirar los datos con gráficos y resúmenes antes de modelar">Análisis exploratorio (EDA)</abbr></strong></td>
+      <td>¿Cómo son los datos?</td>
+      <td>Histogramas de <code>Price</code> y <code>KM</code>, boxplots de la 0001, conteos de <code>Fuel_Type</code> (Petrol 1264 / Diesel 155 / <abbr title="CNG: Compressed Natural Gas, gas natural comprimido">CNG</abbr> 17). No explica ni predice: describe.</td></tr>
+    <tr><td><strong><abbr title="Análisis de diagnóstico: análisis ex post que explica por qué ocurrió algo ya observado">Análisis de diagnóstico</abbr></strong></td>
+      <td>¿Por qué pasó lo que pasó? (ex post)</td>
+      <td>¿Por qué los diésel promedian ≈ 11.295 € y los nafteros ≈ 10.679 €? ¿Es el combustible o es que los diésel son más jóvenes y pesados? Diagnóstico = separar causas.</td></tr>
+    <tr><td><strong><abbr title="Análisis predictivo: usa datos pasados para estimar valores futuros o desconocidos">Análisis predictivo</abbr></strong></td>
+      <td>¿Cuánto valdrá un auto dado lo que sé de él?</td>
+      <td>La primera función de aproximación a estudiar es la <abbr title="Regresión lineal: fórmula del tipo precio = base + coeficiente × KM que aproxima una variable con otra">regresión lineal</abbr>: <code>Price ≈ 14.508 − 0,055 × KM</code>. Detalle completo en la lección 0003.</td></tr>
+    <tr><td><strong><abbr title="Análisis prescriptivo: orienta la decisión futura buscando el resultado óptimo">Análisis prescriptivo</abbr></strong></td>
+      <td>¿Qué debería hacer a continuación para el mejor resultado?</td>
+      <td>Con el modelo en mano: descontar ≈ 551 € por cada 10.000 km al fijar precio, priorizar tramos jóvenes, descartar extras que no pagan. Orienta la toma de decisiones con resultados óptimos a futuro.</td></tr>
+  </table>
+  <p>Dos primos que aparecen en el programa y conviene ubicar desde hoy:</p>
+  <ul>
+    <li><strong><abbr title="Frequent-itemset: relación entre ítems que co-ocurren en un dominio; base de las reglas de asociación">Frequent-itemset</abbr>.</strong>
+    La relación entre dos ítems en un dominio: ¿qué extras suelen venir juntos? En Toyota,
+    <abbr title="ABS: Anti-lock Braking System, frenos antibloqueo; vale 1 si el auto lo tiene">ABS</abbr> está en el
+    81,3 %, <abbr title="Central_Lock: cierre centralizado; 1 si el auto lo tiene">Central_Lock</abbr> en el 58,0 % y
+    <abbr title="Airco: aire acondicionado simple; 1 si el auto lo tiene">Airco</abbr> en el 50,8 %, mientras que
+    <abbr title="Automatic_airco: climatizador automático; 1 si el auto lo tiene">Automatic_airco</abbr> solo en el 5,6 %.
+    Esa tabla de soportes es la materia prima de la Unidad 9 (reglas de asociación y algoritmo Apriori).</li>
+    <li><strong><abbr title="Series de tiempo: datos ordenados en el tiempo para detectar estacionalidad y tendencia">Series de tiempo</abbr>.</strong>
+    Sirven para conocer la estacionalidad de un producto. Con <code>Mfg_Month</code> se ve cuántos autos se fabricaron por mes
+    (enero 207, septiembre 76, diciembre 68): hay ritmo anual. La Unidad 9 y el contexto de
+    <abbr title="Forecasting: pronóstico de series de tiempo; predecir valores futuros a partir de la historia">forecasting</abbr>
+    lo retomarán.</li>
+  </ul>
+  <figure>
+    <img src="../assets/img/toyota/0002-niveles-tipos-analisis-tdsp-fig2.png" alt="Barras de soporte de equipamiento y barras de autos por mes de fabricación">
+    <figcaption>Fig. 2 — Izq.: soporte de equipamiento (% sobre 1436: ABS 81,3 %, Central_Lock 58,0 %, Airco 50,8 %,
+    Automatic_airco 5,6 %): la base del frequent-itemset. Der.: autos por mes de fabricación (pico en enero con 207,
+    valle en diciembre con 68): la estacionalidad que estudian las series de tiempo.</figcaption>
+  </figure>
+
+  <h2>4 · Metodologías: del caos al ciclo de vida</h2>
+  <p>Como el proceso involucra stakeholders, fuentes y objetivos distintos, se propusieron varios esquemas:
+  <abbr title="CRISP-DM: Cross-Industry Standard Process for Data Mining; ciclo clásico: negocio, datos, preparación, modelado, evaluación, despliegue">CRISP-DM</abbr>,
+  <abbr title="Scrum: marco ágil de trabajo por sprints cortos con backlog y roles definidos">Scrum</abbr>,
+  <abbr title="Domino: metodología de ciclo de vida de Domino Data Lab, cercana a TDSP">Domino</abbr>,
+  <abbr title="DDS: Data Driven Scrum, Scrum adaptado a proyectos guiados por datos">DDS</abbr>,
+  <abbr title="R&D: Research and Development, enfoque de investigación y desarrollo">R&amp;D</abbr>,
+  <abbr title="Cascada: modelo en cascada, fases secuenciales sin vuelta atrás">Cascada</abbr>, entre otras.
+  Todas comparten las partes comunes: entendimiento del negocio, entendimiento de los datos y preparación, modelado,
+  evaluación y puesta en producción.</p>
+  <p>La que adopta este curso como mapa es el
+  <strong><abbr title="TDSP: Team Data Science Process, metodología de Microsoft (2016), ágil e iterativa">Team Data Science Process (TDSP)</abbr></strong>,
+  propuesto por Microsoft en 2016. Es ágil e iterativa: mejora la colaboración y la eficiencia de los equipos porque
+  combina el ciclo de vida de ciencia de datos con ingeniería de software y prácticas ágiles (backlog, sprints,
+  control de versiones). Su ciclo de vida tiene cinco etapas iterativas:</p>
+  <ol>
+    <li><strong>Comprensión del negocio</strong> (<abbr title="Business understanding: definir objetivos y preguntas de negocio antes de tocar datos">business understanding</abbr>): ¿qué hace que un Corolla valga más? ¿qué decisión tomará la concesionaria?</li>
+    <li><strong>Adquisición y comprensión de datos</strong>: traer el <code>CSV</code>, verificar tipos (lección 0001), detectar el <code>?</code> de <code>Model</code> y los <code>KM=1</code> sospechosos.</li>
+    <li><strong>Modelado</strong> (incluye <abbr title="Feature engineering: crear y transformar variables para darles valor o significado; el proceso más complejo del análisis">feature engineering</abbr> + entrenamiento): acá vive el proceso más complejo del análisis de datos, el feature engineering, que consiste en otorgarle valor o significado a los datos (tramos de edad, dummies de combustible, interacciones peso-potencia).</li>
+    <li><strong>Despliegue</strong> (<abbr title="Deployment: puesta en producción; llevar el modelo al uso real">deployment</abbr>): la fórmula llega al mostrador (planilla de tasación, regla de descuento por KM).</li>
+    <li><strong>Aceptación del cliente</strong> (<abbr title="Customer acceptance: validación del cliente de que el sistema cumple la necesidad de negocio">customer acceptance</abbr>): la concesionaria valida si la tasación acierta y paga lo que predice.</li>
+  </ol>
+  <p>TDSP además define roles (arquitecto de solución, project manager, ingeniero de datos, científico de datos,
+  desarrollador, líder de proyecto), estructura estándar de proyecto y plantillas. Para profundizar:</p>
+  <ul>
+    <li><a href="https://www.datascience-pm.com/tdsp/">Ficha TDSP en Data Science PM (ciclo, roles, pros/contras)</a></li>
+    <li><a href="https://microsoft.github.io/azureml-ops-accelerator/1-MLOpsFoundation/2-SkillsRolesAndResponsibilities/1-AdoptingDSProcess.html">Microsoft: Adopting a Data Science Process (roles y responsabilidades)</a></li>
+  </ul>
+  <div class="callout"><strong>Cómo leer el curso con TDSP.</strong> 0001–0002 = comprensión del negocio + datos.
+  U2–U4 = adquisición y preparación (wrangling, outliers, faltantes). U5–U6 = modelado (selección, regularización,
+  regresión). U7–U9 = modelado avanzado (clustering, clasificación, asociación). El despliegue y la aceptación los
+  simulamos comunicando: cada lección cierra con qué le dirías al dueño de la concesionaria.</div>
+
+  <h2>5 · Quiz (auto-chequeo inmediato)</h2>
+  <p class="meta">Elegí una opción por pregunta: el feedback es inmediato.</p>
+
+  <div class="quiz" id="q1">
+    <strong>P1 · Fijar el descuento por KM para todo el trimestre es nivel…</strong>
+    <label><input type="radio" name="q1" value="0"> Táctico: planifica un segmento a mediano plazo</label>
+    <label><input type="radio" name="q1" value="1"> Operativo: decide un solo auto en el mostrador</label>
+    <label><input type="radio" name="q1" value="2"> Predictivo: ajusta la recta OLS con los datos</label>
+    <label><input type="radio" name="q1" value="3"> Exploratorio: describe histogramas sin predecir</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <div class="quiz" id="q2">
+    <strong>P2 · Preguntar por qué el diésel promedia más que el naftero es…</strong>
+    <label><input type="radio" name="q2" value="0"> Diagnóstico: análisis ex post que busca la causa</label>
+    <label><input type="radio" name="q2" value="1"> Prescriptivo: receta óptima de qué hacer mañana</label>
+    <label><input type="radio" name="q2" value="2"> Exploratorio: mira histogramas antes de modelar</label>
+    <label><input type="radio" name="q2" value="3"> Predictivo: estima el precio con una fórmula</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <div class="quiz" id="q3">
+    <strong>P3 · En TDSP (2016, Microsoft), el feature engineering vive en…</strong>
+    <label><input type="radio" name="q3" value="0"> Modelado: dar valor a variables y entrenar el modelo</label>
+    <label><input type="radio" name="q3" value="1"> Despliegue: llevar la fórmula al mostrador real</label>
+    <label><input type="radio" name="q3" value="2"> Aceptación: validar con el cliente si acierta</label>
+    <label><input type="radio" name="q3" value="3"> Negocio: definir objetivos sin tocar los datos</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <h2>6 · Fuente primaria y cierre</h2>
+  <p><strong>Para profundizar (1 fuente):</strong> Provost &amp; Fawcett, <em>Data Science for Business</em> —
+  capítulos 1–2 (pensamiento analítico, encuadre de negocio y ciclo de vida). Es la referencia del curso para ubicar
+  cada pregunta Toyota en su nivel y tipo de análisis
+  (<a href="https://www.oreilly.com/library/view/data-science-for/9781449374273/">O'Reilly</a>, también en
+  <a href="../index.html">RESOURCES.md</a> del índice). Para el ciclo concreto usamos la documentación oficial de
+  <a href="https://www.datascience-pm.com/tdsp/">TDSP</a> y
+  <a href="https://microsoft.github.io/azureml-ops-accelerator/1-MLOpsFoundation/2-SkillsRolesAndResponsibilities/1-AdoptingDSProcess.html">Microsoft</a>.</p>
+  <p>¿Algo no quedó claro? <strong>Preguntame al agente</strong>: qué nivel es tu pregunta, qué tipo de análisis necesita,
+  o en qué fase TDSP estás. Esa pregunta vale más que releer.</p>
+
+  <nav class="lesson-nav">
+    <a href="0001-tipos-de-datos-toyota.html">← 0001 Tipos de datos</a>
+    <a href="0003-regresion-lineal-precio-km.html">Siguiente: 0003 Regresión lineal →</a>
+  </nav>
+  <p class="meta">Ver también: <a href="../index.html">índice del curso</a> ·
+  <a href="../reference/toyota-data-dictionary.html">diccionario Toyota</a> ·
+  <a href="../reference/analisis-ejemplo-ols.html">análisis OLS de ejemplo</a></p>
+</main>
+<script>
+(function(){
+  var answers = {q1: 0, q2: 0, q3: 0};
+  var msgs = {
+    q1: ["Correcto: un descuento trimestral por segmento es táctico, mediano plazo.",
+         "No: lo operativo es caso por caso en el mostrador; lo trimestral por segmento es táctico."],
+    q2: ["Correcto: preguntar por qué pasó algo observado es diagnóstico ex post.",
+         "No: buscar la causa de algo ya observado es diagnóstico, no prescripción ni predicción."],
+    q3: ["Correcto: el feature engineering (dar valor a variables) vive en el modelado TDSP.",
+         "No: en TDSP el feature engineering va en modelado, antes del despliegue y la aceptación."]
+  };
+  ["q1","q2","q3"].forEach(function(id){
+    var box = document.getElementById(id);
+    var fb = box.querySelector(".feedback");
+    box.addEventListener("change", function(e){
+      var ok = parseInt(e.target.value, 10) === answers[id];
+      fb.textContent = ok ? msgs[id][0] : msgs[id][1];
+      fb.className = "feedback " + (ok ? "ok" : "no");
+    });
+  });
+})();
+</script>
+</body>
+</html>

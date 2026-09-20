@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>0003 · Regresión lineal Price ~ KM — Unidad 6</title>
+  <link rel="stylesheet" href="../assets/styles.css">
+</head>
+<body>
+<main>
+  <header class="course">
+    <p class="kicker">Unidad 6 · Regresión lineal simple y múltiple · Lección 0003</p>
+    <h1>Regresión lineal: la recta que explica el precio por KM</h1>
+    <p><strong>Win de hoy:</strong> ajustar <code>Price ~ KM</code> con
+    <abbr title="OLS: Ordinary Least Squares, mínimos cuadrados ordinarios; elige la recta que minimiza los errores al cuadrado">OLS</abbr>,
+    leer su ecuación, testear la hipótesis del kilometraje, medir
+    <abbr title="R²: coeficiente de determinación; proporción de la variación del precio que explica la recta, de 0 a 1">R²</abbr>
+    y los <abbr title="Residuos: errores auto por auto; diferencia entre el precio real y el predicho">residuos</abbr>,
+    y validar con <abbr title="K-Fold: validación cruzada que parte los datos en k pliegues y rota cuál es test">K-Fold k=10</abbr>.
+    Réplica por partes del <a href="../reference/analisis-ejemplo-ols.html">análisis OLS de ejemplo</a> (Parte 2, versión simple).</p>
+    <p class="meta"><a href="../index.html">← Índice</a> ·
+    <a href="0002-niveles-tipos-analisis-tdsp.html">← 0002 Niveles y TDSP</a> ·
+    <a href="../reference/toyota-data-dictionary.html">Diccionario Toyota</a> ·
+    <a href="../ToyotaCorolla.csv">CSV</a></p>
+  </header>
+
+  <h2>1 · La pregunta, la hipótesis y el gráfico de dispersión</h2>
+  <p>Una <strong><abbr title="Hipótesis: idea que se plantea para explicar un fenómeno y se intenta comprobar o rechazar con datos">hipótesis</abbr></strong>
+  es una idea que se plantea para explicar un fenómeno y que se intenta comprobar o rechazar mediante experimentación u
+  otros métodos. En regresión siempre jugamos con dos:</p>
+  <ul>
+    <li><strong><abbr title="Hipótesis nula (H₀): la que el investigador trata de refutar; dice que no hay efecto">Hipótesis nula (H₀)</abbr>.</strong>
+    Es la que el investigador trata de refutar, rechazar o anular. Acá: <em>“el kilometraje no guarda relación con el precio”</em>
+    (la pendiente es cero). Es el “no pasa nada” por defecto.</li>
+    <li><strong><abbr title="Hipótesis alternativa (H₁): la que el investigador realmente cree; dice que sí hay efecto">Hipótesis alternativa (H₁)</abbr>.</strong>
+    Es la que el investigador realmente piensa que causa el fenómeno. Acá: <em>“el kilometraje sí guarda relación con el precio”</em>
+    (la pendiente es distinta de cero, y esperamos que sea negativa).</li>
+  </ul>
+  <p>Antes de creerle a ningún número hay que mirar la
+  <strong><abbr title="Dispersión: nube de puntos que muestra cómo se reparten dos variables en el plano">dispersión de los datos</abbr></strong>:
+  cada auto es un punto en el plano precio–kilómetro. Si la nube baja hacia la derecha, H₁ tiene chances; si es una nube
+  redonda sin dirección, H₀ sobrevive. En Toyota la nube baja: correlación <strong>r = −0,57</strong>.</p>
+  <figure>
+    <img src="../assets/img/toyota/0003-regresion-lineal-precio-km-fig1.png" alt="Dispersión de precio contra kilómetros con recta OLS">
+    <figcaption>Fig. 1 — <abbr title="Scatterplot: gráfico de dispersión; cada punto es un auto con su KM y su precio">Dispersión</abbr>
+    <code>Price</code> vs <code>KM</code> (1436 autos) con la recta
+    <abbr title="OLS: mínimos cuadrados ordinarios; minimiza la suma de errores al cuadrado">OLS</abbr>:
+    <code>precio ≈ 14.508 − 0,0551 × KM</code>. Cada 10.000 km restan ≈ 551 €.
+    <abbr title="R²: 0,325; la recta explica el 32,5 % de la variación de precios">R² = 0,325</abbr>, r = −0,57.</figcaption>
+  </figure>
+  <pre><code>import pandas as pd
+from sklearn.linear_model import LinearRegression
+df = pd.read_csv("../ToyotaCorolla.csv")  # desde lessons/
+X, y = df[["KM"]], df["Price"]
+m = LinearRegression().fit(X, y)
+print(m.intercept_, m.coef_)  # 14508.14  [-0.0551]
+print(m.score(X, y))          # 0.3249 (R² en entrenamiento)
+print(df["Price"].corr(df["KM"]))  # -0.57</code></pre>
+
+  <h2>2 · Qué es el análisis de regresión (y su ecuación)</h2>
+  <p>El <strong><abbr title="Análisis de regresión: busca relaciones significativas entre variables y predice una a partir de otras">análisis de regresión</abbr></strong>
+  busca relaciones significativas entre variables. Busca predecir el valor de una variable dado el valor de otra. Más formal:
+  es una medida estadística que intenta determinar la fuerza de la relación entre una
+  <abbr title="Variable dependiente: la que queremos explicar o predecir; acá el precio">variable dependiente</abbr>
+  y una serie de valores cambiantes o
+  <abbr title="Variables independientes: las que usamos para explicar; acá el kilometraje">variables independientes</abbr>.
+  Predice el valor de la dependiente a partir de los valores de las independientes. En estadística incluye diversas técnicas
+  para el modelado y el análisis de diversas variables, cuando el foco está en la relación entre la dependiente y una o más
+  independientes.</p>
+  <p>La <strong><abbr title="Regresión lineal: recta que busca describir el comportamiento de los puntos en el plano">regresión lineal</abbr></strong>
+  es una recta que busca describir el comportamiento de los puntos en el plano (estos puntos pueden ser precio–kilómetro).
+  Su ecuación poblacional es:</p>
+  <p><strong>Price = β₀ + β₁ · KM + ε</strong></p>
+  <ul>
+    <li><strong>β₀ (<abbr title="Intercepto: precio predicho cuando KM = 0; la base de la recta">intercepto</abbr>)</strong>: la base. Estimado ≈ <strong>14.508 €</strong>: lo que valdría un Corolla con 0 km según la recta (extrapolación, ningún auto tiene 0 km reales salvo los <code>KM=1</code> sospechosos).</li>
+    <li><strong>β₁ (<abbr title="Pendiente: cuánto cambia el precio por cada kilómetro extra">pendiente</abbr>)</strong>: el efecto. Estimada ≈ <strong>−0,0551 €/km</strong> (≈ −551 € cada 10.000 km). Negativa, como pedía H₁.</li>
+    <li><strong>ε (<abbr title="Variable de error: lo que la recta no explica; desviación, varianza y factores omitidos">variable de error</abbr>)</strong>:
+    todo lo que la recta no captura (desviación, varianza, estado de conservación, apuro del vendedor, equipamiento).
+    Cada auto tiene su propio ε = real − predicho, que luego llamaremos residuo.</li>
+  </ul>
+  <p>El método <abbr title="OLS: mínimos cuadrados ordinarios; minimiza la suma de errores al cuadrado">OLS</abbr> elige β₀ y β₁
+  minimizando la suma de errores al cuadrado. Con <code>statsmodels</code> se ve el boletín completo (el mismo patrón del
+  <a href="../reference/analisis-ejemplo-ols.html">análisis de ejemplo</a>):</p>
+  <pre><code>import statsmodels.api as sm
+d = df[["Price", "KM"]].dropna()
+res = sm.OLS(d["Price"], sm.add_constant(d["KM"])).fit()
+print(res.summary())
+# const  14508.1  |  KM  -0.0551  |  P&gt;|t| = 0.000 en ambas
+# R-squared 0.325  |  F 690.0, Prob(F) 1.8e-124</code></pre>
+  <p>Lectura de la tabla para H₀: la columna <code>P&gt;|t|</code> del <code>KM</code> vale <strong>0,000</strong>.
+  Eso significa que si H₀ fuera cierta (pendiente cero), ver una pendiente tan extrema como −0,0551 sería casi imposible.
+  Rechazamos H₀ y nos quedamos con H₁: la edad en kilómetros sí guarda relación con el precio. El
+  <abbr title="Test F: prueba global de si el modelo explica algo más que la media">test F = 690</abbr> con probabilidad
+  ≈ 0 dice lo mismo a nivel modelo.</p>
+  <div class="callout">Traducción a negocio: un Corolla con 60.000 km se predice en ≈ 14.508 − 0,0551 × 60.000 ≈ <strong>11.202 €</strong>;
+  uno con 120.000 km, en ≈ <strong>7.896 €</strong>. La diferencia (≈ 3.306 €) es el descuento táctico que la 0002 pedía.</div>
+
+  <h2>3 · Las 3 partes que importan tras correr la regresión</h2>
+  <p>Tras ejecutar el algoritmo hay tres lecturas obligatorias. En ese orden:</p>
+
+  <h3>3.1 · R²: qué porción explica la recta</h3>
+  <p>El <strong><abbr title="R²: proporción de la variación de la respuesta que explica el modelo; 1 − RSS/TSS">R²</abbr></strong>
+  dice qué tan bien ajustan los puntos vs la regresión. Más alto, mejor… hasta cierto punto. Nuestro modelo simple da
+  <strong>R² = 0,325</strong>: explica el 32,5 % de las diferencias de precio; el 67,5 % queda en el error (edad, peso,
+  equipamiento, ruido). El modelo múltiple del análisis de ejemplo llega a 0,741 porque suma esas variables.</p>
+  <p>Reglas de pulgar de la pizarra (no leyes físicas): el rango de valores “cómodos” está entre <strong>0,65 y 0,95</strong>
+  (según la pizarra, entre <strong>0,7 y 0,98</strong>). Si <strong>R² = 1</strong>, el modelo es determinista (predice perfecto:
+  sospechá). Si es <strong>0</strong>, la regresión casi no explica la variabilidad de la respuesta. Pero ojo con los matices:</p>
+  <ul>
+    <li><strong>¿Los R² bajos son un problema?</strong> No necesariamente. Pueden ser buenos modelos por numerosas razones:
+    comportamientos humanos (psicología, sociología) son ruidosos por naturaleza, y si las variables independientes son
+    estadísticamente significativas todavía se pueden extraer conclusiones sobre las relaciones. Nuestro 0,325 con pendiente
+    ultra-significativa es exactamente ese caso: modesto pero real.</li>
+    <li><strong>¿Los R² altos son siempre buenos?</strong> No. En el análisis de residuales pueden aparecer patrones no deseados
+    (sesgo por falta de variables independientes significativas) u <abbr title="Overfitting: sobreajuste; memorizar la muestra y fallar con datos nuevos">overfitting</abbr>
+    (el modelo se ajusta a peculiaridades aleatorias de la muestra). Todos los modelos tienden al overfitting; lo grave es pasarse.</li>
+    <li><strong>Limitaciones del R²:</strong> no dice si los coeficientes estimados y las predicciones tienen sesgo; no dice si el
+    modelo ajusta bien a los datos (un buen modelo puede tener R² bajo y viceversa). Por eso nunca se lee solo: se lee con residuos y validación.</li>
+  </ul>
+
+  <h3>3.2 · Residuos y RSS: qué tan grandes son los errores</h3>
+  <p>Los <strong><abbr title="Residuos: errores auto por auto; real menos predicho">residuos</abbr></strong> son la diferencia
+  entre cada valor observado y el predicho por el modelo, auto por auto. La
+  <strong><abbr title="RSS: Residual Sum of Squares; suma de residuos al cuadrado; lo que OLS minimiza">RSS (residual sum of squares)</abbr></strong>
+  es la suma de esos errores al cuadrado: es lo que OLS minimiza y mide la dispersión no explicada. Acá
+  <strong>RSS ≈ 12.744.882.944</strong> (12,7 mil millones de €²; las unidades al cuadrado suenan raras, por eso en la práctica
+  se reporta su raíz como <abbr title="RMSE: Root Mean Squared Error; error típico en las unidades originales">RMSE ≈ 2.973 €</abbr>).</p>
+  <figure>
+    <img src="../assets/img/toyota/0003-regresion-lineal-precio-km-fig2.png" alt="Residuos contra predicciones e histograma de residuos">
+    <figcaption>Fig. 2 — Diagnóstico de residuos. Izq.: residuos vs predichos, nube centrada en 0 pero con forma de abanico
+    (los caros se predicen peor) y cola alta: falta peso, edad y equipamiento. Der.: histograma con pico en 0 y cola derecha
+    (sesgo 1,39): los errores no son una campana perfecta.</figcaption>
+  </figure>
+  <p>Cómo leerla: la recta que se ajuste bien tendrá residuos pequeños, centrados en cero, sin forma rara. Acá hay dos avisos:
+  el abanico (más dispersión a la derecha = <abbr title="Heterocedasticidad: la varianza del error cambia con el nivel predicho">heterocedasticidad</abbr>)
+  y la cola derecha del histograma. Ambos gritan “te faltan variables”: exactamente lo que la versión múltiple (R² 0,741) corrige.</p>
+  <pre><code>pred = m.predict(X); resid = y.values - pred
+print((resid**2).sum())  # RSS ≈ 12744882943.7
+print((resid**2).mean()**0.5)  # RMSE ≈ 2979.5 (en muestra)</code></pre>
+
+  <h3>3.3 · Error de generalización: K-Fold k=10</h3>
+  <p>Hay que dividir el dataset en <strong><abbr title="K-Fold: validación cruzada en k pliegues; cada pliegue es test una vez">K-Fold = 10</abbr></strong>
+  y evaluar desde allí el análisis. La idea: parto los 1436 autos en 10 pliegues (≈ 144 autos cada uno), entreno en 9 y pruebo en
+  el restante, roto 10 veces y comparo los valores entre las diferentes ejecuciones. Si el R² salta mucho entre folds, el modelo
+  es inestable; si es parejo, es creíble.</p>
+  <figure>
+    <img src="../assets/img/toyota/0003-regresion-lineal-precio-km-fig3.png" alt="R cuadrado por fold en validación cruzada de 10 pliegues">
+    <figcaption>Fig. 3 — R² por fold (k=10, barajado, semilla 42): entre 0,256 y 0,391, media <strong>0,315 ± 0,042</strong>,
+    <abbr title="RMSE: error típico ≈ 2.973 € ± 265 €">RMSE ≈ 2.973 ± 265 €</abbr>. Estable y parecido al 0,325 en muestra: no hay overfitting grave.</figcaption>
+  </figure>
+  <pre><code>from sklearn.model_selection import KFold, cross_val_score
+import numpy as np
+kf = KFold(n_splits=10, shuffle=True, random_state=42)
+r2 = cross_val_score(m, X, y, cv=kf, scoring="r2")
+print(np.round(r2, 3))
+# [0.366 0.301 0.299 0.305 0.33  0.35  0.391 0.296 0.258 0.256]
+print(r2.mean().round(3), r2.std().round(3))  # 0.315 0.042</code></pre>
+  <div class="callout"><strong>Regla de trabajo.</strong> Reportá siempre el par: R² en muestra (0,325) + R² en K-Fold (0,315 ± 0,042).
+  Si el primero es mucho mayor que el segundo, sospechá overfitting (volvé a la U de la lección 0001). Si ambos son bajos pero la
+  pendiente es significativa, tenés un efecto real pero chico: pedí más variables (camino al modelo múltiple).</div>
+
+  <h2>4 · Quiz (auto-chequeo inmediato)</h2>
+  <p class="meta">Elegí una opción por pregunta: el feedback es inmediato.</p>
+
+  <div class="quiz" id="q1">
+    <strong>P1 · H₀ “el KM no afecta al precio” con P&gt;|t| = 0,000 implica…</strong>
+    <label><input type="radio" name="q1" value="0"> Rechazo H₀: el KM sí guarda relación con el precio</label>
+    <label><input type="radio" name="q1" value="1"> Acepto H₀: el KM no guarda relación con el precio</label>
+    <label><input type="radio" name="q1" value="2"> Rechazo H₁: el KM nunca explica nada del precio</label>
+    <label><input type="radio" name="q1" value="3"> Acepto todo: el KM y el precio son lo mismo</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <div class="quiz" id="q2">
+    <strong>P2 · R² = 0,325 en Price ~ KM significa que…</strong>
+    <label><input type="radio" name="q2" value="0"> La recta explica el 32,5 % de la variación de precios</label>
+    <label><input type="radio" name="q2" value="1"> La recta explica el 67,5 % de la variación de precios</label>
+    <label><input type="radio" name="q2" value="2"> El modelo es determinista y predice sin ningún error</label>
+    <label><input type="radio" name="q2" value="3"> Los residuos son nulos y la RSS vale cero total</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <div class="quiz" id="q3">
+    <strong>P3 · K-Fold k=10 con R² 0,256–0,391 (media 0,315) indica…</strong>
+    <label><input type="radio" name="q3" value="0"> Modelo estable: rinde parecido en cada corte test</label>
+    <label><input type="radio" name="q3" value="1"> Overfitting grave: memoriza y falla siempre en test</label>
+    <label><input type="radio" name="q3" value="2"> Sesgo total: la pendiente del KM es nula e inútil</label>
+    <label><input type="radio" name="q3" value="3"> Error cero: predice perfecto cada auto del test</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <h2>5 · Fuente primaria y cierre</h2>
+  <p><strong>Para profundizar (1 fuente):</strong> James, Witten, Hastie &amp; Tibshirani,
+  <em>An Introduction to Statistical Learning</em> — capítulos 3 (regresión lineal: ecuación,
+  <abbr title="OLS: mínimos cuadrados ordinarios; minimiza RSS">OLS</abbr>, R², tests de hipótesis) y 5 (remuestreo y
+  validación cruzada). Texto base del programa
+  (<a href="https://www.statlearning.com/">statlearning.com</a>, PDF libre; también en
+  <a href="../index.html">RESOURCES.md</a> del índice). La sintaxis exacta de <code>LinearRegression</code>,
+  <code>KFold</code> y <code>cross_val_score</code> sale de la
+  <a href="https://scikit-learn.org/stable/">documentación de scikit-learn</a>, y el <code>summary()</code> con
+  <code>P&gt;|t|</code>, <code>AIC</code>/<code>BIC</code> de la
+  <a href="https://www.statsmodels.org/stable/index.html">documentación de statsmodels</a>.</p>
+  <p>¿Algo no quedó claro? <strong>Preguntame al agente</strong>: qué parte de la ecuación, del R², de los residuos o del
+  K-Fold te cuesta, o cómo pasar de esta recta simple al modelo múltiple (R² 0,741) del análisis de ejemplo. Esa pregunta
+  vale más que releer.</p>
+
+  <nav class="lesson-nav">
+    <a href="0002-niveles-tipos-analisis-tdsp.html">← 0002 Niveles y TDSP</a>
+    <a href="../index.html">Índice ↑</a>
+  </nav>
+  <p class="meta">Ver también: <a href="../index.html">índice del curso</a> ·
+  <a href="../reference/toyota-data-dictionary.html">diccionario Toyota</a> ·
+  <a href="../reference/analisis-ejemplo-ols.html">análisis OLS de ejemplo</a> (Partes 2–3)</p>
+</main>
+<script>
+(function(){
+  var answers = {q1: 0, q2: 0, q3: 0};
+  var msgs = {
+    q1: ["Correcto: P≈0 refuta H₀; el KM sí guarda relación con el precio.",
+         "No: con P≈0 se rechaza H₀ (el KM no afecta) y se acepta H₁."],
+    q2: ["Correcto: R² = 0,325 es el 32,5 % explicado; el resto es error.",
+         "No: R² es lo explicado (32,5 %); el 67,5 % restante queda sin explicar."],
+    q3: ["Correcto: R² parejo entre folds (0,32 ± 0,04) es estabilidad, no overfit.",
+         "No: un rango 0,26–0,39 con media 0,32 es estable; overfit sería train alto y test bajo."]
+  };
+  ["q1","q2","q3"].forEach(function(id){
+    var box = document.getElementById(id);
+    var fb = box.querySelector(".feedback");
+    box.addEventListener("change", function(e){
+      var ok = parseInt(e.target.value, 10) === answers[id];
+      fb.textContent = ok ? msgs[id][0] : msgs[id][1];
+      fb.className = "feedback " + (ok ? "ok" : "no");
+    });
+  });
+})();
+</script>
+</body>
+</html>
