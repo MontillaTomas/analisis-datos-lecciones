@@ -27,11 +27,12 @@ IMGDIR = ROOT / "assets" / "img" / "toyota"
 # Registro de figuras por slug de lección. Cada entrada: (nombre_png, función, descripción).
 # Las lecciones futuras agregan aquí su slug + función generadora.
 FIGURE_REGISTRY: dict[str, list[tuple[str, str, str]]] = {
-    # Piloto U1 (plantilla; la lección 0001 lo usa y lo documenta):
-    # "tipos-de-datos-toyota": [
-    #     ("0001-tipos-de-datos-toyota-fig1.png", "fig_u1_boxplot_price_km",
-    #      "Boxplots de Price y KM (réplica del EDA del notebook ejemplo)."),
-    # ],
+    "tipos-de-datos-toyota": [
+        ("0001-tipos-de-datos-toyota-fig1.png", "fig_u1_boxplot_price_km",
+         "Boxplots de Price y KM (réplica Parte 1 del notebook ejemplo)."),
+        ("0001-tipos-de-datos-toyota-fig2.png", "fig_u1_bias_variance_tradeoff",
+         "Curvas de bias, varianza y error total vs complejidad (trade-off)."),
+    ],
 }
 
 
@@ -72,8 +73,43 @@ def fig_u1_boxplot_price_km(out: Path) -> Path:
     return out
 
 
+def fig_u1_bias_variance_tradeoff(out: Path) -> Path:
+    """Trade-off sesgo-varianza: error vs complejidad (figura didáctica sintética)."""
+    _need_deps()
+    import numpy as np
+    import matplotlib.pyplot as plt
+
+    x = np.linspace(0, 10, 200)
+    bias2 = 8 * np.exp(-0.7 * x) + 0.2          # sesgo^2: cae con la complejidad
+    variance = 0.08 * x**2 + 0.05 * x           # varianza: crece con la complejidad
+    irreducible = np.full_like(x, 1.0)          # error irreducible (ruido)
+    total = bias2 + variance + irreducible      # error total en forma de U
+    k_opt = float(x[int(np.argmin(total))])
+
+    fig, ax = plt.subplots(figsize=(12, 4.8))
+    ax.plot(x, bias2, label="Sesgo² (bias²): cae", linewidth=2, color="#1f77b4")
+    ax.plot(x, variance, label="Varianza: crece", linewidth=2, color="#ff7f0e")
+    ax.plot(x, total, label="Error total (test): forma de U", linewidth=2.5, color="#2ca02c")
+    ax.axhline(1.0, linestyle="--", label="Error irreducible (ruido)", color="#7f7f7f")
+    ax.axvline(k_opt, linestyle=":", linewidth=1.5, color="#333333")
+    ax.text(k_opt + 0.15, float(total.min()) + 0.15, "óptimo\n(no sobre ni sub)",
+            fontsize=9)
+    ax.set_xlabel("Complejidad del modelo → (underfit a la izquierda, overfit a la derecha)")
+    ax.set_ylabel("Error")
+    ax.set_title("Bias–variance tradeoff: el error total es mínimo en el medio")
+    ax.legend(loc="upper center", fontsize=9)
+    ax.set_xlim(0, 10)
+    ax.set_ylim(0, 11)
+    fig.tight_layout()
+    out.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(out, dpi=100)
+    plt.close(fig)
+    return out
+
+
 GENERATORS = {
     "fig_u1_boxplot_price_km": fig_u1_boxplot_price_km,
+    "fig_u1_bias_variance_tradeoff": fig_u1_bias_variance_tradeoff,
 }
 
 
