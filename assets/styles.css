@@ -1,0 +1,139 @@
+/* Curso Introducción al Análisis de Datos — stylesheet compartido.
+   Todas las lecciones lo enlazan como ../assets/styles.css.
+   Estilo Tufte sobrio, legible, print-friendly. */
+
+:root {
+  --ink: #1a1a1a;
+  --muted: #5b5b5b;
+  --accent: #0b5cad;
+  --bg: #ffffff;
+  --wash: #f6f6f4;
+  --line: #e2e2e0;
+  --ok: #1e7e34;
+  --bad: #b00020;
+  --maxw: 44rem;
+  --font: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font);
+  line-height: 1.6;
+}
+
+main, .wrap {
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: 2rem 1.25rem 4rem;
+}
+
+header.course {
+  border-bottom: 2px solid var(--ink);
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+}
+
+header.course p.kicker {
+  font-family: var(--sans);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin: 0 0 0.25rem;
+}
+
+h1, h2, h3 { line-height: 1.25; }
+h1 { font-size: 2rem; margin: 0.25rem 0 0.75rem; }
+h2 { font-size: 1.4rem; margin-top: 2.25rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+h3 { font-size: 1.1rem; }
+
+p, li { font-size: 1.05rem; }
+small, .meta { font-family: var(--sans); font-size: 0.85rem; color: var(--muted); }
+
+a { color: var(--accent); }
+a:hover { text-decoration-thickness: 2px; }
+
+figure { margin: 1.5rem 0; }
+figure img {
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--line);
+  background: #fff;
+}
+figcaption { font-family: var(--sans); font-size: 0.85rem; color: var(--muted); margin-top: 0.4rem; }
+
+pre {
+  background: var(--wash);
+  border: 1px solid var(--line);
+  padding: 1rem;
+  overflow-x: auto;
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+code { font-family: var(--mono); font-size: 0.9em; }
+pre code { font-size: 1em; }
+
+table { border-collapse: collapse; width: 100%; font-family: var(--sans); font-size: 0.9rem; }
+th, td { border: 1px solid var(--line); padding: 0.5rem 0.6rem; text-align: left; vertical-align: top; }
+th { background: var(--wash); }
+
+nav.lesson-nav {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 3rem;
+  padding-top: 1rem;
+  border-top: 2px solid var(--ink);
+  font-family: var(--sans);
+}
+
+.callout {
+  border-left: 4px solid var(--accent);
+  background: var(--wash);
+  padding: 0.75rem 1rem;
+  margin: 1.25rem 0;
+  font-family: var(--sans);
+  font-size: 0.95rem;
+}
+
+.quiz { border: 1px solid var(--line); padding: 1rem; margin: 1.5rem 0; font-family: var(--sans); }
+.quiz legend, .quiz > strong { font-weight: 700; }
+.quiz label { display: block; padding: 0.4rem 0.5rem; margin: 0.25rem 0; border: 1px solid var(--line); cursor: pointer; }
+.quiz label:hover { background: var(--wash); }
+.quiz .feedback { margin-top: 0.75rem; font-size: 0.9rem; min-height: 1.5em; }
+.quiz .feedback.ok { color: var(--ok); }
+.quiz .feedback.no { color: var(--bad); }
+
+.units { display: grid; gap: 1rem; padding: 0; list-style: none; }
+.units li {
+  border: 1px solid var(--line);
+  padding: 1rem 1.1rem;
+  font-family: var(--sans);
+}
+.units li h3 { margin: 0 0 0.35rem; font-size: 1.05rem; }
+.units li p { margin: 0.25rem 0; font-size: 0.92rem; color: var(--muted); }
+.units li ul { margin: 0.5rem 0 0 1.1rem; padding: 0; font-size: 0.92rem; }
+
+.badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border: 1px solid var(--line);
+  padding: 0.1rem 0.45rem;
+  color: var(--muted);
+}
+
+@media print {
+  main, .wrap { max-width: 100%; padding: 0; }
+  nav.lesson-nav, .quiz label { break-inside: avoid; }
+  a { color: #000; }
+  figure img { border: none; }
+}

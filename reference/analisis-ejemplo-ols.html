@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Análisis OLS de ejemplo — referencia</title>
+  <link rel="stylesheet" href="../assets/styles.css">
+</head>
+<body>
+<main>
+  <header class="course">
+    <p class="kicker">Referencia · patrón canónico · réplica por partes en U6</p>
+    <h1>Análisis de ejemplo: OLS sobre Toyota Corolla</h1>
+    <p>Condensado del notebook de ejemplo. Flujo en tres partes con <code>VAR_X = KM</code>, <code>VAR_Y = Price</code>.
+    Las lecciones de regresión replican cada parte con su figura generada.</p>
+    <p class="meta"><a href="../index.html">← Índice</a> ·
+    <a href="toyota-data-dictionary.html">Diccionario Toyota</a> ·
+    <a href="../ToyotaCorolla.csv">CSV</a></p>
+  </header>
+
+  <h2>Parte 1 — EDA: boxplots + pairplot de KM y Price</h2>
+  <pre><code>import pandas as pd, matplotlib.pyplot as plt, seaborn as sns
+df = pd.read_csv("../ToyotaCorolla.csv")
+df_eda = df.dropna(subset=["KM", "Price"])
+fig, axes = plt.subplots(1, 2, figsize=(12, 4))
+sns.boxplot(y=df_eda["KM"], ax=axes[0], color="skyblue");  axes[0].set_title("Boxplot de KM")
+sns.boxplot(y=df_eda["Price"], ax=axes[1], color="lightgreen"); axes[1].set_title("Boxplot de Price")
+plt.tight_layout(); plt.show()
+sns.pairplot(df_eda[["KM", "Price"]], height=4, diag_kind="kde")</code></pre>
+  <div class="callout">Figura esperada: <code>assets/img/toyota/NNNN-*-fig*.png</code> generada con
+  <code>python scripts/make_figures.py --only &lt;slug&gt;</code> (plantilla <code>fig_u1_boxplot_price_km</code>).</div>
+
+  <h2>Parte 2 — OLS múltiple con feature selection</h2>
+  <pre><code>import statsmodels.api as sm, numpy as np
+cols_numericas = df.select_dtypes(include=[np.number]).columns
+df_limpio = df[cols_numericas].copy()
+columnas_basura = ["Id","Met_Color","Airbag_1","Airbag_2","Gears","Mistlamps",
+  "Radio_cassette","Power_Steering","Backseat_Divider","Central_Lock","Radio",
+  "cc","Doors","Cilynders","CD_Player","Airco","Automatic","Tow_Bar",
+  "Boardcomputer","Metallic_Rim","Mfg_Year","Mfr_Guarantee","Cylinders",
+  "ABS","Sport_Model","Age_08_04"]
+df_limpio = df_limpio.drop(columns=[c for c in columnas_basura if c in df_limpio.columns])
+df_limpio = df_limpio.fillna(df_limpio.mean())
+y = df_limpio["Price"]; X = df_limpio.drop(columns=["Price"])
+modelo = sm.OLS(y, sm.add_constant(X)).fit()
+print(modelo.summary())  # R² ≈ 0.74, AIC/BIC incluidos</code></pre>
+  <p>Resultado de referencia: 1436 obs., R² 0,741 / ajustado 0,740, <code>KM</code> con coef. ≈ −0,046 (p≈0),
+  VIF alto (Cond. No. ≈ 2,3e+06 → multicolinealidad a discutir en U5/U6).</p>
+
+  <h2>Parte 3 — Diagnóstico profundo</h2>
+  <pre><code>residuos, predicciones = modelo.resid, modelo.fittedvalues
+# hist + QQ + residuos vs fitted
+# scale-location (raíz |resid. estudentizados| vs fitted, curva lowess)
+# leverage vs residuos (burbuja = distancia de Cook)
+# regresión parcial aislada de KM: sm.graphics.plot_partregress(...)</code></pre>
+  <p>Cada gráfico va a una lección de U6 con interpretación de negocio
+  (qué le dice al que fija precios de usados).</p>
+
+  <nav class="lesson-nav">
+    <a href="toyota-data-dictionary.html">← Diccionario Toyota</a>
+    <a href="../index.html">Índice →</a>
+  </nav>
+</main>
+</body>
+</html>

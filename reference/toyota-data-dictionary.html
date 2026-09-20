@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Diccionario ToyotaCorolla — referencia</title>
+  <link rel="stylesheet" href="../assets/styles.css">
+</head>
+<body>
+<main>
+  <header class="course">
+    <p class="kicker">Referencia · imprime bien · fuente: ToyotaCorolla.csv</p>
+    <h1>Diccionario del dataset Toyota Corolla</h1>
+    <p>1436 filas × 37 columnas. Precios de Toyota Corolla usados. Sin celdas vacías:
+    la suciedad viene codificada (<code>?</code>, <code>KM=1</code>, rarezas en <code>cc/Doors/Gears</code>).
+    Es el hilo conductor de todas las lecciones.</p>
+    <p class="meta"><a href="../index.html">← Índice</a> · <a href="../ToyotaCorolla.csv">CSV</a></p>
+  </header>
+
+  <h2>Columnas clave por unidad</h2>
+  <table>
+    <tr><th>Columna</th><th>Tipo</th><th>Notas (qué explotar)</th></tr>
+    <tr><td><code>Price</code></td><td>numérica continua</td><td>Target principal. Rango 4.350–32.500, mediana ~9.900. EDA, regresión, clustering.</td></tr>
+    <tr><td><code>KM</code></td><td>numérica continua</td><td>Predictor estrella (coef. negativo en OLS). Rango 1–243.000; valores <code>1</code> = atípicos/outliers.</td></tr>
+    <tr><td><code>Age_08_04</code></td><td>numérica (meses)</td><td>Antigüedad. Colineal con <code>Mfg_Year/Mfg_Month</code>: el notebook ejemplo la excluye.</td></tr>
+    <tr><td><code>Fuel_Type</code></td><td>categórica</td><td>Petrol 1264 / Diesel 155 / CNG 17. Desbalanceo para clasificación y barplots.</td></tr>
+    <tr><td><code>Model</code></td><td>texto</td><td>147 filas empiezan con <code>?</code> (~10%). Caso canónico de wrangling + regex (U2).</td></tr>
+    <tr><td><code>HP, Weight, Quarterly_Tax, Guarantee_Period, BOVAG_Guarantee, Automatic_airco, Powered_Windows, Mfg_Month</code></td><td>numéricas/binarias</td><td>Las ~9 predictoras del OLS de referencia (R² ≈ 0,74). Base de U5/U6.</td></tr>
+    <tr><td><code>Airco, ABS, Airbag_1/2, Boardcomputer, CD_Player, …</code></td><td>binarias 0/1</td><td>Equipamiento para ítems frecuentes y Apriori (U9).</td></tr>
+    <tr><td><code>cc, Doors, Gears, Cylinders</code></td><td>numéricas discretas</td><td>Rarezas: <code>cc=16000</code>, <code>Doors=2</code> (2 casos), <code>Gears</code> 3/4/5/6. Limpieza (U2).</td></tr>
+    <tr><td><code>Id</code> y columnas de <code>columnas_basura</code> del notebook</td><td>identificadores / constantes</td><td>Se excluyen del modelado (ver referencia OLS). Incluyen <code>Met_Color, Airbag_*</code> y dummies de equipamiento casi constantes.</td></tr>
+  </table>
+
+  <h2>Suciedad conocida (cheat-sheet)</h2>
+  <ul>
+    <li><strong><code>Model</code> con <code>?</code>:</strong> limpiar con <code>str.lstrip('?')</code> + regex de versión/carrocería.</li>
+    <li><strong><code>KM=1</code>:</strong> decidir: ¿error de carga o auto nuevo? Documentar el criterio (outliers, U2).</li>
+    <li><strong><code>Fuel_Type=CNG</code> (17 casos):</strong> categoría rara; cuidado con estratificación en clasificación.</li>
+    <li><strong>Sin nulos reales:</strong> U4 inyecta missingness artificial con semilla fija y la documenta.</li>
+  </ul>
+
+  <h2>Cómo citar este dataset en cada lección</h2>
+  <pre><code>import pandas as pd
+df = pd.read_csv("../ToyotaCorolla.csv")  # desde lessons/
+print(df.shape)  # (1436, 37)</code></pre>
+
+  <nav class="lesson-nav">
+    <a href="../index.html">← Índice</a>
+    <a href="analisis-ejemplo-ols.html">Análisis OLS de ejemplo →</a>
+  </nav>
+</main>
+</body>
+</html>
