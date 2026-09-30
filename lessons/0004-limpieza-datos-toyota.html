@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>0004 · Limpieza de datos con Toyota — Unidad 2</title>
+  <link rel="stylesheet" href="../assets/styles.css">
+</head>
+<body>
+<main>
+  <header class="course">
+    <p class="kicker">Unidad 2 · Exploración de datos · Lección 0004</p>
+    <h1>Limpieza de datos con Toyota: detectar la suciedad</h1>
+    <p><strong>Win de hoy:</strong> auditar <code>ToyotaCorolla.csv</code> (1436 × 37) y documentar
+    sus 5 defectos conocidos: <code>Model</code> con <code>?</code>, <code>KM</code> sospechosos y rarezas
+    en <code>cc</code>/<code>Doors</code>/<code>Gears</code>, con un snippet que los cuenta.</p>
+    <p class="meta"><a href="../index.html">← Índice</a> ·
+    <a href="../reference/toyota-data-dictionary.html">Diccionario Toyota</a> ·
+    <a href="../ToyotaCorolla.csv">CSV</a></p>
+  </header>
+
+  <h2>1 · Limpiar: el trabajo invisible que sostiene todo</h2>
+  <p><strong><abbr title="Limpieza de datos: detectar y corregir errores, inconsistencias y formatos rotos antes de analizar">Limpiar</abbr></strong>
+  es revisar la tabla antes de creerle: buscar celdas vacías, errores de carga, formatos mezclados y valores
+  imposibles. Dicen que es el 80 % del trabajo real, y se entiende con una regla vieja de computación:
+  <strong><abbr title="GIGO: garbage in, garbage out; si entran datos sucios, salen conclusiones sucias">GIGO</abbr></strong>,
+  “basura entra, basura sale”. Ningún modelo, por sofisticado que sea, se salva de datos sucios.</p>
+  <p>Dos palabras que vamos a usar mucho:</p>
+  <ul>
+    <li><strong><abbr title="Valor nulo (NaN): celda vacía, dato que falta; pandas lo marca como NaN">Valor nulo</abbr>.</strong>
+    La celda vacía: el dato no está. En <abbr title="pandas: biblioteca de Python para trabajar con tablas de datos">pandas</abbr> se marca como
+    <code><abbr title="NaN: not a number; la marca que usa pandas para un valor faltante">NaN</abbr></code>
+    (<em>not a number</em>). Ojo: un <code>?</code> pegado a un texto o un <code>1</code> donde debería haber
+    60.000 <strong>no</strong> son nulos para pandas: son suciedad <em>codificada</em>, que es peor, porque el
+    programa no la ve venir.</li>
+    <li><strong><abbr title="Valor atípico: dato que se aleja mucho del resto; puede ser un error o un caso real pero raro">Valor atípico</abbr>.</strong>
+    Un dato que se aleja mucho del resto. Algunos son errores (<code>cc = 16000</code>), otros son casos reales
+    pero raros (un Corolla de 32.500 €). La limpieza los <em>detecta y documenta</em>; decidir qué hacer con ellos
+    (corregir, marcar, excluir) es una decisión que se anota, nunca se esconde.</li>
+  </ul>
+  <div class="callout"><strong>Regla de oro de esta lección:</strong> no borres nada en silencio.
+  Cada defecto se cuenta, se muestra con evidencia y se decide por escrito qué hacer (corregir, marcar con un
+  <abbr title="Flag: columna nueva de 0/1 que marca las filas con un defecto, sin borrarlas">flag</abbr>, o dejarlo).
+  El dataset limpio se guarda como archivo <em>nuevo</em>; el original no se toca.</div>
+  <p><strong>Paso −1: ¿de dónde vienen?</strong> Los
+  <strong><abbr title="Datos privados: provistos por organizaciones; conllevan cuidados de seguridad y privacidad">datos privados</abbr></strong>
+  (los de una concesionaria real: clientes, patentes) exigen cuidados de seguridad y privacidad antes de abrirlos;
+  los <strong><abbr title="Datos públicos: publicados por organismos para todos (ej. Our World in Data)">datos públicos</abbr></strong>
+  (organismos, portales abiertos, <em>Our World in Data</em>) vienen con documentación y licencia.
+  Este CSV es público y docente: ideal para aprender, pero igual hereda sesgos de cómo se juntó (ver
+  <a href="0038-muestreo-sesgo.html">lección 0038</a>).</p>
+
+  <h2>2 · Paso 0: ¿hay celdas vacías? (<code>info</code>, <code>describe</code>, <code>isna</code>)</h2>
+  <p>Antes de cazar defectos sutiles, la pregunta más básica: ¿falta algo? Tres comandos responden:</p>
+  <pre><code>import pandas as pd
+df = pd.read_csv("../ToyotaCorolla.csv")  # desde lessons/
+print(df.shape)              # (1436, 37)
+print(df.isna().sum().sum()) # 0 → ni una celda vacía
+print(df.info())             # 35 numéricas + 2 de texto (Model, Fuel_Type)</code></pre>
+  <p>Resultado: <strong>0 valores nulos</strong> en todo el archivo. ¿Terminamos? No: como advierte el
+  <a href="../reference/toyota-data-dictionary.html">diccionario Toyota</a>, acá la suciedad viene
+  <em>codificada dentro de celdas llenas</em>. El <code>isna()</code> no la detecta; hay que mirar columna por columna.
+  Por eso esta unidad existe: <code>describe()</code> muestra el resumen numérico, pero el juicio lo pone el analista.</p>
+
+  <h2>3 · Caso 1: <code>Model</code> con <code>?</code> inicial (147 filas)</h2>
+  <p>La columna <code>Model</code> describe la versión del auto en texto. Pero 147 filas empiezan con un signo
+  de pregunta pegado, defecto típico de carga del archivo original:</p>
+  <pre><code>raro = df["Model"].str.startswith("?", na=False)
+print(raro.sum())  # 147
+print(df.loc[raro, "Model"].iloc[0])
+# ?TOYOTA Corolla 2.0 D4D HATCHB TERRA 2/3-Doors</code></pre>
+  <p>¿Es grave? Para contar modelos distintos sí: <code>"?TOYOTA …"</code> y <code>"TOYOTA …"</code> son el mismo
+  auto escrito distinto, y pandas los cuenta como dos. La decisión documentada:</p>
+  <ul>
+    <li>Crear <code>Model_tiene_pregunta</code> (flag 0/1): no perdemos la información de que esa fila venía rota.</li>
+    <li>Crear <code>Model_limpio</code> sin el <code>?</code> para agrupar y contar bien.</li>
+  </ul>
+  <pre><code>df["Model_tiene_pregunta"] = raro.astype(int)
+df["Model_limpio"] = df["Model"].str.lstrip("?")</code></pre>
+  <p class="meta">En la próxima lección exprimiremos <code>Model</code> con
+  <abbr title="Regex: expresiones regulares; patrones para buscar y extraer partes de un texto">regex</abbr>;
+  hoy alcanza con dejar el defecto contado y marcado.</p>
+
+  <h2>4 · Caso 2: <code>KM ≤ 100</code> (9 autos, 8 con <code>KM = 1</code>)</h2>
+  <p>¿Un auto <em>usado</em> con 1 kilómetro? Hay 9 filas con <code>KM ≤ 100</code>. Acá viene la lección importante:
+  <strong>el contexto decide si es error o no</strong>. Mirá la tabla completa de los 9:</p>
+  <table>
+    <tr><th>Fila</th><th>Price (€)</th><th>KM</th><th>Edad (meses)</th><th>Combustible</th><th>Lectura</th></tr>
+    <tr><td>184/185</td><td>17.795 / 18.245</td><td>1</td><td>1</td><td>Petrol</td><td>De 1 mes: casi nuevo, KM=1 es creíble</td></tr>
+    <tr><td>109</td><td>32.500</td><td>1</td><td>4</td><td>Diesel</td><td>De 4 meses y carísimo: creíble</td></tr>
+    <tr><td>117/169/170/183</td><td>17–21 mil</td><td>1–15</td><td>2–9</td><td>Petrol</td><td>Jóvenes y caros: creíbles</td></tr>
+    <tr><td>601</td><td>7.500</td><td>1</td><td>50</td><td>Diesel</td><td>De 50 meses: <strong>error casi seguro</strong></td></tr>
+    <tr><td>1435</td><td>6.950</td><td>1</td><td>76</td><td>Petrol</td><td>De 76 meses: <strong>error casi seguro</strong></td></tr>
+  </table>
+  <p>Siete son autos jóvenes y caros donde <code>KM = 1</code> puede significar “sin rodar” (un código del vendedor,
+  no una medición). Pero las filas 601 y 1435 tienen 4 y 6 <em>años</em> con 1 km: eso es un error de carga.
+  Decisión documentada: flag <code>KM_sospechoso</code> en los 9, y en el análisis de <code>KM</code> mirar los
+  resultados con y sin ellos. Borrarlos sin más sería esconder evidencia.</p>
+  <pre><code>df["KM_sospechoso"] = (df["KM"] &lt;= 100).astype(int)
+print(df["KM_sospechoso"].sum())  # 9</code></pre>
+
+  <h2>5 · Caso 3: rarezas en <code>cc</code>, <code>Doors</code> y <code>Gears</code></h2>
+  <ul>
+    <li><strong><code>cc = 16000</code> (1 fila).</strong> Toda la columna está entre 1300 y 2000… salvo una fila
+    con 16.000, exactamente 10× lo típico. Casi seguro alguien sumó un cero. Decisión: corregir a 1600
+    (el valor más común) y anotarlo, o marcarla; lo imperdonable es dejarla pasar en silencio porque distorsiona
+    cualquier promedio.</li>
+    <li><strong><code>Doors = 2</code> (2 filas).</strong> El resto: 622 con 3, 138 con 4, 674 con 5. ¿Existe un
+    Corolla de 2 puertas? Raro pero no imposible; se marca con flag y se sigue. Ejemplo perfecto de
+    “atípico ≠ error”.</li>
+    <li><strong><code>Gears ≠ 5</code> (46 filas).</strong> 1390 autos tienen 5 marchas; hay 43 con 6 (plausible en
+    versiones deportivas), 2 con 3 y 1 con 4 (sospechosos). Se marcan; el modelo dirá si importan.</li>
+  </ul>
+  <p>Y un hallazgo de regalo: hay columnas <strong><abbr title="Casi constante: columna que vale lo mismo en casi todas las filas; aporta poca información">casi constantes</abbr></strong>
+  (<code>Cylinders</code> vale 4 en las 1436 filas, <code>Guarantee_Period</code> vale 3 en 1274).
+  Si una columna no varía, no puede explicar nada: el análisis de ejemplo las deja afuera, y en la
+  Unidad 5 veremos cómo la selección de variables las descarta sola.</p>
+
+  <h2>6 · Figuras: el mapa de la suciedad</h2>
+  <p>Primero, el conteo de filas afectadas por cada defecto (de 1436):</p>
+  <figure>
+    <img src="../assets/img/toyota/0004-limpieza-datos-toyota-fig1.png" alt="Barras con filas afectadas por cada defecto: Model 147, Gears 46, KM 9, Doors 2, cc 1">
+    <figcaption>Fig. 1 — Ningún defecto es masivo, pero todos existen. El <code>?</code> de
+    <code>Model</code> (147) es el único que supera el 10 %; el resto son puñados de filas que igual
+    hay que documentar.</figcaption>
+  </figure>
+  <p>Y con lupa, los dos casos numéricos: los 9 <code>KM ≤ 100</code> en rojo sobre la nube
+  <code>Price vs KM</code>, y el histograma de <code>cc</code> donde todo vive bajo 2000 salvo la fila imposible:</p>
+  <figure>
+    <img src="../assets/img/toyota/0004-limpieza-datos-toyota-fig2.png" alt="Scatter Price vs KM con 9 puntos rojos en KM bajo e histograma de cc con una fila en 16000">
+    <figcaption>Fig. 2 — Izquierda: los 9 autos con <code>KM ≤ 100</code> (rojo) pegados al eje.
+    Derecha: <code>cc</code> concentrada entre 1300 y 2000, con 1 fila en 16.000 fuera de escala.</figcaption>
+  </figure>
+  <p>Snippet generador de la Fig. 1 (conteo honesto, sin hardcodear):</p>
+  <pre><code>import pandas as pd
+df = pd.read_csv("../ToyotaCorolla.csv")
+print("Model con ?:", int(df["Model"].str.startswith("?", na=False).sum()))  # 147
+print("Gears != 5:", int((df["Gears"] != 5).sum()))                          # 46
+print("KM <= 100:", int((df["KM"] &lt;= 100).sum()))                          # 9
+print("Doors == 2:", int((df["Doors"] == 2).sum()))                          # 2
+print("cc > 5000:", int((df["cc"] > 5000).sum()))                            # 1</code></pre>
+  <p>Regenerar ambas figuras (mismo resultado versionado en <code>assets/img/toyota/</code>):</p>
+  <pre><code>python scripts/make_figures.py --only limpieza-datos-toyota</code></pre>
+
+  <h2>7 · Quiz (auto-chequeo inmediato)</h2>
+  <p class="meta">Elegí una opción por pregunta: el feedback es inmediato.</p>
+
+  <div class="quiz" id="q1">
+    <strong>P1 · El CSV trae 0 celdas vacías: entonces…</strong>
+    <label><input type="radio" name="q1" value="0"> Ya está limpio, no hay nada más</label>
+    <label><input type="radio" name="q1" value="1"> Igual hay suciedad codificada dentro</label>
+    <label><input type="radio" name="q1" value="2"> Solo faltan los gráficos finales</label>
+    <label><input type="radio" name="q1" value="3"> Hay que borrar las 1436 filas</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <div class="quiz" id="q2">
+    <strong>P2 · ¿Qué hacer con los 147 Model con ?…</strong>
+    <label><input type="radio" name="q2" value="0"> Borrar las 147 filas sin avisar</label>
+    <label><input type="radio" name="q2" value="1"> Ignorarlos porque son muy pocos</label>
+    <label><input type="radio" name="q2" value="2"> Cambiarlos todos por valor medio</label>
+    <label><input type="radio" name="q2" value="3"> Marcarlos con flag y limpiar copia</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <div class="quiz" id="q3">
+    <strong>P3 · KM=1 en un auto de 76 meses es…</strong>
+    <label><input type="radio" name="q3" value="0"> Un auto nuevo sin rodar aún</label>
+    <label><input type="radio" name="q3" value="1"> Un valor nulo tipo NaN real</label>
+    <label><input type="radio" name="q3" value="2"> Un error de carga casi seguro</label>
+    <label><input type="radio" name="q3" value="3"> Una columna casi constante ya</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <h2>8 · Fuente primaria y cierre</h2>
+  <p><strong>Para profundizar (1 fuente):</strong>
+  McKinney, <em>Python for Data Analysis</em> — capítulos de limpieza, valores faltantes y
+  <code><abbr title="value_counts: método de pandas que cuenta cuántos casos hay por categoría">value_counts</abbr></code>
+  (<a href="https://wesmckinney.com/book/">wesmckinney.com/book</a>, también en
+  <a href="../RESOURCES.md">RESOURCES.md</a> del curso).
+  Es la referencia para todo lo que hoy contaste con <code>isna</code> y comparaciones booleanas.</p>
+  <p>¿Algo no quedó claro? <strong>Preguntame al agente</strong>: qué defecto te cuesta detectar, cuándo un atípico
+  es error y cuándo es real, o cómo decidir entre corregir, marcar o excluir. Esa pregunta vale más que releer.</p>
+
+  <nav class="lesson-nav">
+    <a href="0003-regresion-lineal-precio-km.html">← 0003 Regresión lineal</a>
+    <a href="0005-wrangling-regex-model.html">Siguiente: 0005 Wrangling y regex →</a>
+  </nav>
+  <p class="meta">Ver también: <a href="../index.html">índice del curso</a> ·
+  <a href="../reference/toyota-data-dictionary.html">diccionario Toyota</a> ·
+  <a href="../reference/analisis-ejemplo-ols.html">análisis OLS de ejemplo</a></p>
+</main>
+<script>
+(function(){
+  var answers = {q1: 1, q2: 3, q3: 2};
+  var msgs = {
+    q1: ["Correcto: 0 nulos no es 0 suciedad; el ? y el KM=1 vienen codificados.",
+         "No: sin celdas vacías igual hay suciedad codificada (?, KM=1, cc)."],
+    q2: ["Correcto: flag 0/1 + columna limpia; el original no se toca ni se borra.",
+         "No: nunca se borra en silencio; se marca con flag y se limpia una copia."],
+    q3: ["Correcto: 76 meses con 1 km es imposible; es error de carga, no 0 km real.",
+         "No: con 76 meses, KM=1 no puede ser real; es un error de carga."]
+  };
+  ["q1","q2","q3"].forEach(function(id){
+    var box = document.getElementById(id);
+    var fb = box.querySelector(".feedback");
+    box.addEventListener("change", function(e){
+      var ok = parseInt(e.target.value, 10) === answers[id];
+      fb.textContent = ok ? msgs[id][0] : msgs[id][1];
+      fb.className = "feedback " + (ok ? "ok" : "no");
+    });
+  });
+})();
+</script>
+</body>
+</html>

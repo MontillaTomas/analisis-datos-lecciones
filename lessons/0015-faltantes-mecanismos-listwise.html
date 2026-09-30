@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>0015 · Faltantes: mecanismos y listwise — Unidad 4</title>
+  <link rel="stylesheet" href="../assets/styles.css">
+</head>
+<body>
+<main>
+  <header class="course">
+    <p class="kicker">Unidad 4 · Datos faltantes e imputación · Lección 0015</p>
+    <h1>Faltantes: por qué faltan y qué se pierde</h1>
+    <p><strong>Win de hoy:</strong> distinguir <abbr title="MCAR: missing completely at random; falta al azar, sin patrón">MCAR</abbr> /
+    <abbr title="MAR: missing at random; falta según otra columna observada (ej. edad)">MAR</abbr> /
+    <abbr title="MNAR: missing not at random; falta según el propio valor ausente">MNAR</abbr>, inyectar faltantes
+    documentados (semilla 42: 139 KM + 205 HP) y medir lo que listwise tira (327 filas).</p>
+    <p class="meta"><a href="../index.html">← Índice</a> ·
+    <a href="../reference/toyota-data-dictionary.html">Diccionario Toyota</a> ·
+    <a href="../ToyotaCorolla.csv">CSV</a></p>
+  </header>
+
+  <h2>1 · No todos los huecos son iguales (MCAR / MAR / MNAR)</h2>
+  <p>El mecanismo —<em>por qué</em> falta— decide el tratamiento. Tres casos con historias Toyota:</p>
+  <ul>
+    <li><strong>MCAR</strong> (falta al azar total): el sensor del service se rompió días sueltos y 139 KM se
+    perdieron sin patrón. Lo que queda es representativo; el único costo es tamaño.</li>
+    <li><strong>MAR</strong> (falta según otra columna): las fichas viejas en papel perdieron el HP (1,7 % en
+    jóvenes, 19,2 % en viejos). El patrón se explica con la edad <em>observada</em>: se puede corregir.</li>
+    <li><strong>MNAR</strong> (falta según el propio valor): vendedores que ocultan KM altos. Acá el hueco esconde
+    justo lo que querés saber: es el peor caso y ningún truco mecánico lo arregla del todo.</li>
+  </ul>
+
+  <h2>2 · La inyección documentada (el CSV no trae vacíos)</h2>
+  <p>ToyotaCorolla.csv tiene 0 celdas vacías (0004), así que para practicar <strong>fabricamos</strong> los faltantes
+  con semilla fija y lo documentamos. Esta inyección vale para toda la Unidad 4:</p>
+  <pre><code>import numpy as np
+rng = np.random.default_rng(42)          # semilla: reproducible
+m_km = rng.random(len(df)) &lt; 0.10       # MCAR: 139 KM (~10 %)
+tramos = pd.cut(df["Age_08_04"], [0, 30, 60, 81], labels=["joven", "medio", "viejo"])
+p = tramos.map({"joven": 0.05, "medio": 0.12, "viejo": 0.20})
+m_hp = rng.random(len(df)) &lt; p.to_numpy(dtype=float)  # MAR: 205 HP
+df.loc[m_km, "KM"] = np.nan
+df.loc[m_hp, "HP"] = np.nan</code></pre>
+  <div class="callout"><strong>Regla U4:</strong> como conocemos los valores reales que tapamos, podemos medir qué
+  método de relleno se acerca más (0018). Sin verdad conocida, comparar imputaciones es opinar.</div>
+
+  <h2>3 · Listwise vs pairwise: tirar filas vs aprovechar columnas</h2>
+  <ul>
+    <li><strong><abbr title="Listwise: descartar toda fila con algún faltante (dropna)">Listwise</abbr></strong>
+    (<code>dropna()</code>): tira las 327 filas con algún hueco (22,8 %) y se queda con 1109 completas. Simple y
+    honesto, pero caro: casi un cuarto afuera. Solo es insesgado con MCAR.</li>
+    <li><strong><abbr title="Pairwise: usar en cada cálculo todas las filas disponibles para esas columnas">Pairwise</abbr></strong>:
+    cada cálculo usa lo disponible: media de KM con 1297, media de HP con 1231, correlación KM–HP con 1109.
+    Aprovecha más, pero cada número sale de una muestra distinta (pandas lo hace por defecto en <code>corr()</code>).</li>
+  </ul>
+  <p>Ninguno rellena: ambos <em>conviven</em> con huecos. Rellenarlos (<abbr title="Imputación: rellenar faltantes con valores estimados (media, vecinos, modelos)">imputación</abbr>)
+  empieza en la 0016.</p>
+
+  <h2>4 · Figura: el MAR a la vista y el costo listwise</h2>
+  <figure>
+    <img src="../assets/img/toyota/0015-faltantes-mecanismos-listwise-fig1.png" alt="Porcentaje de HP perdido por tramo de edad y filas útiles según estrategia">
+    <figcaption>Fig. 1 — Izquierda: HP perdido crece con la edad (1,7 → 19,2 %): MAR de libro. Derecha: listwise
+    deja 1109 filas; pairwise rescata 1297 para KM y 1231 para HP.</figcaption>
+  </figure>
+  <p>Regenerar la figura (mismo resultado versionado en <code>assets/img/toyota/</code>):</p>
+  <pre><code>python scripts/make_figures.py --only faltantes-mecanismos-listwise</code></pre>
+
+  <h2>5 · Quiz (auto-chequeo inmediato)</h2>
+  <p class="meta">Elegí una opción por pregunta: el feedback es inmediato.</p>
+
+  <div class="quiz" id="q1">
+    <strong>P1 · Un sensor que falla al azar es…</strong>
+    <label><input type="radio" name="q1" value="0"> Es MNAR seguro siempre sí</label>
+    <label><input type="radio" name="q1" value="1"> MCAR puro y al azar</label>
+    <label><input type="radio" name="q1" value="2"> Es MAR explicado por edad</label>
+    <label><input type="radio" name="q1" value="3"> Es listwise directo sin dudar</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <div class="quiz" id="q2">
+    <strong>P2 · HP que falta más en viejos es…</strong>
+    <label><input type="radio" name="q2" value="0"> MCAR puro y al azar</label>
+    <label><input type="radio" name="q2" value="1"> Es listwise sin ningún remedio</label>
+    <label><input type="radio" name="q2" value="2"> Es MAR explicado por edad</label>
+    <label><input type="radio" name="q2" value="3"> Pairwise calculado de a pares</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <div class="quiz" id="q3">
+    <strong>P3 · Listwise tira 327 filas: pierde…</strong>
+    <label><input type="radio" name="q3" value="0"> Casi un cuarto de filas</label>
+    <label><input type="radio" name="q3" value="1"> Solo nueve autos en total</label>
+    <label><input type="radio" name="q3" value="2"> No pierde ni una fila</label>
+    <label><input type="radio" name="q3" value="3"> Justo la mitad del dataset</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <h2>6 · Fuente primaria y cierre</h2>
+  <p><strong>Para profundizar (1 fuente):</strong>
+  Kuhn &amp; Johnson, <em>Applied Predictive Modeling</em> — capítulo de preprocesamiento y datos faltantes
+  (<a href="http://appliedpredictivemodeling.com/">appliedpredictivemodeling.com</a>, también en
+  <a href="../RESOURCES.md">RESOURCES.md</a> del curso).</p>
+  <p>¿Algo no quedó claro? <strong>Preguntame al agente</strong>: qué mecanismo tiene tu hueco, cuándo listwise
+  alcanza, o por qué la semilla fija importa. Esa pregunta vale más que releer.</p>
+
+  <nav class="lesson-nav">
+    <a href="0014-mapas-texto-dos-visualizaciones.html">← 0014 Mapas y texto</a>
+    <a href="0016-relleno-simple-media-razon.html">Siguiente: 0016 Relleno simple →</a>
+  </nav>
+  <p class="meta">Ver también: <a href="../index.html">índice del curso</a> ·
+  <a href="../reference/toyota-data-dictionary.html">diccionario Toyota</a> ·
+  <a href="../reference/analisis-ejemplo-ols.html">análisis OLS de ejemplo</a></p>
+</main>
+<script>
+(function(){
+  var answers = {q1: 1, q2: 2, q3: 0};
+  var msgs = {
+    q1: ["Correcto: sin patrón ni explicación = MCAR.",
+         "No: fallar al azar sin patrón es MCAR."],
+    q2: ["Correcto: la edad observada explica el hueco = MAR.",
+         "No: si otra columna lo explica, es MAR."],
+    q3: ["Correcto: 327 de 1436 = 22,8 %, casi un cuarto.",
+         "No: 327 filas son el 22,8 %, casi un cuarto."]
+  };
+  ["q1","q2","q3"].forEach(function(id){
+    var box = document.getElementById(id);
+    var fb = box.querySelector(".feedback");
+    box.addEventListener("change", function(e){
+      var ok = parseInt(e.target.value, 10) === answers[id];
+      fb.textContent = ok ? msgs[id][0] : msgs[id][1];
+      fb.className = "feedback " + (ok ? "ok" : "no");
+    });
+  });
+})();
+</script>
+</body>
+</html>

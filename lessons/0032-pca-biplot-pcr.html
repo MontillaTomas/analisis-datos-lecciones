@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>0032 · PCA y biplot — Unidad 7</title>
+  <link rel="stylesheet" href="../assets/styles.css">
+</head>
+<body>
+<main>
+  <header class="course">
+    <p class="kicker">Unidad 7 · Agrupamientos (clustering) · Lección 0032</p>
+    <h1>PCA y biplot: comprimir variables que repiten la historia</h1>
+    <p><strong>Win de hoy:</strong> reemplazar 8 variables correlacionadas por 2
+    <strong><abbr title="Componente principal: combinación ponderada de las variables que resume la mayor variabilidad posible">componentes</abbr></strong>
+    que explican el 68 % de la varianza (49 % + 19 %), y leer el biplot: KM y Age apuntan juntas, los 3 clusters se separan solos.</p>
+    <p class="meta"><a href="../index.html">← Índice</a> ·
+    <a href="../reference/toyota-data-dictionary.html">Diccionario Toyota</a> ·
+    <a href="../ToyotaCorolla.csv">CSV</a></p>
+  </header>
+
+  <h2>1 · El problema: columnas que cuentan la misma película</h2>
+  <p>Un auto viejo suele tener muchos <code>KM</code>, ser Diesel y tener cilindrada grande:
+  varias columnas miden casi lo mismo. Si entran todas crudas a un modelo, la información se repite
+  (los modelos se marean con la
+  <strong><abbr title="Correlación: cuando dos variables tienden a subir o bajar juntas">correlación</abbr></strong>).
+  <strong><abbr title="PCA: técnica que combina variables correlacionadas en pocas componentes no correlacionadas">PCA</abbr></strong>
+  responde: <em>¿podemos reemplazar 8 variables correlacionadas por 2 componentes que expliquen casi la misma variabilidad?</em></p>
+  <p>Condición fundamental: <strong>estandarizar primero</strong> (<code>StandardScaler</code>), porque
+  <code>KM</code> (miles) aplastaría a <code>Doors</code> (4 o 5) si comparamos escalas crudas.</p>
+
+  <h2>2 · Scree plot: ¿cuántas componentes guardar?</h2>
+  <p>Cada componente explica un % de la
+  <strong><abbr title="Varianza explicada: proporción de la dispersión total que captura cada componente">varianza</abbr></strong>
+  total. El
+  <strong><abbr title="Scree plot: gráfico de varianza explicada por componente, de mayor a menor; el 'codo' indica dónde cortar">scree plot</abbr></strong>
+  muestra ese % ordenado; buscamos el «codo» donde agregar más componentes ya aporta poco.</p>
+  <figure>
+    <img src="../assets/img/toyota/0032-pca-biplot-pcr-fig1.png" alt="Scree plot y biplot PCA con clusters de autos Toyota">
+    <figcaption>Fig. 1 — Izquierda: scree plot, PC1 49 % + PC2 19 % = 68 %; el resto aporta poco.
+    Derecha: biplot, cada punto es un auto (color = cluster de k-means), cada flecha es una variable.</figcaption>
+  </figure>
+  <p>¿Cómo se lee el
+  <strong><abbr title="Biplot: gráfico que muestra a la vez los puntos (autos) y las flechas de las variables en el plano de dos componentes">biplot</abbr></strong>?
+  <strong>Flechas largas</strong> = variables importantes; <strong>flechas paralelas</strong> = variables correlacionadas
+  (<code>KM</code> y <code>Age</code> apuntan juntas, como vimos en la <a href="0023-correlacion-vs-regresion.html">lección 0023</a>);
+  <strong>puntos cercanos</strong> = autos parecidos. Y confirma visualmente los 3 clusters de k-means (colores bien separados).</p>
+  <p>Regenerar la figura (mismo resultado versionado en <code>assets/img/toyota/</code>):</p>
+  <pre><code>python scripts/make_figures.py --only pca-biplot-pcr</code></pre>
+
+  <h2>3 · Qué significan PC1 y PC2 (las cargas)</h2>
+  <p>Cada componente es una <strong>combinación ponderada</strong>: <code>PC1 = 0,45·Age + 0,42·KM + …</code>.
+  Los pesos se llaman
+  <strong><abbr title="Cargas (loadings): pesos de cada variable original dentro de una componente; indican qué mide">cargas</abbr></strong>.
+  Con 8 variables estandarizadas, el ajuste da:</p>
+  <table>
+    <tr><th>Componente</th><th>Varianza</th><th>Cargas dominantes (qué mide)</th></tr>
+    <tr><td>PC1</td><td>49 %</td><td><code>KM</code> (+0,45), <code>Age</code> (+0,44), <code>cc</code> (+0,43) → «desgaste / tamaño»</td></tr>
+    <tr><td>PC2</td><td>19 %</td><td><code>HP</code> (+0,54), <code>cc</code> (+0,43) → «potencia»</td></tr>
+  </table>
+  <p>En palabras: PC1 ordena de «nuevo-chico» a «viejo-grande», PC2 de «poca potencia» a «mucha potencia».
+  Dos números por auto reemplazan razonablemente bien a ocho.</p>
+
+  <h2>4 · PCA en 10 líneas (reproducí el 49 % / 19 %)</h2>
+  <pre><code>import pandas as pd
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
+
+df = pd.read_csv("../ToyotaCorolla.csv")
+cols = ["Price","Age_08_04","KM","HP","cc","Doors","Gears","Weight"]
+X = df[cols].dropna()
+Xs = StandardScaler().fit_transform(X)   # ¡siempre estandarizar antes!
+
+p = PCA(n_components=2).fit(Xs)
+print(p.explained_variance_ratio_.round(2))  # [0.49 0.19]
+print(pd.Series(p.components_[0], index=cols).round(2).sort_values())
+Z = p.transform(Xs)  # los autos ahora viven en 2D: graficables</code></pre>
+  <p><strong>Tu turno:</strong> graficá <code>Z[:,0]</code> vs <code>Z[:,1]</code> coloreando por
+  <code>Fuel_Type</code>: el diésel se separa solo, sin que PCA haya visto el combustible.</p>
+
+  <h2>5 · Bonus: PCR, regresión sobre componentes</h2>
+  <p>Podemos usar las componentes como predictores de <code>Price</code> en lugar de las 8 originales: eso es
+  <strong><abbr title="PCR (regresión de componentes principales): regresión que usa las componentes como predictores para evitar la multicolinealidad">PCR</abbr></strong>.
+  ¿Ventaja? Las componentes no están correlacionadas entre sí, así que la
+  <strong><abbr title="Multicolinealidad: predictores fuertemente correlacionados que vuelven inestables los coeficientes">multicolinealidad</abbr></strong>
+  desaparece. ¿Costo? Los coeficientes hablan de «PC1» en vez de «KM»: hay que traducirlos de vuelta.
+  Es la alternativa clásica a Ridge cuando el problema es la correlación entre predictores
+  (ver <a href="0021-ridge-lasso-caminos.html">lección 0021</a>).</p>
+  <p><strong>Cuidado:</strong> PCA es no supervisado: comprime las X <em>sin mirar</em> <code>Price</code>.
+  La dirección que mejor predice el precio podría ser PC5, no PC1. Por eso PCR a veces pierde contra Ridge/Lasso,
+  que sí miran la respuesta.</p>
+  <p><strong>Pariente moderno:</strong> los
+  <strong><abbr title="Embeddings: vectores densos aprendidos que ubican cada caso en un espacio donde 'cerca' = parecido">embeddings</abbr></strong>
+  (texto, imágenes, recomendadores) son la misma idea —comprimir a pocas dimensiones con sentido— aprendida por redes
+  en vez de álgebra lineal. PCA es el abuelo honesto de todos ellos.</p>
+
+  <h2>6 · Quiz (auto-chequeo inmediato)</h2>
+  <p class="meta">Elegí una opción por pregunta: el feedback es inmediato.</p>
+
+  <div class="quiz" id="q1">
+    <strong>P1 · Estandarizar antes de PCA porque…</strong>
+    <label><input type="radio" name="q1" value="0"> PCA exige columnas enteras siempre</label>
+    <label><input type="radio" name="q1" value="1"> La escala grande dominaría todo</label>
+    <label><input type="radio" name="q1" value="2"> El scree sale al revés</label>
+    <label><input type="radio" name="q1" value="3"> Duplica la varianza total</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <div class="quiz" id="q2">
+    <strong>P2 · Flechas casi paralelas significan…</strong>
+    <label><input type="radio" name="q2" value="0"> Predicen perfecto el precio</label>
+    <label><input type="radio" name="q2" value="1"> Son ruido para borrar</label>
+    <label><input type="radio" name="q2" value="2"> Están correlacionadas entre sí</label>
+    <label><input type="radio" name="q2" value="3"> Viven en clusters distintos</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <div class="quiz" id="q3">
+    <strong>P3 · PCR pierde a veces contra Ridge porque…</strong>
+    <label><input type="radio" name="q3" value="0"> No acepta variables estandarizadas</label>
+    <label><input type="radio" name="q3" value="1"> Comprime sin mirar la respuesta</label>
+    <label><input type="radio" name="q3" value="2"> Usa todas las componentes siempre</label>
+    <label><input type="radio" name="q3" value="3"> Solo admite variables categóricas</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <h2>7 · Fuente primaria y cierre</h2>
+  <p><strong>Para profundizar (1 fuente):</strong>
+  James et al., <em>An Introduction to Statistical Learning</em> — cap. 12 (PCA) y 6.3 (PCR).
+  Más contexto en <a href="../RESOURCES.md">RESOURCES</a>.</p>
+  <p>Cierre U7: distancias (0028) → k-means (0029) → jerárquico/DBSCAN (0030) → validación (0031) → PCA (0032).
+  Siguiente: <a href="0033-clasificacion-knn.html">Unidad 8, clasificación con k-NN</a>.</p>
+
+  <nav class="lesson-nav">
+    <a href="0031-validar-grupos-codo-silueta.html">← 0031 Validar grupos</a>
+    <a href="../index.html">Índice ↑</a>
+    <a href="0033-clasificacion-knn.html">0033 k-NN →</a>
+  </nav>
+</main>
+<script>
+(function(){
+  var answers = {q1: 1, q2: 2, q3: 1};
+  var msgs = {
+    q1: ["Correcto: KM aplastaría a Doors.",
+         "No: sin escalar, KM domina todo."],
+    q2: ["Correcto: juntas suben y bajan.",
+         "No: paralelas = correlacionadas."],
+    q3: ["Correcto: PCA no mira Price.",
+         "No: Ridge sí mira la respuesta."]
+  };
+  ["q1","q2","q3"].forEach(function(id){
+    var box = document.getElementById(id);
+    var fb = box.querySelector(".feedback");
+    box.addEventListener("change", function(e){
+      var ok = parseInt(e.target.value, 10) === answers[id];
+      fb.textContent = ok ? msgs[id][0] : msgs[id][1];
+      fb.className = "feedback " + (ok ? "ok" : "no");
+    });
+  });
+})();
+</script>
+</body>
+</html>

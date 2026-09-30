@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>0008 · Outliers multivariados — Unidad 2</title>
+  <link rel="stylesheet" href="../assets/styles.css">
+</head>
+<body>
+<main>
+  <header class="course">
+    <p class="kicker">Unidad 2 · Exploración de datos · Lección 0008</p>
+    <h1>Outliers multivariados: vecinos, grupos y aislamiento</h1>
+    <p><strong>Win de hoy:</strong> cazar raros en <em>combinación</em> (<code>KM+Price+Edad</code>) con tres
+    detectores: <abbr title="LOF: local outlier factor; marca puntos más aislados que sus vecinos">LOF</abbr> (31),
+    <abbr title="DBSCAN: clustering por densidad; lo que no entra en ningún grupo es ruido">DBSCAN</abbr> (167) e
+    <abbr title="Isolation Forest: bosque que aísla lo raro con pocos cortes; vos elegís el % a sospechar">Isolation Forest</abbr> (72).</p>
+    <p class="meta"><a href="../index.html">← Índice</a> ·
+    <a href="../reference/toyota-data-dictionary.html">Diccionario Toyota</a> ·
+    <a href="../ToyotaCorolla.csv">CSV</a></p>
+  </header>
+
+  <h2>1 · El caso que IQR y z no ven: la fila 43</h2>
+  <p>La fila 43 es un diésel de <strong>27 meses, 110.404 km y 16.950 €</strong>. Columna por columna pasa todos
+  los controles de la 0007: precio bajo la valla (17.200), KM bajo la suya (153.052), edad normal. Pero juntos no
+  cierran: ¿27 meses con 110 mil km (¡4.000 por mes!) y encima caro? Eso es un
+  <strong><abbr title="Outlier multivariado: normal en cada columna por separado, raro en combinación">outlier multivariado</abbr></strong>:
+  normal por separado, rarísimo en combinación. Hacen falta detectores que miren varias columnas a la vez.</p>
+
+  <h2>2 · Paso previo: estandarizar (o KM se come todo)</h2>
+  <p>Estos métodos miden <strong><abbr title="Distancia euclídea: distancia en línea recta entre dos puntos en el espacio de variables">distancias</abbr></strong>
+  entre autos. Pero <code>KM</code> vive cerca de 68.000 y <code>Age_08_04</code> cerca de 56: sin ajuste, el KM
+  domina cualquier distancia y la edad no vota. La
+  <strong><abbr title="Estandarización: restar la media y dividir por el desvío; cada columna queda con media 0 y desvío 1">estandarización</abbr></strong>
+  pone a todas en la misma cancha (media 0, desvío 1):</p>
+  <pre><code>from sklearn.preprocessing import StandardScaler
+X = StandardScaler().fit_transform(df[["KM", "Price", "Age_08_04"]])</code></pre>
+
+  <h2>3 · Por proximidad: LOF, el que vive lejos de sus vecinos (31)</h2>
+  <p><strong>LOF</strong> (<em>local outlier factor</em>) mira los 20 vecinos más cercanos de cada auto: si tus
+  vecinos están amontonados entre sí y vos lejos de ellos, sos raro. Es <em>local</em>: un auto puede estar lejos
+  del centro y ser normal si su barrio también es disperso.</p>
+  <pre><code>from sklearn.neighbors import LocalOutlierFactor
+lof = LocalOutlierFactor(n_neighbors=20).fit_predict(X) == -1
+print(lof.sum())  # 31 (la fila 43 está entre ellos)</code></pre>
+
+  <h2>4 · Por clústeres: DBSCAN, el que no entra en ningún grupo (167)</h2>
+  <p><strong>DBSCAN</strong> agrupa por densidad: junta autos pegados (<code>eps = 0,35</code> de radio,
+  mínimo 10 vecinos) y al que no entra en ningún grupo lo declara
+  <strong><abbr title="Ruido (DBSCAN): puntos que no pertenecen a ningún grupo denso; candidatos a outlier">ruido</abbr></strong>.
+  Acá forma 3 grupos y deja 167 ruidos afuera (11,6 %: el más sospechoso de los tres).</p>
+  <pre><code>from sklearn.cluster import DBSCAN
+db = DBSCAN(eps=0.35, min_samples=10).fit(X).labels_ == -1
+print(db.sum())  # 167 ruidos en 3 grupos</code></pre>
+  <p class="meta">DBSCAN vuelve en la Unidad 7 como algoritmo de clustering; hoy lo usamos solo como detector.</p>
+
+  <h2>5 · Por aislamiento: Isolation Forest, lo raro se aísla rápido (72)</h2>
+  <p><strong>Isolation Forest</strong> hace lo inverso: corta el espacio al azar una y otra vez. Un auto normal,
+  rodeado de otros, tarda muchos cortes en quedar solo; uno raro se aísla en 2–3 cortes. Vos elegís qué porcentaje
+  sospechar con <code>contamination</code> (acá 5 % → 72 autos).</p>
+  <pre><code>from sklearn.ensemble import IsolationForest
+iso = IsolationForest(contamination=0.05, random_state=42).fit_predict(X) == -1
+print(iso.sum())  # 72 (la fila 43 también está)</code></pre>
+
+  <h2>6 · Comparar: tres lentes, tres listas (16 en las tres)</h2>
+  <table>
+    <tr><th>Método</th><th>Marca</th><th>Idea en una línea</th></tr>
+    <tr><td>LOF (vecinos)</td><td>31</td><td>Raro = más aislado que su barrio</td></tr>
+    <tr><td>DBSCAN (ruido)</td><td>167</td><td>Raro = no entra en ningún grupo</td></tr>
+    <tr><td>Isolation Forest</td><td>72</td><td>Raro = se aísla con pocos cortes</td></tr>
+  </table>
+  <p>Solo <strong>16 autos están en las tres listas</strong> (la fila 43 es uno): cada método mira distinto y
+  sospecha distinto. No hay “el” detector correcto; hay consenso y criterio. Cierre de Unidad 2: limpiar (0004),
+  dar forma (0005), explorar (0006) y cazar rarezas (0007–0008). Recién ahora los datos están listos para contar
+  historias (U3) y modelar (U5–U9).</p>
+
+  <h2>7 · Figura: los 72 de Isolation Forest y el conteo</h2>
+  <figure>
+    <img src="../assets/img/toyota/0008-outliers-multivariados-lof-dbscan-fig1.png" alt="Scatter KM-Price con 72 outliers en rojo y barras de conteo por método">
+    <figcaption>Fig. 1 — Izquierda: los 72 de Isolation Forest (rojo) sobre la nube; la fila 43 anotada.
+    Derecha: cada método sospecha de distinta cantidad (31 / 167 / 72).</figcaption>
+  </figure>
+  <p>Regenerar la figura (mismo resultado versionado en <code>assets/img/toyota/</code>):</p>
+  <pre><code>python scripts/make_figures.py --only outliers-multivariados-lof-dbscan</code></pre>
+
+  <h2>8 · Quiz (auto-chequeo inmediato)</h2>
+  <p class="meta">Elegí una opción por pregunta: el feedback es inmediato.</p>
+
+  <div class="quiz" id="q1">
+    <strong>P1 · Sin estandarizar, ¿qué domina las distancias?</strong>
+    <label><input type="radio" name="q1" value="0"> Todas las columnas pesan igual</label>
+    <label><input type="radio" name="q1" value="1"> KM por su gran escala</label>
+    <label><input type="radio" name="q1" value="2"> La edad medida en meses</label>
+    <label><input type="radio" name="q1" value="3"> El precio medido en euros</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <div class="quiz" id="q2">
+    <strong>P2 · LOF marca un auto si…</strong>
+    <label><input type="radio" name="q2" value="0"> Vive lejos de sus vecinos</label>
+    <label><input type="radio" name="q2" value="1"> Supera el triple del desvío</label>
+    <label><input type="radio" name="q2" value="2"> Trae algún valor vacío adentro</label>
+    <label><input type="radio" name="q2" value="3"> Vale más de diecisiete mil</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <div class="quiz" id="q3">
+    <strong>P3 · DBSCAN llama ruido a…</strong>
+    <label><input type="radio" name="q3" value="0"> Todo el grupo más numeroso</label>
+    <label><input type="radio" name="q3" value="1"> Los centroides de cada grupo</label>
+    <label><input type="radio" name="q3" value="2"> Los puntos fuera de grupos</label>
+    <label><input type="radio" name="q3" value="3"> Las columnas constantes del dataset</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <h2>9 · Fuente primaria y cierre</h2>
+  <p><strong>Para profundizar (1 fuente):</strong>
+  Géron, <em>Hands-On Machine Learning</em> — capítulos de entrenamiento, detección de anomalías y
+  aprendizaje no supervisado con scikit-learn
+  (<a href="https://www.oreilly.com/library/view/hands-on-machine-learning/9781098125967/">O'Reilly</a>,
+  también en <a href="../RESOURCES.md">RESOURCES.md</a> del curso).</p>
+  <p>¿Algo no quedó claro? <strong>Preguntame al agente</strong>: por qué estandarizar antes de medir distancias,
+  cómo elegir k/eps/contamination, o qué hacer cuando los métodos no se ponen de acuerdo.</p>
+
+  <nav class="lesson-nav">
+    <a href="0007-outliers-estadisticos-iqr-z.html">← 0007 Outliers IQR y z</a>
+    <a href="0009-que-grafico-para-que-dato.html">Siguiente: 0009 Qué gráfico →</a>
+  </nav>
+  <p class="meta">Ver también: <a href="../index.html">índice del curso</a> ·
+  <a href="../reference/toyota-data-dictionary.html">diccionario Toyota</a> ·
+  <a href="../reference/analisis-ejemplo-ols.html">análisis OLS de ejemplo</a></p>
+</main>
+<script>
+(function(){
+  var answers = {q1: 1, q2: 0, q3: 2};
+  var msgs = {
+    q1: ["Correcto: KM ~68.000 aplasta a Edad ~56 sin estandarizar.",
+         "No: la columna de mayor escala (KM) domina las distancias."],
+    q2: ["Correcto: LOF compara tu aislamiento con el de tu barrio.",
+         "No: LOF es local; marca al aislado entre vecinos juntos."],
+    q3: ["Correcto: ruido es lo que no entra en ningún grupo denso.",
+         "No: DBSCAN agrupa lo denso y declara ruido al resto."]
+  };
+  ["q1","q2","q3"].forEach(function(id){
+    var box = document.getElementById(id);
+    var fb = box.querySelector(".feedback");
+    box.addEventListener("change", function(e){
+      var ok = parseInt(e.target.value, 10) === answers[id];
+      fb.textContent = ok ? msgs[id][0] : msgs[id][1];
+      fb.className = "feedback " + (ok ? "ok" : "no");
+    });
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>0031 · Validar grupos — Unidad 7</title>
+  <link rel="stylesheet" href="../assets/styles.css">
+</head>
+<body>
+<main>
+  <header class="course">
+    <p class="kicker">Unidad 7 · Agrupamientos (clustering) · Lección 0031</p>
+    <h1>Validar grupos: codo, silueta y criterio</h1>
+    <p><strong>Win de hoy:</strong> elegir k con números: codo en 3–4, silueta máxima en k=2 (0,49),
+    y k=3 defendido por negocio (solo 19 siluetas negativas).</p>
+    <p class="meta"><a href="../index.html">← Índice</a> ·
+    <a href="../reference/toyota-data-dictionary.html">Diccionario Toyota</a> ·
+    <a href="../ToyotaCorolla.csv">CSV</a></p>
+  </header>
+
+  <h2>1 · Codo: dónde deja de valer la pena</h2>
+  <p>La <strong><abbr title="Inercia: suma de distancias² al centroide; siempre baja con k">inercia</abbr></strong>
+  (2.093 → 1.428 → 993 → 848 → …) siempre baja con k: más grupos = más cerca del centro. El
+  <strong><abbr title="Codo: k donde la inercia deja de caer fuerte; equilibrio grupos vs compactez">codo</abbr></strong>
+  marca dónde frena la ganancia: acá 3–4. Ojo: el codo es visual, no teorema; dos analistas ven dos codos.</p>
+
+  <h2>2 · Silueta: cada punto vota (−1…+1)</h2>
+  <p>La <strong><abbr title="Silueta: (vecino − propio) / máx; cerca de 1 = bien puesto, negativa = mudanza">silueta</abbr></strong>
+  compara distancia a su grupo vs al vecino más cercano: 1 = bien puesto, −1 = mudanza urgente. Promedios:
+  k=2 → <strong>0,49</strong> (máximo), k=3 → 0,37, k=4 → 0,39. En k=3 por grupo: nuevitos 0,53 (compactos), medios
+  0,36, veteranos 0,33, con solo 19 negativas en 1436: grupos sanos.</p>
+
+  <h2>3 · Métricas vs negocio (y límites)</h2>
+  <p>Silueta premia k=2 (nuevos vs resto: dos nubes nítidas), el codo sugiere 3–4, el negocio cuenta 3 edades.
+  Elegimos 3: <strong>las métricas guían, el dominio decide</strong>. Límites honestos: silueta ama esferas (castiga
+  formas DBSCAN), el codo es subjetivo, y todo k debe chequear <strong>estabilidad</strong> (otras semillas, mismos
+  grupos) antes de presentarse.</p>
+
+  <h2>4 · Figura: codo y siluetas</h2>
+  <figure>
+    <img src="../assets/img/toyota/0031-validar-grupos-codo-silueta-fig1.png" alt="Codo de inercia y silueta media por k">
+    <figcaption>Fig. 1 — Izquierda: codo en 3–4. Derecha: silueta máxima en k=2 (verde); k=3–4 competitivos.
+    Decisión documentada: k=3.</figcaption>
+  </figure>
+  <p>Regenerar la figura (mismo resultado versionado en <code>assets/img/toyota/</code>):</p>
+  <pre><code>python scripts/make_figures.py --only validar-grupos-codo-silueta</code></pre>
+
+  <h2>5 · Quiz (auto-chequeo inmediato)</h2>
+  <p class="meta">Elegí una opción por pregunta: el feedback es inmediato.</p>
+
+  <div class="quiz" id="q1">
+    <strong>P1 · El codo marca…</strong>
+    <label><input type="radio" name="q1" value="0"> k igual a ocho siempre</label>
+    <label><input type="radio" name="q1" value="1"> Donde deja de bajar</label>
+    <label><input type="radio" name="q1" value="2"> El máximo global siempre</label>
+    <label><input type="radio" name="q1" value="3"> Cero grupos en total</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <div class="quiz" id="q2">
+    <strong>P2 · Silueta −1 significa…</strong>
+    <label><input type="radio" name="q2" value="0"> Perfecto y muy compacto</label>
+    <label><input type="radio" name="q2" value="1"> Grupo muy grande siempre</label>
+    <label><input type="radio" name="q2" value="2"> Mal asignado seguro total</label>
+    <label><input type="radio" name="q2" value="3"> Ruido puro de DBSCAN</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <div class="quiz" id="q3">
+    <strong>P3 · Silueta premia k=2, elegimos 3 porque…</strong>
+    <label><input type="radio" name="q3" value="0"> Negocio y codo mandan</label>
+    <label><input type="radio" name="q3" value="1"> Dos siempre falla todo</label>
+    <label><input type="radio" name="q3" value="2"> Cuatro resulta aún mejor</label>
+    <label><input type="radio" name="q3" value="3"> El azar lo quiso</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <h2>6 · Fuente primaria y cierre</h2>
+  <p><strong>Para profundizar (1 fuente):</strong>
+  Tan, Steinbach &amp; Kumar, <em>Introduction to Data Mining</em> — capítulo de validación de clustering
+  (<a href="https://www-users.cs.umn.edu/~kumar001/dmbook/">dmbook</a>, también en
+  <a href="../RESOURCES.md">RESOURCES.md</a> del curso).</p>
+  <p>¿Algo no quedó claro? <strong>Preguntame al agente</strong>: leer tu codo, interpretar siluetas negativas,
+  o defender tu k. Esa pregunta vale más que releer.</p>
+
+  <nav class="lesson-nav">
+    <a href="0030-jerarquico-dbscan.html">← 0030 Jerárquico</a>
+    <a href="../index.html">Índice ↑</a>
+    <a href="0032-pca-biplot-pcr.html">0032 PCA →</a>
+  </nav>
+  <p class="meta">Ver también: <a href="../index.html">índice del curso</a> ·
+  <a href="../reference/toyota-data-dictionary.html">diccionario Toyota</a> ·
+  <a href="../reference/analisis-ejemplo-ols.html">análisis OLS de ejemplo</a></p>
+</main>
+<script>
+(function(){
+  var answers = {q1: 1, q2: 2, q3: 0};
+  var msgs = {
+    q1: ["Correcto: codo 3–4, donde frena la ganancia.",
+         "No: el codo es donde deja de bajar fuerte."],
+    q2: ["Correcto: −1 pide mudanza de grupo ya.",
+         "No: silueta −1 = mal asignado."],
+    q3: ["Correcto: métricas guían, dominio decide.",
+         "No: negocio + codo justifican k=3."]
+  };
+  ["q1","q2","q3"].forEach(function(id){
+    var box = document.getElementById(id);
+    var fb = box.querySelector(".feedback");
+    box.addEventListener("change", function(e){
+      var ok = parseInt(e.target.value, 10) === answers[id];
+      fb.textContent = ok ? msgs[id][0] : msgs[id][1];
+      fb.className = "feedback " + (ok ? "ok" : "no");
+    });
+  });
+})();
+</script>
+</body>
+</html>

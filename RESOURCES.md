@@ -36,6 +36,12 @@ Fuentes de confianza para este curso. El conocimiento de las lecciones sale de a
   Use for: OLS, `summary()` con AIC/BIC, QQ, partial regression (patrón del notebook ejemplo).
 - [Docs: scikit-learn](https://scikit-learn.org/stable/)
   Use for: imputación, Lasso/Ridge, KMeans/DBSCAN, clasificación, PCA.
+- [Book: *OpenIntro Statistics* (Diez, Barr, Çetinkaya-Rundel)](https://www.openintro.org/book/os/)
+  Libro abierto de estadística. Use for: muestreo, test de hipótesis, p-valor, ANOVA.
+- [Book: *Feature Engineering and Selection* (Kuhn & Johnson)](https://bookdown.org/max/FES/)
+  Libro abierto. Use for: transformaciones (log, skew), discretización, escalado.
+- [Data: Our World in Data](https://ourworldindata.org/)
+  Datasets públicos documentados. Use for: ejemplo de origen público de datos con licencia.
 
 ## Wisdom (Communities)
 

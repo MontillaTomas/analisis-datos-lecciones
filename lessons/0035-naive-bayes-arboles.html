@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>0035 · Naive Bayes y árboles — Unidad 8</title>
+  <link rel="stylesheet" href="../assets/styles.css">
+</head>
+<body>
+<main>
+  <header class="course">
+    <p class="kicker">Unidad 8 · Clasificación · Lección 0035</p>
+    <h1>Naive Bayes y árboles: el ingenuo que funciona y las reglas sí/no</h1>
+    <p><strong>Win de hoy:</strong>
+    <strong><abbr title="Naive Bayes: clasificador probabilístico que supone (ingenuamente) independencia entre variables">Naive Bayes</abbr></strong>
+    llega a 83,5 % suponiendo independencia que no existe; el
+    <strong><abbr title="Árbol de decisión: preguntas sí/no encadenadas (¿edad ≤ 57,5?) que separan las clases">árbol</abbr></strong>
+    llega a 87,3 % con profundidad 5… y memoriza el train (99,9 %) si lo dejás crecer libre.</p>
+    <p class="meta"><a href="../index.html">← Índice</a> ·
+    <a href="../reference/toyota-data-dictionary.html">Diccionario Toyota</a> ·
+    <a href="../ToyotaCorolla.csv">CSV</a></p>
+  </header>
+
+  <h2>1 · Naive Bayes: «supongamos que nada se relaciona con nada»</h2>
+  <p>Bayes dice: <code>P(caro | datos) ∝ P(datos | caro) · P(caro)</code>. El problema es
+  <code>P(datos | caro)</code>: la chance conjunta de (edad, KM, HP, cc, peso) es imposible de estimar directo.
+  El truco <em>naive</em> (ingenuo): suponer que las variables son <strong>independientes</strong> y multiplicar
+  las chances una por una. Sabemos que es falso (edad y KM van juntas, <a href="0023-correlacion-vs-regresion.html">lección 0023</a>),
+  pero igual da <strong>83,5 %</strong> (CV): para <em>ordenar</em> clases alcanza con que los errores se compensen.
+  Rápido, sin perillas, gran baseline.</p>
+
+  <h2>2 · Árboles: preguntar hasta separar</h2>
+  <p>Un árbol hace preguntas sí/no: «¿edad ≤ 57,5?» → «¿KM ≤ 127.633?» → … hasta que cada hoja queda casi pura
+  (casi todos caros o casi todos baratos). La
+  <strong><abbr title="Profundidad: cantidad máxima de preguntas encadenadas; más profundidad = más memoria, menos generalización">profundidad</abbr></strong>
+  es la perilla: poca = modelo tonto, mucha = memoriza.</p>
+  <figure>
+    <img src="../assets/img/toyota/0035-naive-bayes-arboles-fig1.png" alt="Train vs CV por profundidad y árbol de decisión dibujado">
+    <figcaption>Fig. 1 — Izquierda: train trepa a ~100 % con la profundidad (memoriza); CV tiene techo en d=5 (87,3 %).
+    Derecha: árbol depth=2 — la raíz pregunta edad ≤ 57,5 (el mismo corte de la lección 0013).</figcaption>
+  </figure>
+  <p>Lectura triple: <strong>(1)</strong> d=5 gana (CV 0,8725), empatado con k-NN y logística (~87 %):
+  tres algoritmos distintos, mismo techo del problema. <strong>(2)</strong> Sin límite, train 99,9 % pero CV 83,7 %:
+  <strong><abbr title="Sobreajuste: memorizar el train (ruido incluido) y fallar en datos nuevos">sobreajuste</abbr></strong>
+  de manual. <strong>(3)</strong> La raíz (edad ≤ 57,5) coincide con el árbol de la lección 0013: la señal es robusta.</p>
+  <p>Regenerar la figura (mismo resultado versionado en <code>assets/img/toyota/</code>):</p>
+  <pre><code>python scripts/make_figures.py --only naive-bayes-arboles</code></pre>
+
+  <h2>3 · Tabla del partido (CV 5-fold, mismo target y folds)</h2>
+  <table>
+    <tr><th>Modelo</th><th>CV accuracy</th><th>Qué lo hace especial</th></tr>
+    <tr><td>Naive Bayes</td><td>83,5 %</td><td>Sin perillas, rapidísimo, baseline honesto</td></tr>
+    <tr><td>Árbol d=2</td><td>85,7 %</td><td>Se dibuja en una servilleta (3 preguntas)</td></tr>
+    <tr><td>Árbol d=5</td><td><strong>87,3 %</strong></td><td>Mejor punto: reglas finas sin memorizar</td></tr>
+    <tr><td>Árbol sin límite</td><td>83,7 %</td><td>Train 99,9 %: memoriza, no aprende</td></tr>
+  </table>
+
+  <h2>4 · Ambos en 12 líneas (reproducí 83,5 % y 87,3 %)</h2>
+  <pre><code>import pandas as pd
+from sklearn.naive_bayes import GaussianNB
+from sklearn.tree import DecisionTreeClassifier, export_text
+from sklearn.model_selection import cross_val_score, StratifiedKFold
+
+df = pd.read_csv("../ToyotaCorolla.csv")
+cols = ["Age_08_04","KM","HP","cc","Weight"]
+X, y = df[cols].values, (df["Price"] > 9900).astype(int).values
+cv = StratifiedKFold(5, shuffle=True, random_state=42)
+print(cross_val_score(GaussianNB(), X, y, cv=cv).mean().round(4))  # 0.8349
+print(cross_val_score(DecisionTreeClassifier(max_depth=5, random_state=42),
+                      X, y, cv=cv).mean().round(4))  # 0.8725
+print(export_text(DecisionTreeClassifier(max_depth=2, random_state=42).fit(X, y),
+                  feature_names=cols))  # el árbol de la Fig. 1, en texto</code></pre>
+  <p><strong>Tu turno:</strong> cambiá <code>max_depth=5</code> por <code>None</code> y compará train vs CV:
+  vas a ver el sobreajuste con tus propios números (train ≈ 1,0, CV ≈ 0,84).</p>
+
+  <h2>5 · Quiz (auto-chequeo inmediato)</h2>
+  <p class="meta">Elegí una opción por pregunta: el feedback es inmediato.</p>
+
+  <div class="quiz" id="q1">
+    <strong>P1 · Naive Bayes supone…</strong>
+    <label><input type="radio" name="q1" value="0"> Variables independientes entre sí</label>
+    <label><input type="radio" name="q1" value="1"> Todas las clases balanceadas</label>
+    <label><input type="radio" name="q1" value="2"> Datos siempre estandarizados</label>
+    <label><input type="radio" name="q1" value="3"> Árboles de profundidad dos</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <div class="quiz" id="q2">
+    <strong>P2 · Train 99,9 % y CV 83,7 % es…</strong>
+    <label><input type="radio" name="q2" value="0"> Un modelo perfectamente calibrado</label>
+    <label><input type="radio" name="q2" value="1"> Sobreajuste: memoriza, no generaliza</label>
+    <label><input type="radio" name="q2" value="2"> Falta de datos de entrenamiento</label>
+    <label><input type="radio" name="q2" value="3"> Un árbol demasiado playo</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <div class="quiz" id="q3">
+    <strong>P3 · ¿Por qué d=5 y no sin límite?</strong>
+    <label><input type="radio" name="q3" value="0"> Porque CV manda: 87,3 % máximo</label>
+    <label><input type="radio" name="q3" value="1"> Porque train debe dar cien</label>
+    <label><input type="radio" name="q3" value="2"> Porque NB lo exige así</label>
+    <label><input type="radio" name="q3" value="3"> Porque cinco es default sklearn</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <h2>6 · Fuente primaria y cierre</h2>
+  <p><strong>Para profundizar (1 fuente):</strong>
+  James et al., <em>An Introduction to Statistical Learning</em> — cap. 4.4 (NB) y 8.1 (árboles).
+  Más contexto en <a href="../RESOURCES.md">RESOURCES</a>.</p>
+  <p>Siguiente: <a href="0036-random-forest-boosting.html">0036 · Random forest y boosting</a>:
+  si un árbol memoriza, ¿qué tal un bosque que vota?</p>
+
+  <nav class="lesson-nav">
+    <a href="0034-regresion-logistica-roc.html">← 0034 Logística</a>
+    <a href="../index.html">Índice ↑</a>
+    <a href="0036-random-forest-boosting.html">0036 Bosques →</a>
+  </nav>
+</main>
+<script>
+(function(){
+  var answers = {q1: 0, q2: 1, q3: 0};
+  var msgs = {
+    q1: ["Correcto: ingenua pero efectiva.",
+         "No: supone independencia, nada más."],
+    q2: ["Correcto: gap train–CV gigante.",
+         "No: esa brecha es sobreajuste."],
+    q3: ["Correcto: se elige por CV.",
+         "No: train alto engaña, mirá CV."]
+  };
+  ["q1","q2","q3"].forEach(function(id){
+    var box = document.getElementById(id);
+    var fb = box.querySelector(".feedback");
+    box.addEventListener("change", function(e){
+      var ok = parseInt(e.target.value, 10) === answers[id];
+      fb.textContent = ok ? msgs[id][0] : msgs[id][1];
+      fb.className = "feedback " + (ok ? "ok" : "no");
+    });
+  });
+})();
+</script>
+</body>
+</html>

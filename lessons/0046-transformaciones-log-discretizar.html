@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>0046 · Transformaciones: log y discretización — Unidad 2</title>
+  <link rel="stylesheet" href="../assets/styles.css">
+</head>
+<body>
+<main>
+  <header class="course">
+    <p class="kicker">Unidad 2 · Exploración de datos · Lección 0046</p>
+    <h1>Transformaciones: log para la cola larga, tramos para la edad</h1>
+    <p><strong>Win de hoy:</strong> el precio tiene cola derecha (skew 1,70) y <code>log1p</code> la doma (skew 0,73);
+    la edad continua se vuelve 4 tramos que valen 15.266 / 10.265 / 9.086 / 7.904 € —
+    dos transformaciones de <strong><abbr title="Feature engineering: crear y transformar variables para que los modelos aprendan mejor">feature engineering</abbr></strong> con efecto medible.</p>
+    <p class="meta"><a href="../index.html">← Índice</a> ·
+    <a href="../reference/toyota-data-dictionary.html">Diccionario Toyota</a> ·
+    <a href="../ToyotaCorolla.csv">CSV</a></p>
+  </header>
+
+  <h2>1 · El mapa: 5 transformaciones, 2 nuevas hoy</h2>
+  <p>Transformar es reexpresar una variable para que los algoritmos la aprovechen mejor. La familia completa de clase:</p>
+  <table>
+    <tr><th>Transformación</th><th>Idea</th><th>Dónde se estudia</th></tr>
+    <tr><td>Escalado</td><td>Igualar rangos (KM no aplasta a Doors)</td><td><a href="0028-distancias-similaridad.html">0028</a>, <a href="0033-clasificacion-knn.html">0033</a></td></tr>
+    <tr><td>Llenado de faltantes</td><td>Rellenar huecos con criterio</td><td>U4 (0015–0018)</td></tr>
+    <tr><td>Agrupamiento</td><td>Crear grupos como variable (clusters)</td><td>U7 (0028–0032)</td></tr>
+    <tr><td><strong>Log / skew</strong></td><td><strong>Domar colas largas</strong></td><td><strong>Hoy §2</strong></td></tr>
+    <tr><td><strong>Discretización</strong></td><td><strong>Número → tramo con sentido</strong></td><td><strong>Hoy §3</strong></td></tr>
+  </table>
+
+  <h2>2 · Log: achicar la cola que estira todo</h2>
+  <p>Price tiene <strong><abbr title="Skew (asimetría): cola más larga de un lado; positiva = pocos valores muy grandes">skew 1,70</abbr></strong>:
+  la mayoría vale 5–12k € pero unos pocos premium estiran la media y aplastan los gráficos. El logaritmo comprime los grandes
+  (log(30.000) ≈ 10,3 vs log(5.000) ≈ 8,5: la brecha se achica) y deja skew 0,73. Se usa
+  <code>log1p(x) = log(1+x)</code> para no romper con ceros.</p>
+  <figure>
+    <img src="../assets/img/toyota/0046-transformaciones-log-discretizar-fig1.png" alt="Precio crudo vs log y edad discretizada en cuartiles">
+    <figcaption>Fig. 1 — Izquierda: formas comparables (estandarizadas) — el crudo (naranja) tiene joroba apretada y cola larga;
+    el log (celeste) se parece a una campana. Derecha: edad en cuartiles — el precio medio cae parejo 15.266 → 7.904 €.</figcaption>
+  </figure>
+  <p>Cuándo log: target o feature con cola derecha fuerte + modelos que suponen simetría (OLS, k-means, NB).
+  Cuándo NO: si necesitás coeficientes en euros directos («−0,0456 €/km» se entiende; «−0,000004 log-€/km» no cierra acuerdos).
+  Ojo KM: su log queda skew −6,1 (sobrecorrección por los KM=1): transformar también se valida, no se aplica a ciegas.</p>
+  <p>Regenerar la figura (mismo resultado versionado en <code>assets/img/toyota/</code>):</p>
+  <pre><code>python scripts/make_figures.py --only transformaciones-log-discretizar</code></pre>
+
+  <h2>3 · Discretización: cortar donde hay patrón</h2>
+  <p><strong><abbr title="Discretización: convertir un número continuo en tramos (bins) ordenados">Discretizar</abbr></strong>
+  es cortar un continuo en tramos: <code>qcut(edad, 4)</code> da cuartiles con ~350 autos cada uno, y el precio medio
+  cuenta la historia sin fórmulas (15.266 → 10.265 → 9.086 → 7.904 €). ¿Cuándo conviene? Cuando la relación no es lineal
+  (el salto Q1→Q2 es 5.000 €, Q3→Q4 es 1.200 €: una recta lo promedia mal) o cuando el negocio piensa en tramos
+  («jóvenes vs veteranos»). ¿Costo? Se pierde detalle fino: 44 y 60 meses caen en el mismo balde.</p>
+
+  <h2>4 · Ambas en 8 líneas (reproducí la Fig. 1)</h2>
+  <pre><code>import pandas as pd, numpy as np
+df = pd.read_csv("../ToyotaCorolla.csv")
+print(df["Price"].skew().round(3))            # 1.704
+print(np.log1p(df["Price"]).skew().round(3))  # 0.734
+df["Tramo"] = pd.qcut(df["Age_08_04"], 4, labels=["Q1","Q2","Q3","Q4"])
+print(df.groupby("Tramo", observed=True)["Price"].mean().round(0).to_string())
+# Q1 15266 · Q2 10265 · Q3 9086 · Q4 7904</code></pre>
+  <p><strong>Tu turno:</strong> discretizá <code>KM</code> en 3 tramos (<code>qcut</code>) y mirá el precio medio:
+  ¿cae parejo como la edad, o hay un salto brusco en algún corte?</p>
+
+  <h2>5 · Quiz (auto-chequeo inmediato)</h2>
+  <p class="meta">Elegí una opción por pregunta: el feedback es inmediato.</p>
+
+  <div class="quiz" id="q1">
+    <strong>P1 · Log baja el skew 1,70 → 0,73 porque…</strong>
+    <label><input type="radio" name="q1" value="0"> Comprime los valores grandes</label>
+    <label><input type="radio" name="q1" value="1"> Borra los outliers siempre</label>
+    <label><input type="radio" name="q1" value="2"> Suma una constante fija</label>
+    <label><input type="radio" name="q1" value="3"> Ordena los tramos jóvenes</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <div class="quiz" id="q2">
+    <strong>P2 · Discretizar conviene cuando…</strong>
+    <label><input type="radio" name="q2" value="0"> La relación no es lineal</label>
+    <label><input type="radio" name="q2" value="1"> Sobran filas siempre todas</label>
+    <label><input type="radio" name="q2" value="2"> El skew ya dio cero</label>
+    <label><input type="radio" name="q2" value="3"> Hay pocos outliers</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <div class="quiz" id="q3">
+    <strong>P3 · Log de KM da skew −6,1: moraleja…</strong>
+    <label><input type="radio" name="q3" value="0"> Transformar también se valida</label>
+    <label><input type="radio" name="q3" value="1"> Log siempre funciona todo</label>
+    <label><input type="radio" name="q3" value="2"> KM no tiene outliers</label>
+    <label><input type="radio" name="q3" value="3"> Usar log1p jamás sirve</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <h2>6 · Fuente primaria y cierre</h2>
+  <p><strong>Para profundizar (1 fuente):</strong>
+  Kuhn &amp; Johnson, <em>Feature Engineering and Selection</em> — cap. 3 (transformaciones, skew).
+  Más contexto en <a href="../RESOURCES.md">RESOURCES</a>.</p>
+  <p>Cierre del bloque de apuntes: inferencia (0042) → métricas (0043) → ANOVA (0044) → violín/KDE (0045) → transformaciones (0046).
+  Volvé al <a href="../index.html">índice</a> y seguí por donde ibas.</p>
+
+  <nav class="lesson-nav">
+    <a href="0045-violin-densidad-torta.html">← 0045 Violín</a>
+    <a href="../index.html">Índice ↑</a>
+  </nav>
+</main>
+<script>
+(function(){
+  var answers = {q1: 0, q2: 0, q3: 0};
+  var msgs = {
+    q1: ["Correcto: achica la cola.",
+         "No: log comprime grandes."],
+    q2: ["Correcto: Q1→Q2 ≠ Q3→Q4.",
+         "No: tramos captan saltos."],
+    q3: ["Correcto: KM=1 la rompe.",
+         "No: ni el log es automático."]
+  };
+  ["q1","q2","q3"].forEach(function(id){
+    var box = document.getElementById(id);
+    var fb = box.querySelector(".feedback");
+    box.addEventListener("change", function(e){
+      var ok = parseInt(e.target.value, 10) === answers[id];
+      fb.textContent = ok ? msgs[id][0] : msgs[id][1];
+      fb.className = "feedback " + (ok ? "ok" : "no");
+    });
+  });
+})();
+</script>
+</body>
+</html>

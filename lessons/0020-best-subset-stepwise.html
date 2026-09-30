@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>0020 · Best subset y stepwise — Unidad 5</title>
+  <link rel="stylesheet" href="../assets/styles.css">
+</head>
+<body>
+<main>
+  <header class="course">
+    <p class="kicker">Unidad 5 · Selección de variables y regularización · Lección 0020</p>
+    <h1>Best subset y stepwise: buscar el mejor equipo</h1>
+    <p><strong>Win de hoy:</strong> probar los 256 equipos de 8 candidatas: el codo está en k=4
+    (CV 0,867), AIC pide 7, BIC 5, y con las 8 un fold se desploma (0,57).</p>
+    <p class="meta"><a href="../index.html">← Índice</a> ·
+    <a href="../reference/toyota-data-dictionary.html">Diccionario Toyota</a> ·
+    <a href="../ToyotaCorolla.csv">CSV</a></p>
+  </header>
+
+  <h2>1 · Best subset: probar todo (cuando se puede)</h2>
+  <p><strong><abbr title="Best subset: probar las 2^p combinaciones y quedarse con la mejor según un criterio">Best subset</abbr></strong>
+  prueba las 2<sup>p</sup> combinaciones: con 8 candidatas son 256 modelos (segundos); con las 37 columnas serían
+  137 mil millones (imposible). Por eso existe lo goloso (paso 3). Pool de hoy:
+  <code>KM, Age, HP, Weight, cc, Tax, Year, Guarantee</code>.</p>
+
+  <h2>2 · AIC y BIC: ajuste menos castigo</h2>
+  <p>R² siempre premia agregar variables (nunca baja en train), así que se necesita un criterio que <em>castigue</em>
+  la complejidad: <strong><abbr title="AIC: criterio de Akaike; ajuste menos 2 por parámetro (menos es mejor)">AIC</abbr></strong>
+  resta 2 por parámetro, <strong><abbr title="BIC: criterio bayesiano; castiga más que AIC con n grande (menos es mejor)">BIC</abbr></strong>
+  resta log(n) ≈ 7,3. Acá AIC minimiza en k=7, BIC en k=5… y el CV dice que con k=4 (Year, Weight, KM, HP → 0,867)
+  ya ameseta. Tres opiniones, un mensaje: <strong>de 4 en más, casi no se gana</strong>.</p>
+
+  <h2>3 · Stepwise: lo goloso (y acierta)</h2>
+  <p><strong><abbr title="Forward stepwise: agregar de a una la variable que más mejora, hasta que no mejore">Forward stepwise</abbr></strong>
+  agrega de a una la que más mejora el AIC: Year → Weight → KM → HP → Tax → Guarantee → Age → cc. Acá coincide
+  <em>exacto</em> con el óptimo exhaustivo (suerte + estructura limpia; en general lo goloso puede fallar). Su primo
+  <strong><abbr title="Backward: empezar con todas e ir sacando la menos útil">backward</abbr></strong> hace lo inverso:
+  empieza con las 8 y poda. Costo: 8+7+…+1 = 36 ajustes vs 256.</p>
+  <div class="callout"><strong>Aviso k=8:</strong> con las 8, un fold de CV cae a 0,57 (media 0,805): Age+Year+cc
+  redundantes desestabilizan (0019). Más variables no solo no ayudan: a veces rompen.</div>
+
+  <h2>4 · Figura: criterios y codo</h2>
+  <figure>
+    <img src="../assets/img/toyota/0020-best-subset-stepwise-fig1.png" alt="AIC y BIC por cantidad de variables y R cuadrado de validación con codo en 4">
+    <figcaption>Fig. 1 — Izquierda: AIC minimiza en 7, BIC en 5. Derecha: CV-R² se ameseta en k=4 (0,867) y k=8
+    cae por inestabilidad. El equipo ganador: Year, Weight, KM, HP.</figcaption>
+  </figure>
+  <p>Regenerar la figura (mismo resultado versionado en <code>assets/img/toyota/</code>):</p>
+  <pre><code>python scripts/make_figures.py --only best-subset-stepwise</code></pre>
+
+  <h2>5 · Quiz (auto-chequeo inmediato)</h2>
+  <p class="meta">Elegí una opción por pregunta: el feedback es inmediato.</p>
+
+  <div class="quiz" id="q1">
+    <strong>P1 · Probar las 2^37 combinaciones es…</strong>
+    <label><input type="radio" name="q1" value="0"> Pocos y rápidos de más</label>
+    <label><input type="radio" name="q1" value="1"> Es totalmente imposible de probar</label>
+    <label><input type="radio" name="q1" value="2"> Ocho modelos y nada más</label>
+    <label><input type="radio" name="q1" value="3"> Un simple y único ajuste</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <div class="quiz" id="q2">
+    <strong>P2 · AIC 7, BIC 5, CV ameseta en 4: elegir…</strong>
+    <label><input type="radio" name="q2" value="0"> Las ocho siempre todas completas</label>
+    <label><input type="radio" name="q2" value="1"> Las siete que pide AIC</label>
+    <label><input type="radio" name="q2" value="2"> Cuatro o cinco nada más</label>
+    <label><input type="radio" name="q2" value="3"> Ninguna jamás sirve para nada</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <div class="quiz" id="q3">
+    <strong>P3 · Forward coincidió con el óptimo: es…</strong>
+    <label><input type="radio" name="q3" value="0"> Goloso y acertó justo acá</label>
+    <label><input type="radio" name="q3" value="1"> Siempre exacto sin fallar jamás</label>
+    <label><input type="radio" name="q3" value="2"> Peor que el azar puro</label>
+    <label><input type="radio" name="q3" value="3"> Tal cual igual que backward</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <h2>6 · Fuente primaria y cierre</h2>
+  <p><strong>Para profundizar (1 fuente):</strong>
+  James et al., <em>An Introduction to Statistical Learning</em> — capítulo de selección (subset, stepwise, AIC/BIC)
+  (<a href="https://www.statlearning.com/">statlearning.com</a>, PDF libre; también en
+  <a href="../RESOURCES.md">RESOURCES.md</a> del curso).</p>
+  <p>¿Algo no quedó claro? <strong>Preguntame al agente</strong>: por qué R² no sirve para elegir, AIC vs BIC,
+  o cuándo forward falla. Esa pregunta vale más que releer.</p>
+
+  <nav class="lesson-nav">
+    <a href="0019-por-que-seleccionar.html">← 0019 Por qué seleccionar</a>
+    <a href="0021-ridge-lasso-caminos.html">Siguiente: 0021 Ridge y Lasso →</a>
+  </nav>
+  <p class="meta">Ver también: <a href="../index.html">índice del curso</a> ·
+  <a href="../reference/toyota-data-dictionary.html">diccionario Toyota</a> ·
+  <a href="../reference/analisis-ejemplo-ols.html">análisis OLS de ejemplo</a></p>
+</main>
+<script>
+(function(){
+  var answers = {q1: 1, q2: 2, q3: 0};
+  var msgs = {
+    q1: ["Correcto: 137 mil millones de ajustes no se hacen.",
+         "No: 2^37 es imposible; por eso existe lo goloso."],
+    q2: ["Correcto: donde CV ameseta (4–5) está el equipo.",
+         "No: con k=4 el CV ya ameseta; más es ruido."],
+    q3: ["Correcto: goloso no garantiza; acá tuvo suerte.",
+         "No: forward es goloso; coincidió acá nomás."]
+  };
+  ["q1","q2","q3"].forEach(function(id){
+    var box = document.getElementById(id);
+    var fb = box.querySelector(".feedback");
+    box.addEventListener("change", function(e){
+      var ok = parseInt(e.target.value, 10) === answers[id];
+      fb.textContent = ok ? msgs[id][0] : msgs[id][1];
+      fb.className = "feedback " + (ok ? "ok" : "no");
+    });
+  });
+})();
+</script>
+</body>
+</html>

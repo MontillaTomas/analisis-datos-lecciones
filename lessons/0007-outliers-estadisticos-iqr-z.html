@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>0007 · Outliers estadísticos: IQR y z — Unidad 2</title>
+  <link rel="stylesheet" href="../assets/styles.css">
+</head>
+<body>
+<main>
+  <header class="course">
+    <p class="kicker">Unidad 2 · Exploración de datos · Lección 0007</p>
+    <h1>Outliers estadísticos: IQR y z-score</h1>
+    <p><strong>Win de hoy:</strong> cazar outliers de <code>Price</code> con dos reglas clásicas
+    (<abbr title="IQR: rango intercuartílico; Q3 menos Q1, el ancho de la mitad central">IQR</abbr> caza 110,
+    <abbr title="z-score: distancia a la media medida en desvíos estándar">z-score</abbr> solo 26) y entender
+    por qué ninguna ve los <code>KM ≤ 100</code> de la 0004.</p>
+    <p class="meta"><a href="../index.html">← Índice</a> ·
+    <a href="../reference/toyota-data-dictionary.html">Diccionario Toyota</a> ·
+    <a href="../ToyotaCorolla.csv">CSV</a></p>
+  </header>
+
+  <h2>1 · Outlier: el que se desvía (¿error o rareza real?)</h2>
+  <p>Un <strong><abbr title="Outlier: valor que se aleja mucho del resto; puede ser error de carga o un caso real pero raro">outlier</abbr></strong>
+  es un valor que se desvía tanto del resto que parece venir de otro mecanismo. La distinción que importa, ya vista
+  en la 0004: <code>cc = 16000</code> es casi seguro un <strong>error</strong> (un cero de más), mientras que
+  <code>Doors = 2</code> puede ser una <strong>rareza real</strong>. La estadística detecta; el analista decide.
+  Hoy, dos detectores de una sola columna (<abbr title="Univariado: que mira una sola columna a la vez">univariados</abbr>).</p>
+
+  <h2>2 · Regla IQR: las vallas del boxplot (110 en Price)</h2>
+  <p>El <strong>rango intercuartílico</strong> (<code>IQR = Q3 − Q1</code>) mide el ancho de la mitad central.
+  La regla clásica del boxplot: outlier es lo que cae fuera de <code>Q1 − 1,5·IQR</code> y <code>Q3 + 1,5·IQR</code>
+  (las “vallas”). Para <code>Price</code>: Q1 = 8.450, Q3 = 11.950, IQR = 3.500 → vallas 3.200 y 17.200:</p>
+  <pre><code>q1, q3 = df["Price"].quantile(0.25), df["Price"].quantile(0.75)
+iqr = q3 - q1
+lo, hi = q1 - 1.5*iqr, q3 + 1.5*iqr   # 3200 – 17200
+out_iqr = (df["Price"] &lt; lo) | (df["Price"] &gt; hi)
+print(out_iqr.sum())  # 110 (el más barato: 17.250 €)</code></pre>
+  <div class="callout"><strong>Punto ciego:</strong> en <code>KM</code> la valla baja da <strong>−23.031</strong>
+  (¡kilometraje negativo!). Como ningún auto tiene KM negativo, el IQR es ciego por abajo: los 9
+  <code>KM ≤ 100</code> de la 0004 <strong>no</strong> saltan. La regla supone distribución pareja; <code>KM</code>
+  no la tiene. Ningún detector ve todo.</div>
+
+  <h2>3 · z-score: distancia en desvíos (|z| &gt; 3 caza 26)</h2>
+  <p>El <strong>z-score</strong> mide a cuántos
+  <abbr title="Desvío estándar: distancia típica de los valores a la media">desvíos estándar</abbr> está cada valor
+  de la <abbr title="Media: promedio aritmético; los valores extremos la arrastran">media</abbr>:
+  <code>z = (x − media) / desvío</code>. La regla habitual: <code>|z| &gt; 3</code> es outlier. Para
+  <code>Price</code> (media 10.731, desvío 3.626) eso es pasar los 21.612 €:</p>
+  <pre><code>z = (df["Price"] - df["Price"].mean()) / df["Price"].std()
+out_z = z.abs() &gt; 3
+print(out_z.sum())  # 26, todos dentro de los 110 del IQR</code></pre>
+  <p>z es <strong>más estricto</strong> (26 ⊂ 110) porque supone forma de campana más o menos simétrica, y
+  <code>Price</code> tiene cola a la derecha (sesgo, 0006). Moraleja: cada regla trae supuestos; con sesgo, el IQR
+  (basado en cuartiles, robustos) suele cazar mejor.</p>
+
+  <h2>4 · Qué hacer: flag, comparar y no borrar</h2>
+  <p>Detectar no es eliminar. Protocolo honesto: flag 0/1, y reportar el resultado <em>con y sin</em> outliers:</p>
+  <pre><code>df["out_iqr"] = out_iqr.astype(int)
+print(df["Price"].mean())              # 10731 (con los 110)
+print(df.loc[~out_iqr, "Price"].mean())  # 9945 (sin ellos: −786 €)</code></pre>
+  <p>Los 110 caros inflan la media en 786 €: decirlo es parte del análisis. Y queda una deuda: estas reglas miran
+  <strong>una columna a la vez</strong>. Un auto puede ser normal en <code>KM</code>, normal en <code>Price</code>…
+  y rarísimo en combinación (joven pero baratísimo). Eso lo cazan los detectores multivariados de la 0008.</p>
+
+  <h2>5 · Figura: las dos reglas sobre Price</h2>
+  <figure>
+    <img src="../assets/img/toyota/0007-outliers-estadisticos-iqr-z-fig1.png" alt="Boxplot de Price con valla alta e histograma con umbrales IQR y z">
+    <figcaption>Fig. 1 — Izquierda: boxplot con la valla alta en 17.200 € (110 puntos arriba). Derecha: histograma
+    con ambos umbrales; z (&gt; 21.612 €) solo marca 26, todos incluidos en los 110 del IQR.</figcaption>
+  </figure>
+  <p>Regenerar la figura (mismo resultado versionado en <code>assets/img/toyota/</code>):</p>
+  <pre><code>python scripts/make_figures.py --only outliers-estadisticos-iqr-z</code></pre>
+
+  <h2>6 · Quiz (auto-chequeo inmediato)</h2>
+  <p class="meta">Elegí una opción por pregunta: el feedback es inmediato.</p>
+
+  <div class="quiz" id="q1">
+    <strong>P1 · La valla alta de Price es…</strong>
+    <label><input type="radio" name="q1" value="0"> Es diecisiete mil doscientos euros</label>
+    <label><input type="radio" name="q1" value="1"> Tres mil doscientos euros siempre</label>
+    <label><input type="radio" name="q1" value="2"> La media más tres desvíos</label>
+    <label><input type="radio" name="q1" value="3"> El máximo menos el mínimo</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <div class="quiz" id="q2">
+    <strong>P2 · Los KM ≤ 100 no saltan por IQR porque…</strong>
+    <label><input type="radio" name="q2" value="0"> Es un error de pandas</label>
+    <label><input type="radio" name="q2" value="1"> Son valores normales y esperados</label>
+    <label><input type="radio" name="q2" value="2"> La valla baja da negativa</label>
+    <label><input type="radio" name="q2" value="3"> El IQR ignora los kilómetros</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <div class="quiz" id="q3">
+    <strong>P3 · Si los 26 de z están en los 110, z es…</strong>
+    <label><input type="radio" name="q3" value="0"> Más sensible que el IQR</label>
+    <label><input type="radio" name="q3" value="1"> Más estricto que el IQR</label>
+    <label><input type="radio" name="q3" value="2"> Idéntico al IQR en todo</label>
+    <label><input type="radio" name="q3" value="3"> Inútil con precios muy altos</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <h2>7 · Fuente primaria y cierre</h2>
+  <p><strong>Para profundizar (1 fuente):</strong>
+  Tan, Steinbach &amp; Kumar, <em>Introduction to Data Mining</em> — capítulo de detección de anomalías
+  (enfoques estadísticos, por proximidad y por clustering)
+  (<a href="https://www-users.cs.umn.edu/~kumar001/dmbook/">dmbook</a>, también en
+  <a href="../RESOURCES.md">RESOURCES.md</a> del curso).</p>
+  <p>¿Algo no quedó claro? <strong>Preguntame al agente</strong>: por qué 1,5·IQR, cuándo z miente con sesgo,
+  o cómo decidir entre corregir, marcar o excluir. Esa pregunta vale más que releer.</p>
+
+  <nav class="lesson-nav">
+    <a href="0006-eda-sistematico-toyota.html">← 0006 EDA sistemático</a>
+    <a href="0008-outliers-multivariados-lof-dbscan.html">Siguiente: 0008 Outliers multivariados →</a>
+  </nav>
+  <p class="meta">Ver también: <a href="../index.html">índice del curso</a> ·
+  <a href="../reference/toyota-data-dictionary.html">diccionario Toyota</a> ·
+  <a href="../reference/analisis-ejemplo-ols.html">análisis OLS de ejemplo</a></p>
+</main>
+<script>
+(function(){
+  var answers = {q1: 0, q2: 2, q3: 1};
+  var msgs = {
+    q1: ["Correcto: Q3 + 1,5·IQR = 11.950 + 5.250 = 17.200 €.",
+         "No: la valla alta es Q3 + 1,5·IQR = 17.200 €."],
+    q2: ["Correcto: valla baja −23.031; ningún KM real cae debajo.",
+         "No: el IQR es ciego abajo porque la valla da negativa."],
+    q3: ["Correcto: z marca menos (26 ⊂ 110); es más estricto.",
+         "No: si marca menos casos incluidos, es más estricto."]
+  };
+  ["q1","q2","q3"].forEach(function(id){
+    var box = document.getElementById(id);
+    var fb = box.querySelector(".feedback");
+    box.addEventListener("change", function(e){
+      var ok = parseInt(e.target.value, 10) === answers[id];
+      fb.textContent = ok ? msgs[id][0] : msgs[id][1];
+      fb.className = "feedback " + (ok ? "ok" : "no");
+    });
+  });
+})();
+</script>
+</body>
+</html>

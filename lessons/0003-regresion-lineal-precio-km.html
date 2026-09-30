@@ -124,7 +124,7 @@ print(res.summary())
   <strong><abbr title="RSS: Residual Sum of Squares; suma de residuos al cuadrado; lo que OLS minimiza">RSS (residual sum of squares)</abbr></strong>
   es la suma de esos errores al cuadrado: es lo que OLS minimiza y mide la dispersión no explicada. Acá
   <strong>RSS ≈ 12.744.882.944</strong> (12,7 mil millones de €²; las unidades al cuadrado suenan raras, por eso en la práctica
-  se reporta su raíz como <abbr title="RMSE: Root Mean Squared Error; error típico en las unidades originales">RMSE ≈ 2.973 €</abbr>).</p>
+  se reporta su raíz como <abbr title="RMSE: Root Mean Squared Error; error típico en las unidades originales">RMSE ≈ 2.979 €</abbr> en muestra).</p>
   <figure>
     <img src="../assets/img/toyota/0003-regresion-lineal-precio-km-fig2.png" alt="Residuos contra predicciones e histograma de residuos">
     <figcaption>Fig. 2 — Diagnóstico de residuos. Izq.: residuos vs predichos, nube centrada en 0 pero con forma de abanico
@@ -136,7 +136,7 @@ print(res.summary())
   y la cola derecha del histograma. Ambos gritan “te faltan variables”: exactamente lo que la versión múltiple (R² 0,741) corrige.</p>
   <pre><code>pred = m.predict(X); resid = y.values - pred
 print((resid**2).sum())  # RSS ≈ 12744882943.7
-print((resid**2).mean()**0.5)  # RMSE ≈ 2979.5 (en muestra)</code></pre>
+print((resid**2).mean()**0.5)  # RMSE ≈ 2979.1 (en muestra)</code></pre>
 
   <h3>3.3 · Error de generalización: K-Fold k=10</h3>
   <p>Hay que dividir el dataset en <strong><abbr title="K-Fold: validación cruzada en k pliegues; cada pliegue es test una vez">K-Fold = 10</abbr></strong>
@@ -146,7 +146,7 @@ print((resid**2).mean()**0.5)  # RMSE ≈ 2979.5 (en muestra)</code></pre>
   <figure>
     <img src="../assets/img/toyota/0003-regresion-lineal-precio-km-fig3.png" alt="R cuadrado por fold en validación cruzada de 10 pliegues">
     <figcaption>Fig. 3 — R² por fold (k=10, barajado, semilla 42): entre 0,256 y 0,391, media <strong>0,315 ± 0,042</strong>,
-    <abbr title="RMSE: error típico ≈ 2.973 € ± 265 €">RMSE ≈ 2.973 ± 265 €</abbr>. Estable y parecido al 0,325 en muestra: no hay overfitting grave.</figcaption>
+    <abbr title="RMSE: error típico en CV ≈ 2.973 € ± 265 €">RMSE ≈ 2.973 ± 265 €</abbr> en CV. Estable y parecido al 0,325 en muestra: no hay overfitting grave.</figcaption>
   </figure>
   <pre><code>from sklearn.model_selection import KFold, cross_val_score
 import numpy as np
@@ -164,26 +164,26 @@ print(r2.mean().round(3), r2.std().round(3))  # 0.315 0.042</code></pre>
 
   <div class="quiz" id="q1">
     <strong>P1 · H₀ “el KM no afecta al precio” con P&gt;|t| = 0,000 implica…</strong>
-    <label><input type="radio" name="q1" value="0"> Rechazo H₀: el KM sí guarda relación con el precio</label>
-    <label><input type="radio" name="q1" value="1"> Acepto H₀: el KM no guarda relación con el precio</label>
-    <label><input type="radio" name="q1" value="2"> Rechazo H₁: el KM nunca explica nada del precio</label>
-    <label><input type="radio" name="q1" value="3"> Acepto todo: el KM y el precio son lo mismo</label>
+    <label><input type="radio" name="q1" value="0"> Acepto H₀: el KM no guarda relación con el precio</label>
+    <label><input type="radio" name="q1" value="1"> Rechazo H₁: el KM nunca explica nada del precio</label>
+    <label><input type="radio" name="q1" value="2"> Acepto todo: el KM y el precio son lo mismo</label>
+    <label><input type="radio" name="q1" value="3"> Rechazo H₀: el KM sí guarda relación con el precio</label>
     <div class="feedback" aria-live="polite"></div>
   </div>
 
   <div class="quiz" id="q2">
     <strong>P2 · R² = 0,325 en Price ~ KM significa que…</strong>
-    <label><input type="radio" name="q2" value="0"> La recta explica el 32,5 % de la variación de precios</label>
-    <label><input type="radio" name="q2" value="1"> La recta explica el 67,5 % de la variación de precios</label>
-    <label><input type="radio" name="q2" value="2"> El modelo es determinista y predice sin ningún error</label>
+    <label><input type="radio" name="q2" value="0"> La recta explica el 67,5 % de la variación de precios</label>
+    <label><input type="radio" name="q2" value="1"> El modelo es determinista y predice sin ningún error</label>
+    <label><input type="radio" name="q2" value="2"> La recta explica el 32,5 % de la variación de precios</label>
     <label><input type="radio" name="q2" value="3"> Los residuos son nulos y la RSS vale cero total</label>
     <div class="feedback" aria-live="polite"></div>
   </div>
 
   <div class="quiz" id="q3">
     <strong>P3 · K-Fold k=10 con R² 0,256–0,391 (media 0,315) indica…</strong>
-    <label><input type="radio" name="q3" value="0"> Modelo estable: rinde parecido en cada corte test</label>
-    <label><input type="radio" name="q3" value="1"> Overfitting grave: memoriza y falla siempre en test</label>
+    <label><input type="radio" name="q3" value="0"> Overfitting grave: memoriza y falla siempre en test</label>
+    <label><input type="radio" name="q3" value="1"> Modelo estable: rinde parecido en cada corte test</label>
     <label><input type="radio" name="q3" value="2"> Sesgo total: la pendiente del KM es nula e inútil</label>
     <label><input type="radio" name="q3" value="3"> Error cero: predice perfecto cada auto del test</label>
     <div class="feedback" aria-live="polite"></div>
@@ -195,7 +195,7 @@ print(r2.mean().round(3), r2.std().round(3))  # 0.315 0.042</code></pre>
   <abbr title="OLS: mínimos cuadrados ordinarios; minimiza RSS">OLS</abbr>, R², tests de hipótesis) y 5 (remuestreo y
   validación cruzada). Texto base del programa
   (<a href="https://www.statlearning.com/">statlearning.com</a>, PDF libre; también en
-  <a href="../index.html">RESOURCES.md</a> del índice). La sintaxis exacta de <code>LinearRegression</code>,
+  <a href="../RESOURCES.md">RESOURCES.md</a> del curso). La sintaxis exacta de <code>LinearRegression</code>,
   <code>KFold</code> y <code>cross_val_score</code> sale de la
   <a href="https://scikit-learn.org/stable/">documentación de scikit-learn</a>, y el <code>summary()</code> con
   <code>P&gt;|t|</code>, <code>AIC</code>/<code>BIC</code> de la
@@ -206,7 +206,7 @@ print(r2.mean().round(3), r2.std().round(3))  # 0.315 0.042</code></pre>
 
   <nav class="lesson-nav">
     <a href="0002-niveles-tipos-analisis-tdsp.html">← 0002 Niveles y TDSP</a>
-    <a href="../index.html">Índice ↑</a>
+    <a href="0004-limpieza-datos-toyota.html">Siguiente: 0004 Limpieza de datos →</a>
   </nav>
   <p class="meta">Ver también: <a href="../index.html">índice del curso</a> ·
   <a href="../reference/toyota-data-dictionary.html">diccionario Toyota</a> ·
@@ -214,7 +214,7 @@ print(r2.mean().round(3), r2.std().round(3))  # 0.315 0.042</code></pre>
 </main>
 <script>
 (function(){
-  var answers = {q1: 0, q2: 0, q3: 0};
+  var answers = {q1: 3, q2: 2, q3: 1};
   var msgs = {
     q1: ["Correcto: P≈0 refuta H₀; el KM sí guarda relación con el precio.",
          "No: con P≈0 se rechaza H₀ (el KM no afecta) y se acepta H₁."],

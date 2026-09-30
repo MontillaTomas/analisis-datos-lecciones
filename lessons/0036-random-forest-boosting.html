@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>0036 · Random forest y boosting — Unidad 8</title>
+  <link rel="stylesheet" href="../assets/styles.css">
+</head>
+<body>
+<main>
+  <header class="course">
+    <p class="kicker">Unidad 8 · Clasificación · Lección 0036</p>
+    <h1>Random forest y boosting: bosques que votan y corrigen</h1>
+    <p><strong>Win de hoy:</strong> si un árbol memoriza (<a href="0035-naive-bayes-arboles.html">lección 0035</a>),
+    un <strong><abbr title="Random forest: muchos árboles entrenados en muestras distintas que votan">bosque</abbr></strong>
+    promedia el ruido… aunque acá el bosque (86,6 %) <em>no</em> supera al árbol d=5 (87,3 %): lección honesta incluida.</p>
+    <p class="meta"><a href="../index.html">← Índice</a> ·
+    <a href="../reference/toyota-data-dictionary.html">Diccionario Toyota</a> ·
+    <a href="../ToyotaCorolla.csv">CSV</a></p>
+  </header>
+
+  <h2>1 · Random forest: democracia de árboles</h2>
+  <p>Cada árbol se entrena con una muestra bootstrap (filas al azar con reemplazo) y en cada pregunta mira solo
+  algunas variables al azar. Resultado: 200 árboles distintos y mediocres que <strong>votan</strong>.
+  El voto promedia los caprichos de cada uno: menos varianza, menos memorización. Lo mismo vale para
+  <strong><abbr title="Bagging: entrenar varios modelos en muestras bootstrap y promediarlos">bagging</abbr></strong>
+  en general (el bosque es bagging de árboles).</p>
+
+  <h2>2 · Boosting: corregir al anterior, en serie</h2>
+  <p>El
+  <strong><abbr title="Boosting: entrenar modelos en serie, cada uno corrigiendo los errores del anterior">boosting</abbr></strong>
+  hace lo opuesto: árboles chiquitos en serie, donde cada uno se concentra en los autos que el anterior clasificó mal
+  (usamos <code>HistGradientBoosting</code>, la versión rápida de sklearn). Si bagging es «muchos jurados votan»,
+  boosting es «un equipo que corrige sus borradores». Los integrantes famosos de la familia son
+  <strong><abbr title="AdaBoost: boosting que repondera los casos mal clasificados en cada ronda">AdaBoost</abbr></strong>
+  (repondera casos) y
+  <strong><abbr title="XGBoost: boosting por gradiente optimizado, el caballo de batalla de las competencias Kaggle">XGBoost</abbr></strong>
+  (boosting por gradiente optimizado, primo del HGB que usamos acá).</p>
+  <figure>
+    <img src="../assets/img/toyota/0036-random-forest-boosting-fig1.png" alt="Comparación CV de modelos e importancias del bosque">
+    <figcaption>Fig. 1 — Izquierda: CV 5-fold. NB 83,5 %, árbol d=5 87,3 %, RF n=200 86,6 %, boosting 85,9 %:
+    nadie rompe el techo del 87 %. Derecha: importancias RF — edad 52 %, KM 31 %, resto migajas.</figcaption>
+  </figure>
+  <p>La lección incómoda: <strong>más complejo ≠ mejor</strong>. Con 5 variables y señal simple, un árbol podado empata
+  con 200 árboles. Los ensambles brillan con muchas variables ruidosas e interacciones; acá el techo es del problema
+  (~87 %), no del algoritmo: k-NN, logística y árbol ya lo tocan.</p>
+  <p>Regenerar la figura (mismo resultado versionado en <code>assets/img/toyota/</code>):</p>
+  <pre><code>python scripts/make_figures.py --only random-forest-boosting</code></pre>
+
+  <h2>3 · Importancias: el ranking que coincide con todo</h2>
+  <p>El bosque vota cuántas veces (y con cuánto peso) usó cada variable:
+  edad 52 %, KM 31 %, peso 10 %, HP 5 %, <code>cc</code> 2 %. Comparemos con lo que ya sabíamos:
+  logística (<a href="0034-regresion-logistica-roc.html">lección 0034</a>) decía edad −3,30 / KM −0,98 / cc ≈ 0;
+  el árbol preguntaba edad primero; los filtros U5 rankeaban igual. <strong>Cuatro métodos, un ranking</strong>:
+  cuando todo coincide, la señal es real.</p>
+
+  <h2>4 · Bosque en 10 líneas (reproducí 86,6 %)</h2>
+  <pre><code>import pandas as pd
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import cross_val_score, StratifiedKFold
+
+df = pd.read_csv("../ToyotaCorolla.csv")
+cols = ["Age_08_04","KM","HP","cc","Weight"]
+X, y = df[cols].values, (df["Price"] > 9900).astype(int).values
+cv = StratifiedKFold(5, shuffle=True, random_state=42)
+print(cross_val_score(RandomForestClassifier(200, random_state=42),
+                      X, y, cv=cv).mean().round(4))  # 0.8656
+m = RandomForestClassifier(200, random_state=42).fit(X, y)
+print(pd.Series(m.feature_importances_, index=cols).round(3).sort_values())</code></pre>
+  <p><strong>Tu turno:</strong> probá <code>n_estimators=10</code> vs <code>200</code>:
+  85,9 % vs 86,6 %. Más árboles estabilizan (menos lotería entre corridas) pero no rompen el techo.</p>
+
+  <h2>5 · Quiz (auto-chequeo inmediato)</h2>
+  <p class="meta">Elegí una opción por pregunta: el feedback es inmediato.</p>
+
+  <div class="quiz" id="q1">
+    <strong>P1 · Random forest vs boosting…</strong>
+    <label><input type="radio" name="q1" value="0"> Bosque vota en paralelo, boosting corrige en serie</label>
+    <label><input type="radio" name="q1" value="1"> Ambos entrenan un solo árbol grande</label>
+    <label><input type="radio" name="q1" value="2"> Boosting vota, bosque corrige errores</label>
+    <label><input type="radio" name="q1" value="3"> Ninguno usa árboles jamás</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <div class="quiz" id="q2">
+    <strong>P2 · RF 86,6 % &lt; árbol 87,3 % enseña…</strong>
+    <label><input type="radio" name="q2" value="0"> Que RF siempre pierde todo</label>
+    <label><input type="radio" name="q2" value="1"> Que más complejo no es mejor</label>
+    <label><input type="radio" name="q2" value="2"> Que CV está mal calculado</label>
+    <label><input type="radio" name="q2" value="3"> Que sobran los árboles</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <div class="quiz" id="q3">
+    <strong>P3 · Edad 52 % + KM 31 % coincide con…</strong>
+    <label><input type="radio" name="q3" value="0"> Logística, árbol y filtros previos</label>
+    <label><input type="radio" name="q3" value="1"> Solo con Naive Bayes ingenuo</label>
+    <label><input type="radio" name="q3" value="2"> Ningún resultado anterior jamás</label>
+    <label><input type="radio" name="q3" value="3"> Solo con k-means y PCA</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <h2>6 · Fuente primaria y cierre</h2>
+  <p><strong>Para profundizar (1 fuente):</strong>
+  James et al., <em>An Introduction to Statistical Learning</em> — cap. 8.2 (bagging, RF, boosting).
+  Más contexto en <a href="../RESOURCES.md">RESOURCES</a>.</p>
+  <p>Siguiente: <a href="0037-svm-comparacion.html">0037 · SVM y comparación final</a>:
+  la frontera de máximo margen y el torneo de los 7 algoritmos.</p>
+
+  <nav class="lesson-nav">
+    <a href="0035-naive-bayes-arboles.html">← 0035 NB+Árboles</a>
+    <a href="../index.html">Índice ↑</a>
+    <a href="0037-svm-comparacion.html">0037 SVM →</a>
+  </nav>
+</main>
+<script>
+(function(){
+  var answers = {q1: 0, q2: 1, q3: 0};
+  var msgs = {
+    q1: ["Correcto: paralelo vs serie.",
+         "No: bosque vota, boosting corrige."],
+    q2: ["Correcto: el techo es del problema.",
+         "No: acá lo simple empata."],
+    q3: ["Correcto: cuatro métodos coinciden.",
+         "No: todo apunta a edad+KM."]
+  };
+  ["q1","q2","q3"].forEach(function(id){
+    var box = document.getElementById(id);
+    var fb = box.querySelector(".feedback");
+    box.addEventListener("change", function(e){
+      var ok = parseInt(e.target.value, 10) === answers[id];
+      fb.textContent = ok ? msgs[id][0] : msgs[id][1];
+      fb.className = "feedback " + (ok ? "ok" : "no");
+    });
+  });
+})();
+</script>
+</body>
+</html>

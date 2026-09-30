@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>0005 · Wrangling y regex sobre Model — Unidad 2</title>
+  <link rel="stylesheet" href="../assets/styles.css">
+</head>
+<body>
+<main>
+  <header class="course">
+    <p class="kicker">Unidad 2 · Exploración de datos · Lección 0005</p>
+    <h1>Wrangling y regex: exprimir la columna Model</h1>
+    <p><strong>Win de hoy:</strong> extraer motor y puertas del texto de <code>Model</code> con
+    <abbr title="Regex: expresiones regulares; patrones para buscar y extraer partes de un texto">regex</abbr>,
+    crear columnas nuevas y validarlas contra <code>cc</code> y <code>Doors</code> (98,8 % y 89,7 % de acuerdo).</p>
+    <p class="meta"><a href="../index.html">← Índice</a> ·
+    <a href="../reference/toyota-data-dictionary.html">Diccionario Toyota</a> ·
+    <a href="../ToyotaCorolla.csv">CSV</a></p>
+  </header>
+
+  <h2>1 · Wrangling: domar el texto hasta que analice</h2>
+  <p><strong><abbr title="Wrangling: transformar datos crudos en una tabla limpia y analizable, lista para graficar o modelar">Wrangling</abbr></strong>
+  es el paso entre “datos crudos” y “datos analizables”: recortar, separar, convertir y reordenar hasta que cada
+  columna tenga un formato útil. La columna <code>Model</code> es el caso perfecto: guarda motor, carrocería y
+  puertas… pero todo mezclado en una frase. Hoy la desenredamos con el accesorio
+  <code><abbr title="str: accesorio de pandas (.str) que aplica operaciones de texto a toda una columna de una vez">.str</abbr></code>
+  de <abbr title="pandas: biblioteca de Python para trabajar con tablas de datos">pandas</abbr> y un patrón regex.</p>
+  <p>Anatomía de un <code>Model</code> típico (hay 319 textos distintos; este es el más común, 109 autos):</p>
+  <pre><code>TOYOTA Corolla 1.6 16V HATCHB LINEA TERRA 2/3-Doors
+               ^^^                         ^^^^^^^^^
+              motor                        puertas</code></pre>
+
+  <h2>2 · Regex mínimo para este caso: <code>(\d\.\d)</code></h2>
+  <p>Un <strong>patrón regex</strong> describe la forma del texto buscado, no el texto exacto. Para el motor
+  (“1.6”, “2.0”, “1.3”…): un dígito, un punto, un dígito. Se escribe <code>(\d\.\d)</code>:</p>
+  <ul>
+    <li><code>\d</code> = “cualquier dígito (0–9)”.</li>
+    <li><code>\.</code> = “un punto literal” (con backslash, porque el punto solo significa “cualquier cosa”).</li>
+    <li><code>(…)</code> = “esto es lo que quiero capturar y quedarme”.</li>
+  </ul>
+  <pre><code>import pandas as pd
+df = pd.read_csv("../ToyotaCorolla.csv")
+m = df["Model"].str.lstrip("?")          # sin el ? de la 0004
+df["motor_txt"] = m.str.extract(r"(\d\.\d)")[0]
+print(df["motor_txt"].value_counts())
+# 1.6    852
+# 1.3    247
+# 1.4    167
+# 2.0    119
+# 1.9     30
+# 1.8     13</code></pre>
+  <p><strong><abbr title="Cobertura: % de filas donde la extracción funcionó; el resto queda como NaN honesto">Cobertura</abbr>: 1428 de 1436 (99,4 %).</strong>
+  Las 8 que faltan usan formatos raros (ej. <code>"1 6-16v"</code> con espacio en vez de punto): quedan como
+  <code><abbr title="NaN: not a number; la marca que usa pandas para un valor faltante">NaN</abbr></code> honesto. Regla: un <code>NaN</code> que dice “acá no pude” vale más que un invento.</p>
+
+  <h2>3 · Segundo rescate: las puertas del texto</h2>
+  <p>El final del texto trae las puertas en tres dialectos: <code>2/3-Doors</code> (620 autos),
+  <code>4/5-Doors</code> (724) y <code>5DR</code> (89); 92 filas (furgones VERSO/MPV) no traen patrón.
+  Traducimos: “2/3” → 3 puertas, “4/5” y “5DR” → 5:</p>
+  <pre><code>import numpy as np
+df["puertas_txt"] = np.select(
+    [m.str.contains("2/3-Doors", regex=False),
+     m.str.contains("4/5-Doors", regex=False),
+     m.str.contains("5DR", regex=False)],
+    [3, 5, 5], default=np.nan)
+print(df["puertas_txt"].notna().sum())  # 1344 de 1436 (93,6 %)</code></pre>
+  <div class="callout"><strong>Trampa del dominio:</strong> “4/5-Doors” significa “4 <em>o</em> 5”.
+  Los SEDAN con ese texto tienen <code>Doors = 4</code> y los LIFTB tienen 5. El regex extrae; el conocimiento
+  del negocio interpreta. Por eso el paso siguiente (validar) no es opcional.</div>
+
+  <h2>4 · Validar: el texto contra la columna numérica</h2>
+  <p>¿Cómo sabemos que extrajimos bien? El dataset trae la respuesta por otro camino: <code>cc</code> y
+  <code>Doors</code>. Si motor × 1000 coincide con <code>cc</code>, la extracción es buena:</p>
+  <pre><code>acuerdo_cc = (((df["motor_txt"].astype(float) * 1000).round(0) == df["cc"])).mean() * 100
+print(f"Motor vs cc: {acuerdo_cc:.1f}%")        # 98.8% (1411 de 1428)
+val = df["puertas_txt"].notna()
+print(f"Puertas vs Doors: {(df.loc[val, 'puertas_txt'] == df.loc[val, 'Doors']).mean()*100:.1f}%")
+# 89.7% (1206 de 1344; el resto son los SEDAN ambiguos)</code></pre>
+  <p>98,8 % y 89,7 %: dos columnas nuevas, validadas, nacidas de una frase. Y el premio: el motor extraído
+  <em>explica precio</em> (un 1.8 promedia 17.742 €, un 1.3 apenas 8.491 €). Eso es wrangling que paga.</p>
+
+  <h2>5 · Figura: el premio y la validación</h2>
+  <figure>
+    <img src="../assets/img/toyota/0005-wrangling-regex-model-fig1.png" alt="Precio medio por motor extraído y barras de acuerdo texto vs columna">
+    <figcaption>Fig. 1 — Izquierda: precio medio por motor extraído del texto (el 1.8 vale doble que el 1.3).
+    Derecha: % de acuerdo entre lo extraído y la columna numérica gemela. Extraer sin validar es adivinar.</figcaption>
+  </figure>
+  <p>Regenerar la figura (mismo resultado versionado en <code>assets/img/toyota/</code>):</p>
+  <pre><code>python scripts/make_figures.py --only wrangling-regex-model</code></pre>
+
+  <h2>6 · Quiz (auto-chequeo inmediato)</h2>
+  <p class="meta">Elegí una opción por pregunta: el feedback es inmediato.</p>
+
+  <div class="quiz" id="q1">
+    <strong>P1 · El patrón (\d\.\d) extrae…</strong>
+    <label><input type="radio" name="q1" value="0"> Cualquier letra suelta del texto</label>
+    <label><input type="radio" name="q1" value="1"> Un dígito punto dígito textual</label>
+    <label><input type="radio" name="q1" value="2"> Solo los números de puertas</label>
+    <label><input type="radio" name="q1" value="3"> Toda la fila entera junta</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <div class="quiz" id="q2">
+    <strong>P2 · ¿Por qué comparar motor×1000 con cc?</strong>
+    <label><input type="radio" name="q2" value="0"> Para borrar columnas viejas ya</label>
+    <label><input type="radio" name="q2" value="1"> Para ordenar todo el dataset</label>
+    <label><input type="radio" name="q2" value="2"> Para validar que extrajimos bien</label>
+    <label><input type="radio" name="q2" value="3"> Para cambiar tipos de datos</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <div class="quiz" id="q3">
+    <strong>P3 · SEDAN 4/5-Doors con Doors=4 muestra…</strong>
+    <label><input type="radio" name="q3" value="0"> Que el texto es ambiguo a veces</label>
+    <label><input type="radio" name="q3" value="1"> Que sobran todas las columnas</label>
+    <label><input type="radio" name="q3" value="2"> Que regex siempre falla todo</label>
+    <label><input type="radio" name="q3" value="3"> Que hay que borrar filas</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <h2>7 · Fuente primaria y cierre</h2>
+  <p><strong>Para profundizar (1 fuente):</strong>
+  McKinney, <em>Python for Data Analysis</em> — capítulos de limpieza y métodos de texto vectorizados
+  (<code>.str.extract</code>, <code>.str.contains</code>)
+  (<a href="https://wesmckinney.com/book/">wesmckinney.com/book</a>, también en
+  <a href="../RESOURCES.md">RESOURCES.md</a> del curso).</p>
+  <p>¿Algo no quedó claro? <strong>Preguntame al agente</strong>: cómo leer un patrón regex pieza por pieza,
+  cuándo conviene <code>extract</code> vs <code>contains</code>, o cómo validar tu propia extracción.
+  Esa pregunta vale más que releer.</p>
+
+  <nav class="lesson-nav">
+    <a href="0004-limpieza-datos-toyota.html">← 0004 Limpieza de datos</a>
+    <a href="0006-eda-sistematico-toyota.html">Siguiente: 0006 EDA sistemático →</a>
+  </nav>
+  <p class="meta">Ver también: <a href="../index.html">índice del curso</a> ·
+  <a href="../reference/toyota-data-dictionary.html">diccionario Toyota</a> ·
+  <a href="../reference/analisis-ejemplo-ols.html">análisis OLS de ejemplo</a></p>
+</main>
+<script>
+(function(){
+  var answers = {q1: 1, q2: 2, q3: 0};
+  var msgs = {
+    q1: ["Correcto: dígito, punto literal, dígito; los paréntesis capturan el motor.",
+         "No: \\d es dígito y \\. punto literal; captura formas como 1.6."],
+    q2: ["Correcto: la columna gemela es la verdad contra la que se valida.",
+         "No: comparar con cc valida la extracción; dio 98,8 % de acuerdo."],
+    q3: ["Correcto: 4/5 significa 4 o 5; el sedán usa 4 y el texto no lo aclara.",
+         "No: el texto es ambiguo (4 o 5) y el sedán resuelve con 4."]
+  };
+  ["q1","q2","q3"].forEach(function(id){
+    var box = document.getElementById(id);
+    var fb = box.querySelector(".feedback");
+    box.addEventListener("change", function(e){
+      var ok = parseInt(e.target.value, 10) === answers[id];
+      fb.textContent = ok ? msgs[id][0] : msgs[id][1];
+      fb.className = "feedback " + (ok ? "ok" : "no");
+    });
+  });
+})();
+</script>
+</body>
+</html>

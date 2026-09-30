@@ -157,8 +157,8 @@ print(df.groupby("Mfg_Year")["Price"].mean().round(0))
 
   <div class="quiz" id="q1">
     <strong>P1 · Fijar el descuento por KM para todo el trimestre es nivel…</strong>
-    <label><input type="radio" name="q1" value="0"> Táctico: planifica un segmento a mediano plazo</label>
-    <label><input type="radio" name="q1" value="1"> Operativo: decide un solo auto en el mostrador</label>
+    <label><input type="radio" name="q1" value="0"> Operativo: decide un solo auto en el mostrador</label>
+    <label><input type="radio" name="q1" value="1"> Táctico: planifica un segmento a mediano plazo</label>
     <label><input type="radio" name="q1" value="2"> Predictivo: ajusta la recta OLS con los datos</label>
     <label><input type="radio" name="q1" value="3"> Exploratorio: describe histogramas sin predecir</label>
     <div class="feedback" aria-live="polite"></div>
@@ -166,18 +166,18 @@ print(df.groupby("Mfg_Year")["Price"].mean().round(0))
 
   <div class="quiz" id="q2">
     <strong>P2 · Preguntar por qué el diésel promedia más que el naftero es…</strong>
-    <label><input type="radio" name="q2" value="0"> Diagnóstico: análisis ex post que busca la causa</label>
-    <label><input type="radio" name="q2" value="1"> Prescriptivo: receta óptima de qué hacer mañana</label>
-    <label><input type="radio" name="q2" value="2"> Exploratorio: mira histogramas antes de modelar</label>
-    <label><input type="radio" name="q2" value="3"> Predictivo: estima el precio con una fórmula</label>
+    <label><input type="radio" name="q2" value="0"> Prescriptivo: receta óptima de qué hacer mañana</label>
+    <label><input type="radio" name="q2" value="1"> Exploratorio: mira histogramas antes de modelar</label>
+    <label><input type="radio" name="q2" value="2"> Predictivo: estima el precio con una fórmula</label>
+    <label><input type="radio" name="q2" value="3"> Diagnóstico: análisis ex post que busca la causa</label>
     <div class="feedback" aria-live="polite"></div>
   </div>
 
   <div class="quiz" id="q3">
     <strong>P3 · En TDSP (2016, Microsoft), el feature engineering vive en…</strong>
-    <label><input type="radio" name="q3" value="0"> Modelado: dar valor a variables y entrenar el modelo</label>
-    <label><input type="radio" name="q3" value="1"> Despliegue: llevar la fórmula al mostrador real</label>
-    <label><input type="radio" name="q3" value="2"> Aceptación: validar con el cliente si acierta</label>
+    <label><input type="radio" name="q3" value="0"> Despliegue: llevar la fórmula al mostrador real</label>
+    <label><input type="radio" name="q3" value="1"> Aceptación: validar con el cliente si acierta</label>
+    <label><input type="radio" name="q3" value="2"> Modelado: dar valor a variables y entrenar el modelo</label>
     <label><input type="radio" name="q3" value="3"> Negocio: definir objetivos sin tocar los datos</label>
     <div class="feedback" aria-live="polite"></div>
   </div>
@@ -187,7 +187,7 @@ print(df.groupby("Mfg_Year")["Price"].mean().round(0))
   capítulos 1–2 (pensamiento analítico, encuadre de negocio y ciclo de vida). Es la referencia del curso para ubicar
   cada pregunta Toyota en su nivel y tipo de análisis
   (<a href="https://www.oreilly.com/library/view/data-science-for/9781449374273/">O'Reilly</a>, también en
-  <a href="../index.html">RESOURCES.md</a> del índice). Para el ciclo concreto usamos la documentación oficial de
+  <a href="../RESOURCES.md">RESOURCES.md</a> del curso). Para el ciclo concreto usamos la documentación oficial de
   <a href="https://www.datascience-pm.com/tdsp/">TDSP</a> y
   <a href="https://microsoft.github.io/azureml-ops-accelerator/1-MLOpsFoundation/2-SkillsRolesAndResponsibilities/1-AdoptingDSProcess.html">Microsoft</a>.</p>
   <p>¿Algo no quedó claro? <strong>Preguntame al agente</strong>: qué nivel es tu pregunta, qué tipo de análisis necesita,
@@ -203,7 +203,7 @@ print(df.groupby("Mfg_Year")["Price"].mean().round(0))
 </main>
 <script>
 (function(){
-  var answers = {q1: 0, q2: 0, q3: 0};
+  var answers = {q1: 1, q2: 3, q3: 2};
   var msgs = {
     q1: ["Correcto: un descuento trimestral por segmento es táctico, mediano plazo.",
          "No: lo operativo es caso por caso en el mostrador; lo trimestral por segmento es táctico."],

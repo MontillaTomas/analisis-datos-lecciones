@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>0044 · ANOVA: comparar medias — Unidad 6</title>
+  <link rel="stylesheet" href="../assets/styles.css">
+</head>
+<body>
+<main>
+  <header class="course">
+    <p class="kicker">Unidad 6 · Regresión lineal simple y múltiple · Lección 0044</p>
+    <h1>ANOVA: ¿los tres combustibles valen distinto de verdad?</h1>
+    <p><strong>Win de hoy:</strong> <strong><abbr title="ANOVA: análisis de varianza; test que compara las medias de 3+ grupos de una sola vez">ANOVA</abbr></strong>
+    juzga las 3 medias juntas (nafta 10.679, diésel 11.295, GNC 9.421 €): F = 3,12, p = 0,045 —
+    significativo… por 12 centésimas. Un veredicto justito que pide lupa, no festejo.</p>
+    <p class="meta"><a href="../index.html">← Índice</a> ·
+    <a href="../reference/toyota-data-dictionary.html">Diccionario Toyota</a> ·
+    <a href="../ToyotaCorolla.csv">CSV</a></p>
+  </header>
+
+  <h2>1 · Por qué no hacer 3 t-tests</h2>
+  <p>Con 3 grupos podrías comparar de a pares (nafta-vs-diésel, nafta-vs-GNC, diésel-vs-GNC). Problema:
+  cada test tiene 5 % de falsas alarmas, y con 3 tests la chance de <em>alguna</em> falsa alarma trepa a ~14 %.
+  ANOVA hace <strong>un solo juicio global</strong> — H0: «las 3 medias son iguales» — y reparte la varianza total en dos:
+  variación <em>entre</em> grupos (¿las medias se separan?) vs <em>dentro</em> de cada grupo (ruido).
+  El estadístico <strong><abbr title="F: cociente entre variación entre-grupos y dentro-grupos; grande = los grupos se separan de verdad">F</abbr></strong>
+  es el cociente: F ≈ 1 = ruido; F grande = los grupos cantan distinto.</p>
+
+  <h2>2 · El juicio del combustible</h2>
+  <figure>
+    <img src="../assets/img/toyota/0044-anova-comparar-medias-fig1.png" alt="Violines de precio por combustible y distribución F">
+    <figcaption>Fig. 1 — Izquierda: violines de precio (puntos rojos = medias). El GNC (n=17) es un hilito al lado del
+    naftero (n=1264). Derecha: F = 3,12 cruza el umbral 3,00 por apenas 0,12 → p = 0,045.</figcaption>
+  </figure>
+  <p>Lectura triple: <strong>(1)</strong> p = 0,045 &lt; 0,05: se rechaza H0 (<a href="0042-inferencia-pvalor-t.html">lección 0042</a>),
+  pero tan justo que otra muestra podría no rechazarla — «significativo» ≠ «contundente».
+  <strong>(2)</strong> ANOVA no dice <em>qué par</em> difiere (¿diésel-vs-GNC? ¿nafta-vs-diésel?): para eso existen los post-hoc (Tukey).
+  <strong>(3)</strong> El GNC tiene n = 17: su media (9.421 €) baila mucho (ver <a href="0006-eda-sistematico-toyota.html">lección 0006</a>).
+  Ojo extra: los grupos difieren en edad y peso — ANOVA univariado no aísla causas como la múltiple (0024).</p>
+  <p>Regenerar la figura (mismo resultado versionado en <code>assets/img/toyota/</code>):</p>
+  <pre><code>python scripts/make_figures.py --only anova-comparar-medias</code></pre>
+
+  <h2>3 · Supuestos (cuándo desconfiar)</h2>
+  <table>
+    <tr><th>Supuesto</th><th>Qué pide</th><th>Nuestro caso</th></tr>
+    <tr><td>Independencia</td><td>Autos distintos, sin gemelos</td><td>OK razonable</td></tr>
+    <tr><td>Normalidad</td><td>Residuos ≈ normales por grupo</td><td>Dudoso: Price sesgado (ver 0046); n grande perdona</td></tr>
+    <tr><td>Homoscedasticidad</td><td>Misma dispersión por grupo</td><td>Dudoso: GNC n=17 vs nafta n=1264</td></tr>
+  </table>
+  <p>Con n desparejo y p justito, el veredicto honesto es: «hay indicios (p = 0,045), no sentencia».
+  Alternativa robusta si los supuestos fallan feo: Kruskal-Wallis (el ANOVA no paramétrico, por rangos).</p>
+
+  <h2>4 · ANOVA en 8 líneas (reproducí F = 3,12)</h2>
+  <pre><code>import pandas as pd
+from scipy import stats
+df = pd.read_csv("../ToyotaCorolla.csv")
+g = [df.loc[df["Fuel_Type"] == f, "Price"] for f in ["Petrol", "Diesel", "CNG"]]
+print([round(x.mean(), 1) for x in g])  # [10679.3, 11294.6, 9421.2]
+print([len(x) for x in g])              # [1264, 155, 17]
+F, p = stats.f_oneway(*g)
+print("F=%.2f p=%.4f" % (F, p))         # F=3.12 p=0.0446</code></pre>
+  <p><strong>Tu turno:</strong> corré ANOVA de <code>Price</code> por tramos de edad (joven/medio/viejo, 3 grupos parejos):
+  vas a ver un F gigante y un p ≈ 0 — ese sí es contundente.</p>
+
+  <h2>5 · Quiz (auto-chequeo inmediato)</h2>
+  <p class="meta">Elegí una opción por pregunta: el feedback es inmediato.</p>
+
+  <div class="quiz" id="q1">
+    <strong>P1 · ANOVA en vez de 3 t-tests porque…</strong>
+    <label><input type="radio" name="q1" value="0"> Evita falsas alarmas acumuladas</label>
+    <label><input type="radio" name="q1" value="1"> Da siempre p más chico</label>
+    <label><input type="radio" name="q1" value="2"> No necesita supuestos jamás</label>
+    <label><input type="radio" name="q1" value="3"> Compara solo dos grupos</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <div class="quiz" id="q2">
+    <strong>P2 · F = 3,12 con umbral 3,00 significa…</strong>
+    <label><input type="radio" name="q2" value="0"> Significativo justito, pedir lupa</label>
+    <label><input type="radio" name="q2" value="1"> Efecto enorme y contundente</label>
+    <label><input type="radio" name="q2" value="2"> H0 confirmada totalmente</label>
+    <label><input type="radio" name="q2" value="3"> El GNC vale más siempre</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <div class="quiz" id="q3">
+    <strong>P3 · ANOVA significativo NO dice…</strong>
+    <label><input type="radio" name="q3" value="0"> Qué par de grupos difiere</label>
+    <label><input type="radio" name="q3" value="1"> Si las medias son iguales</label>
+    <label><input type="radio" name="q3" value="2"> El valor del estadístico</label>
+    <label><input type="radio" name="q3" value="3"> El p-valor del juicio</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <h2>6 · Fuente primaria y cierre</h2>
+  <p><strong>Para profundizar (1 fuente):</strong>
+  Diez, Barr &amp; Çetinkaya-Rundel, <em>OpenIntro Statistics</em> — cap. 5 (ANOVA).
+  Más contexto en <a href="../RESOURCES.md">RESOURCES</a>.</p>
+  <p>Siguiente: <a href="0045-violin-densidad-torta.html">0045 · Violín, densidad y torta</a>:
+  el gráfico que supera al boxplot, el histograma sin bins y la torta que sobredimensiona.</p>
+
+  <nav class="lesson-nav">
+    <a href="0043-metricas-split-80-20.html">← 0043 Métricas</a>
+    <a href="../index.html">Índice ↑</a>
+    <a href="0045-violin-densidad-torta.html">0045 Violín →</a>
+  </nav>
+</main>
+<script>
+(function(){
+  var answers = {q1: 0, q2: 0, q3: 0};
+  var msgs = {
+    q1: ["Correcto: un juicio, 5 % total.",
+         "No: 3 tests = 14 % falsas."],
+    q2: ["Correcto: 0,12 sobre el umbral.",
+         "No: justito no es contundente."],
+    q3: ["Correcto: eso lo dice Tukey.",
+         "No: ANOVA es solo global."]
+  };
+  ["q1","q2","q3"].forEach(function(id){
+    var box = document.getElementById(id);
+    var fb = box.querySelector(".feedback");
+    box.addEventListener("change", function(e){
+      var ok = parseInt(e.target.value, 10) === answers[id];
+      fb.textContent = ok ? msgs[id][0] : msgs[id][1];
+      fb.className = "feedback " + (ok ? "ok" : "no");
+    });
+  });
+})();
+</script>
+</body>
+</html>

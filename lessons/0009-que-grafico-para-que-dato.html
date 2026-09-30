@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>0009 · Qué gráfico para qué dato — Unidad 3</title>
+  <link rel="stylesheet" href="../assets/styles.css">
+</head>
+<body>
+<main>
+  <header class="course">
+    <p class="kicker">Unidad 3 · Visualización de datos · Lección 0009</p>
+    <h1>Qué gráfico para qué dato</h1>
+    <p><strong>Win de hoy:</strong> elegir el gráfico según el tipo de dato con la regla de Wilke:
+    nominal → barras, continua → histograma, dos continuas → scatter, ordenada → línea. Todo con Toyota.</p>
+    <p class="meta"><a href="../index.html">← Índice</a> ·
+    <a href="../reference/toyota-data-dictionary.html">Diccionario Toyota</a> ·
+    <a href="../ToyotaCorolla.csv">CSV</a></p>
+  </header>
+
+  <h2>1 · La regla de oro: el dato elige el gráfico</h2>
+  <p>Cada gráfico es una <strong><abbr title="Codificación visual: traducir datos a marcas visibles (largo, posición, color)">codificación visual</abbr></strong>:
+  traduce números a largo, posición o color. Si la codificación no calza con el tipo de dato, el gráfico miente
+  sin querer: un histograma de <code>Fuel_Type</code> no tiene sentido (¿qué es “medio combustible”?), y una torta
+  con 319 modelos es sopa de letras. La tabla que resuelve el 90 % de los casos:</p>
+  <table>
+    <tr><th>Dato</th><th>Gráfico</th><th>Ejemplo Toyota</th></tr>
+    <tr><td><strong>Nominal</strong> (etiquetas)</td><td>Barras (una por etiqueta)</td><td>Conteo de <code>Fuel_Type</code>: 1264 / 155 / 17</td></tr>
+    <tr><td><strong>Continua</strong> (una sola)</td><td>Histograma o boxplot</td><td>Distribución de <code>Price</code> (mediana 9.900 €)</td></tr>
+    <tr><td><strong>Dos continuas</strong></td><td>Scatter (nube de puntos)</td><td><code>KM vs Price</code>: la nube que baja</td></tr>
+    <tr><td><strong>Ordenada</strong> (tiempo, edad)</td><td>Línea</td><td>Precio medio por <code>Mfg_Year</code> (1998→2004)</td></tr>
+  </table>
+  <p>En vocabulario del programa: una columna es dato
+  <strong><abbr title="Univariado: análisis de una sola variable a la vez">univariado</abbr></strong>, dos son
+  <strong><abbr title="Bivariado: análisis de dos variables juntas y su relación">bivariadas</abbr></strong>, y tres o
+  más son <strong><abbr title="Multivariado: análisis de tres o más variables a la vez">multivariadas</abbr></strong>
+  (esas llegan en la 0012).</p>
+
+  <h2>2 · Nominal → barras: Fuel_Type al desnudo</h2>
+  <p>Las etiquetas se cuentan, y los conteos se comparan con largos de barra. Las 3 barras muestran el desbalance
+  de un vistazo: Petrol aplasta (1264), Diesel acompaña (155), CNG es anecdótico (17). Regla que vuelve en la 0011:
+  <strong>el eje de un gráfico de barras arranca en 0</strong>, porque el ojo compara largos.</p>
+
+  <h2>3 · Continua → histograma: la forma de Price</h2>
+  <p>El <strong><abbr title="Histograma: barras pegadas que cuentan cuántos valores caen en cada intervalo">histograma</abbr></strong>
+  parte el rango en intervalos (<abbr title="Bins: intervalos del histograma; pocos bins esconden forma, muchos la rompen en ruido">bins</abbr>)
+  y cuenta casos por intervalo: revela forma, centro y cola. <code>Price</code> muestra pico cerca de 8–10 mil y cola
+  derecha hasta 32.500 (el sesgo de la 0006, ahora visible). Alternativa del mismo dato: el boxplot de la 0001,
+  que resume la misma forma en 5 números.</p>
+
+  <h2>4 · Dos continuas → scatter; ordenada → línea</h2>
+  <p>El <strong><abbr title="Scatter: nube de puntos; cada punto es un caso con dos coordenadas">scatter</abbr></strong>
+  pone un punto por auto: la nube <code>KM vs Price</code> baja hacia la derecha (más km, menos precio) y anticipa la
+  regresión de U6. Y cuando hay orden natural (año, mes, tramo de edad), la
+  <strong><abbr title="Gráfico de línea: une promedios ordenados; muestra evolución, no relación">línea</abbr></strong>
+  une los promedios: el precio medio sube con el año de fabricación. Ojo: la línea sugiere evolución, no causalidad.</p>
+
+  <h2>5 · Figura: el catálogo 2×2</h2>
+  <figure>
+    <img src="../assets/img/toyota/0009-que-grafico-para-que-dato-fig1.png" alt="Cuatro gráficos: barras de combustible, histograma de precio, scatter KM-Price y línea por año">
+    <figcaption>Fig. 1 — El catálogo mínimo: barras para lo nominal, histograma para lo continuo, scatter para dos
+    continuas, línea para lo ordenado. Cuatro gráficos, cuatro tipos de dato, un solo CSV.</figcaption>
+  </figure>
+  <p>Regenerar la figura (mismo resultado versionado en <code>assets/img/toyota/</code>):</p>
+  <pre><code>python scripts/make_figures.py --only que-grafico-para-que-dato</code></pre>
+
+  <h2>6 · Quiz (auto-chequeo inmediato)</h2>
+  <p class="meta">Elegí una opción por pregunta: el feedback es inmediato.</p>
+
+  <div class="quiz" id="q1">
+    <strong>P1 · Fuel_Type (3 etiquetas) se grafica con…</strong>
+    <label><input type="radio" name="q1" value="0"> Un histograma de intervalos iguales</label>
+    <label><input type="radio" name="q1" value="1"> Scatter de dos continuas juntas</label>
+    <label><input type="radio" name="q1" value="2"> Barras con una por etiqueta</label>
+    <label><input type="radio" name="q1" value="3"> Una línea de tiempo ordenada</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <div class="quiz" id="q2">
+    <strong>P2 · El scatter KM–Price muestra…</strong>
+    <label><input type="radio" name="q2" value="0"> La evolución en el tiempo</label>
+    <label><input type="radio" name="q2" value="1"> La relación entre dos continuas</label>
+    <label><input type="radio" name="q2" value="2"> Las partes de un total</label>
+    <label><input type="radio" name="q2" value="3"> Los conteos por cada categoría</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <div class="quiz" id="q3">
+    <strong>P3 · Precio medio por año va con línea porque…</strong>
+    <label><input type="radio" name="q3" value="0"> El año trae orden natural</label>
+    <label><input type="radio" name="q3" value="1"> Hay apenas tres etiquetas nomás</label>
+    <label><input type="radio" name="q3" value="2"> Price es una categoría nominal</label>
+    <label><input type="radio" name="q3" value="3"> Los años son nominales puros</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <h2>7 · Fuente primaria y cierre</h2>
+  <p><strong>Para profundizar (1 fuente):</strong>
+  Wilke, <em>Fundamentals of Data Visualization</em> — capítulos de codificación visual y elección de gráfico
+  (<a href="https://clauswilke.com/dataviz/">clauswilke.com/dataviz</a>, también en
+  <a href="../RESOURCES.md">RESOURCES.md</a> del curso). La referencia del curso para toda la Unidad 3.</p>
+  <p>¿Algo no quedó claro? <strong>Preguntame al agente</strong>: qué gráfico usar para tu columna, cuántos bins
+  elegir, o cuándo el boxplot le gana al histograma. Esa pregunta vale más que releer.</p>
+
+  <nav class="lesson-nav">
+    <a href="0008-outliers-multivariados-lof-dbscan.html">← 0008 Outliers multivariados</a>
+    <a href="0010-color-con-criterio.html">Siguiente: 0010 Color con criterio →</a>
+  </nav>
+  <p class="meta">Ver también: <a href="../index.html">índice del curso</a> ·
+  <a href="../reference/toyota-data-dictionary.html">diccionario Toyota</a> ·
+  <a href="../reference/analisis-ejemplo-ols.html">análisis OLS de ejemplo</a></p>
+</main>
+<script>
+(function(){
+  var answers = {q1: 2, q2: 1, q3: 0};
+  var msgs = {
+    q1: ["Correcto: nominal se cuenta y los conteos van en barras.",
+         "No: 3 etiquetas nominales se cuentan con barras."],
+    q2: ["Correcto: dos continuas en ejes forman la nube de relación.",
+         "No: el scatter relaciona dos continuas (KM y Price)."],
+    q3: ["Correcto: el orden del año pide línea de evolución.",
+         "No: año ordenado 1998→2004 se une con línea."]
+  };
+  ["q1","q2","q3"].forEach(function(id){
+    var box = document.getElementById(id);
+    var fb = box.querySelector(".feedback");
+    box.addEventListener("change", function(e){
+      var ok = parseInt(e.target.value, 10) === answers[id];
+      fb.textContent = ok ? msgs[id][0] : msgs[id][1];
+      fb.className = "feedback " + (ok ? "ok" : "no");
+    });
+  });
+})();
+</script>
+</body>
+</html>

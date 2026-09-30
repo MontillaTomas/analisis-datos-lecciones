@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>0010 · Color con criterio — Unidad 3</title>
+  <link rel="stylesheet" href="../assets/styles.css">
+</head>
+<body>
+<main>
+  <header class="course">
+    <p class="kicker">Unidad 3 · Visualización de datos · Lección 0010</p>
+    <h1>Color con criterio: distinguir, ordenar, comparar</h1>
+    <p><strong>Win de hoy:</strong> usar las 3 paletas con criterio Wilke sobre Toyota:
+    categórica para <code>Fuel_Type</code>, secuencial para el heatmap edad×combustible y divergente
+    para correlaciones ±.</p>
+    <p class="meta"><a href="../index.html">← Índice</a> ·
+    <a href="../reference/toyota-data-dictionary.html">Diccionario Toyota</a> ·
+    <a href="../ToyotaCorolla.csv">CSV</a></p>
+  </header>
+
+  <h2>1 · El color también codifica (3 trabajos distintos)</h2>
+  <p>El color no es decoración: es otra <abbr title="Codificación visual: traducir datos a marcas visibles (largo, posición, color)">codificación visual</abbr>,
+  y hace tres trabajos que piden tres
+  <strong><abbr title="Paleta: conjunto de colores con un trabajo asignado; no se mezclan criterios">paletas</abbr></strong>
+  distintas. Usar la paleta equivocada confunde tanto como el gráfico equivocado (0009):</p>
+  <ul>
+    <li><strong>Distinguir</strong> etiquetas → paleta <strong>categórica</strong> (colores bien distintos, sin orden).</li>
+    <li><strong>Ordenar</strong> valores → paleta <strong>secuencial</strong> (de claro a oscuro).</li>
+    <li><strong>Comparar contra un centro</strong> → paleta <strong>divergente</strong> (dos extremos + neutro).</li>
+  </ul>
+
+  <h2>2 · Categórica: un color por etiqueta (Fuel_Type)</h2>
+  <p>Tres combustibles, tres colores sin jerarquía: ninguno debe gritar más que otro. Funciona hasta ~6–7
+  categorías; con 319 modelos (0005) hay que agrupar primero. En el scatter <code>KM vs Price</code> el color revela
+  lo que la nube sola esconde: los diésel (pocos, caros) viven arriba a la derecha.</p>
+  <pre><code>import seaborn as sns
+sns.scatterplot(data=df.sample(600, random_state=42),
+                x="KM", y="Price", hue="Fuel_Type", palette="Set2")</code></pre>
+
+  <h2>3 · Secuencial: oscuro = más (heatmap edad×combustible)</h2>
+  <p>Cuando el valor tiene orden, la intensidad manda: claro = barato, oscuro = caro. El
+  <strong><abbr title="Heatmap: matriz coloreada por valor; revela patrones de filas y columnas de un vistazo">heatmap</abbr></strong>
+  de precio medio por tramo de edad y combustible muestra el gradiente en dos dimensiones: joven+diésel arriba
+  (20.263 €), viejo+CNG abajo (7.502 €). Detalle honesto: la celda joven×CNG queda vacía (no hay casos), y vacía se deja.</p>
+
+  <h2>4 · Divergente: dos direcciones desde cero (correlaciones)</h2>
+  <p>Para valores con centro significativo (correlación −1…+1, residuos ±), la paleta nace en el centro: azul lo
+  positivo, rojo lo negativo, neutro el 0. Las barras de correlación con <code>Price</code> se leen al instante:
+  año y equipamiento empujan arriba (azul), edad/KM/Id empujan abajo (rojo).</p>
+  <div class="callout"><strong>Honestidad cromática:</strong> el arcoíris no ordena (¿es más el verde o el amarillo?),
+  así que nunca va en secuenciales. Y ~8 % de los varones tiene
+  <abbr title="Daltonismo: dificultad para distinguir algunos colores (típico rojo-verde); el diseño debe sobrevivirle">daltonismo</abbr>:
+  preferir paletas probadas (<code>viridis</code>, <code>Set2</code>) y no codificar <em>solo</em> con rojo-verde.
+  Para enfatizar un dato, mejor truco: todo gris + un acento (como los 9 KM≤100 de la 0004).</div>
+
+  <h2>5 · Figura: las 3 paletas en acción</h2>
+  <figure>
+    <img src="../assets/img/toyota/0010-color-con-criterio-fig1.png" alt="Scatter por combustible, heatmap edad por combustible y barras de correlación bicolor">
+    <figcaption>Fig. 1 — Izquierda: categórica (3 combustibles). Centro: secuencial (joven+diésel lo más oscuro).
+    Derecha: divergente (azul positivo, rojo negativo, 0 al medio).</figcaption>
+  </figure>
+  <p>Regenerar la figura (mismo resultado versionado en <code>assets/img/toyota/</code>):</p>
+  <pre><code>python scripts/make_figures.py --only color-con-criterio</code></pre>
+
+  <h2>6 · Quiz (auto-chequeo inmediato)</h2>
+  <p class="meta">Elegí una opción por pregunta: el feedback es inmediato.</p>
+
+  <div class="quiz" id="q1">
+    <strong>P1 · Fuel_Type (3 etiquetas) pide paleta…</strong>
+    <label><input type="radio" name="q1" value="0"> Secuencial de claro a oscuro</label>
+    <label><input type="radio" name="q1" value="1"> Divergente con centro en blanco</label>
+    <label><input type="radio" name="q1" value="2"> Gris con un acento solo</label>
+    <label><input type="radio" name="q1" value="3"> Categórica con tres colores vivos</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <div class="quiz" id="q2">
+    <strong>P2 · Correlaciones −1…+1 piden paleta…</strong>
+    <label><input type="radio" name="q2" value="0"> Divergente con centro en cero</label>
+    <label><input type="radio" name="q2" value="1"> Una categórica de doce colores</label>
+    <label><input type="radio" name="q2" value="2"> El arcoíris para todo orden</label>
+    <label><input type="radio" name="q2" value="3"> Un solo gris bien plano</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <div class="quiz" id="q3">
+    <strong>P3 · Para enfatizar 9 autos entre 1436…</strong>
+    <label><input type="radio" name="q3" value="0"> Usar tres colores bien distintos</label>
+    <label><input type="radio" name="q3" value="1"> Gris todo más un acento</label>
+    <label><input type="radio" name="q3" value="2"> Un arcoíris distinto por auto</label>
+    <label><input type="radio" name="q3" value="3"> Sin color ni marcas visibles</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <h2>7 · Fuente primaria y cierre</h2>
+  <p><strong>Para profundizar (1 fuente):</strong>
+  Wilke, <em>Fundamentals of Data Visualization</em> — capítulos de color (usos, paletas, daltonismo)
+  (<a href="https://clauswilke.com/dataviz/">clauswilke.com/dataviz</a>, también en
+  <a href="../RESOURCES.md">RESOURCES.md</a> del curso).</p>
+  <p>¿Algo no quedó claro? <strong>Preguntame al agente</strong>: qué paleta para tu caso, cómo chequear daltonismo,
+  o cuándo el gris+acento le gana al multicolor. Esa pregunta vale más que releer.</p>
+
+  <nav class="lesson-nav">
+    <a href="0009-que-grafico-para-que-dato.html">← 0009 Qué gráfico</a>
+    <a href="0011-eje-truncado-honestidad.html">Siguiente: 0011 Eje truncado →</a>
+  </nav>
+  <p class="meta">Ver también: <a href="../index.html">índice del curso</a> ·
+  <a href="../reference/toyota-data-dictionary.html">diccionario Toyota</a> ·
+  <a href="../reference/analisis-ejemplo-ols.html">análisis OLS de ejemplo</a></p>
+</main>
+<script>
+(function(){
+  var answers = {q1: 3, q2: 0, q3: 1};
+  var msgs = {
+    q1: ["Correcto: etiquetas sin orden piden colores distintos sin jerarquía.",
+         "No: 3 etiquetas nominales piden paleta categórica."],
+    q2: ["Correcto: centro en 0 con dos direcciones pide divergente.",
+         "No: rango ± con centro significativo pide divergente."],
+    q3: ["Correcto: el gris calla a la multitud y el acento señala.",
+         "No: para enfatizar pocos, gris + un acento."]
+  };
+  ["q1","q2","q3"].forEach(function(id){
+    var box = document.getElementById(id);
+    var fb = box.querySelector(".feedback");
+    box.addEventListener("change", function(e){
+      var ok = parseInt(e.target.value, 10) === answers[id];
+      fb.textContent = ok ? msgs[id][0] : msgs[id][1];
+      fb.className = "feedback " + (ok ? "ok" : "no");
+    });
+  });
+})();
+</script>
+</body>
+</html>

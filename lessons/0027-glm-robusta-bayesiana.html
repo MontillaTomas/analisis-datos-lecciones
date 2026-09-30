@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>0027 · GLM, robusta y bayesiana — Unidad 6</title>
+  <link rel="stylesheet" href="../assets/styles.css">
+</head>
+<body>
+<main>
+  <header class="course">
+    <p class="kicker">Unidad 6 · Regresión lineal simple y múltiple · Lección 0027</p>
+    <h1>Más allá de OLS: GLM, robusta y bayesiana</h1>
+    <p><strong>Win de hoy:</strong> generalizar OLS en 3 direcciones: <strong><abbr title="GLM: modelo lineal generalizado; familia de error + link (ej. Gamma-log para precios)">GLM</abbr></strong>
+    Gamma-log (respeta precio &gt; 0), <strong><abbr title="Robusta: regresión que pesa menos a los extremos (Huber)">robusta</abbr></strong>
+    (−0,055 → −0,044) y <strong><abbr title="Bayesiana: coeficientes con distribución e intervalos creíbles">bayesiana</abbr></strong>
+    (−0,055 ± 0,002).</p>
+    <p class="meta"><a href="../index.html">← Índice</a> ·
+    <a href="../reference/toyota-data-dictionary.html">Diccionario Toyota</a> ·
+    <a href="../ToyotaCorolla.csv">CSV</a></p>
+  </header>
+
+  <h2>1 · GLM: familia + link (precios que no bajan de 0)</h2>
+  <p>Un GLM elige <em>familia</em> de error y <em>link</em>: Gamma con log dice “precio &gt; 0 y varianza que crece
+  con la media”. OLS extrapolado a 270 mil km predice precio <strong>negativo</strong>; Gamma-log, jamás. Resultado
+  honesto: CV-RMSE 1.978 vs 1.871 de OLS — acá OLS gana en puntos, pero GLM gana en <em>sentido</em> (y brilla con
+  conteos, proporciones y varianzas raras).</p>
+  <pre><code>sm.GLM(y, X, family=sm.families.Gamma(sm.families.links.log())).fit()</code></pre>
+
+  <h2>2 · Robusta: pesar menos a los extremos (−0,044)</h2>
+  <p>OLS eleva errores al cuadrado: un extremo grita y la recta obedece. La robusta de Huber pesa menos a los que
+  se alejan: pendiente KM <strong>−0,044</strong> vs −0,055 OLS (20 % más suave). Es “OLS con oídos tapados ante
+  gritos”: ideal con outliers que no querés borrar (regla 0004) ni dejar mandar.</p>
+
+  <h2>3 · Bayesiana: coeficientes con intervalo (−0,055 ± 0,002)</h2>
+  <p>La regresión bayesiana trata cada coeficiente como distribución: combina <em>prior</em> (lo que creías) con datos
+  y entrega <strong><abbr title="Intervalo creíble: rango con 95 % de probabilidad de contener al valor (lectura bayesiana)">intervalo creíble</abbr></strong>
+  directo: P(−0,059 &lt; β_KM &lt; −0,051) = 95 %. Bonus teórico: Ridge (0021) <em>es</em> Bayes con prior gaussiano —
+  U5 y U6 eran la misma colina.</p>
+
+  <h2>4 · Usos de la regresión (y cierre U6)</h2>
+  <ul>
+    <li><strong>Predecir:</strong> tasar el próximo Corolla que entre (0003, 0024).</li>
+    <li><strong>Explicar:</strong> “10 mil km ≈ −456 €, aislado” (0024–0025).</li>
+    <li><strong>Controlar:</strong> comparar precios <em>a igual</em> edad/peso (parcial, 0025).</li>
+    <li><strong>Simular:</strong> ¿y si baja 20 mil km? (what-if con la fórmula).</li>
+  </ul>
+  <div class="callout"><strong>Cierre de Unidad 6.</strong> 0003 simple, 0023 correlación, 0024 múltiple, 0025
+  diagnóstico, 0026 polinomial, hoy extensiones. Lo que sigue (U7): agrupar sin target — clustering.</div>
+
+  <h2>5 · Figura: tres pendientes</h2>
+  <figure>
+    <img src="../assets/img/toyota/0027-glm-robusta-bayesiana-fig1.png" alt="Rectas OLS y robusta sobre KM-Precio y comparación de pendientes">
+    <figcaption>Fig. 1 — Izquierda: la robusta (verde) cede menos ante extremos que OLS. Derecha: pendientes
+    comparadas; Bayes suma intervalo creíble.</figcaption>
+  </figure>
+  <p>Regenerar la figura (mismo resultado versionado en <code>assets/img/toyota/</code>):</p>
+  <pre><code>python scripts/make_figures.py --only glm-robusta-bayesiana</code></pre>
+
+  <h2>6 · Quiz (auto-chequeo inmediato)</h2>
+  <p class="meta">Elegí una opción por pregunta: el feedback es inmediato.</p>
+
+  <div class="quiz" id="q1">
+    <strong>P1 · Gamma-log jamás predice…</strong>
+    <label><input type="radio" name="q1" value="0"> Jamás da precios negativos</label>
+    <label><input type="radio" name="q1" value="1"> Valores exactos siempre sí</label>
+    <label><input type="radio" name="q1" value="2"> Solo números enteros puros</label>
+    <label><input type="radio" name="q1" value="3"> Cero para todos igual</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <div class="quiz" id="q2">
+    <strong>P2 · Robusta −0,044 vs OLS −0,055 porque…</strong>
+    <label><input type="radio" name="q2" value="0"> Ella usa menos datos</label>
+    <label><input type="radio" name="q2" value="1"> Pesa menos los extremos</label>
+    <label><input type="radio" name="q2" value="2"> Suma muchas más variables</label>
+    <label><input type="radio" name="q2" value="3"> Quita siempre la constante</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <div class="quiz" id="q3">
+    <strong>P3 · Bayes −0,055 ± 0,002 entrega…</strong>
+    <label><input type="radio" name="q3" value="0"> Un punto exacto sin error</label>
+    <label><input type="radio" name="q3" value="1"> Tan solo el R cuadrado</label>
+    <label><input type="radio" name="q3" value="2"> Un intervalo creíble bien directo</label>
+    <label><input type="radio" name="q3" value="3"> Sale a buscar más datos</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <h2>7 · Fuente primaria y cierre</h2>
+  <p><strong>Para profundizar (1 fuente):</strong>
+  Hastie, Tibshirani &amp; Friedman, <em>The Elements of Statistical Learning</em> — capítulos de GLM y métodos
+  lineales extendidos (<a href="https://hastie.su.domains/ElemStatLearn/">ElemStatLearn</a>, PDF libre; también en
+  <a href="../RESOURCES.md">RESOURCES.md</a> del curso).</p>
+  <p>¿Algo no quedó claro? <strong>Preguntame al agente</strong>: elegir familia y link, robusta vs borrar outliers,
+  o prior vs Ridge. Esa pregunta vale más que releer.</p>
+
+  <nav class="lesson-nav">
+    <a href="0026-regresion-polinomial.html">← 0026 Polinomial</a>
+    <a href="0028-distancias-similaridad.html">Siguiente: 0028 Distancias →</a>
+  </nav>
+  <p class="meta">Ver también: <a href="../index.html">índice del curso</a> ·
+  <a href="../reference/toyota-data-dictionary.html">diccionario Toyota</a> ·
+  <a href="../reference/analisis-ejemplo-ols.html">análisis OLS de ejemplo</a></p>
+</main>
+<script>
+(function(){
+  var answers = {q1: 0, q2: 1, q3: 2};
+  var msgs = {
+    q1: ["Correcto: link log ⇒ predicción siempre positiva.",
+         "No: Gamma-log respeta precio > 0 siempre."],
+    q2: ["Correcto: Huber amansa extremos (regla 0004).",
+         "No: robusta pesa menos a los extremos."],
+    q3: ["Correcto: posterior ⇒ intervalo creíble directo.",
+         "No: Bayes entrega distribución e intervalo."]
+  };
+  ["q1","q2","q3"].forEach(function(id){
+    var box = document.getElementById(id);
+    var fb = box.querySelector(".feedback");
+    box.addEventListener("change", function(e){
+      var ok = parseInt(e.target.value, 10) === answers[id];
+      fb.textContent = ok ? msgs[id][0] : msgs[id][1];
+      fb.className = "feedback " + (ok ? "ok" : "no");
+    });
+  });
+})();
+</script>
+</body>
+</html>

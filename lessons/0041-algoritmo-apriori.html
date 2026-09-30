@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>0041 · El algoritmo Apriori — Unidad 9</title>
+  <link rel="stylesheet" href="../assets/styles.css">
+</head>
+<body>
+<main>
+  <header class="course">
+    <p class="kicker">Unidad 9 · Ítems frecuentes · Lección 0041</p>
+    <h1>El algoritmo Apriori: generar, podar, contar — nivel por nivel</h1>
+    <p><strong>Win de hoy:</strong> 65.535 combos posibles → Apriori cuenta solo 821 candidatos (min_sop = 0,3)
+    y encuentra 787 frecuentes: la <strong><abbr title="Poda: descartar candidatos sin contarlos porque un subconjunto ya falló">poda</abbr></strong>
+    por monotonicidad hace el 99 % del trabajo.</p>
+    <p class="meta"><a href="../index.html">← Índice</a> ·
+    <a href="../reference/toyota-data-dictionary.html">Diccionario Toyota</a> ·
+    <a href="../ToyotaCorolla.csv">CSV</a></p>
+  </header>
+
+  <h2>1 · La idea en 3 pasos (que se repiten)</h2>
+  <p><strong><abbr title="Apriori: algoritmo que encuentra itemsets frecuentes nivel por nivel, podando con monotonicidad">Apriori</abbr></strong>
+  (Agrawal &amp; Srikant, 1994) sube de nivel: con los frecuentes de tamaño k arma candidatos de tamaño k+1,
+  <strong>poda</strong> los que tienen un subconjunto infrecuente
+  (<a href="0039-soporte-itemsets.html">lección 0039</a>: si {CD, llantas} falla, {CD, llantas, techo} ni se cuenta)
+  y <strong>cuenta</strong> solo los sobrevivientes. Cuando un nivel da vacío, termina: ningún nivel superior puede tener nada.
+  Esta garantía («todo subconjunto de un frecuente es frecuente») se conoce como propiedad de
+  <strong><abbr title="Cierre a la baja (downward closure): si un itemset es frecuente, todos sus subconjuntos lo son">cierre a la baja</abbr></strong>.</p>
+
+  <h2>2 · Apriori corriendo sobre los 16 extras (min_sop = 0,4)</h2>
+  <figure>
+    <img src="../assets/img/toyota/0041-algoritmo-apriori-fig1.png" alt="Candidatos vs frecuentes por nivel y totales por umbral">
+    <figcaption>Fig. 1 — Izquierda: por nivel, candidatos (celeste) vs frecuentes (verde). L3 genera 115 candidatos
+    en vez de los C(11,3) = 165 posibles: 50 se podaron sin contar. Derecha: totales vs umbral — bajar min_sop de 0,6 a 0,3
+    multiplica ×11 los frecuentes (70 → 787), pero siempre lejos de los 65.535 brutos.</figcaption>
+  </figure>
+  <p>Lectura: <strong>(1)</strong> L1 arranca con 16 candidatos y deja 11; L7 termina con 1 combo de 7 extras.
+  Total: 280 frecuentes en 7 niveles. <strong>(2)</strong> El umbral es la perilla del costo: min_sop = 0,3 cuenta
+  821 candidatos; un súper real con miles de ítems y umbral bajo es intratable — por eso existen FP-Growth y muestreo.</p>
+  <p>Regenerar la figura (mismo resultado versionado en <code>assets/img/toyota/</code>):</p>
+  <pre><code>python scripts/make_figures.py --only algoritmo-apriori</code></pre>
+
+  <h2>3 · Mini-Apriori en 20 líneas (puro pandas, sin librerías raras)</h2>
+  <pre><code>import pandas as pd, itertools
+E = ["ABS","Airbag_1","Airbag_2","Airco","Backseat_Divider","BOVAG_Guarantee",
+     "Boardcomputer","CD_Player","Central_Lock","Met_Color","Mfr_Guarantee",
+     "Mistlamps","Power_Steering","Powered_Windows","Sport_Model","Tow_Bar"]
+B = pd.read_csv("../ToyotaCorolla.csv")[E]
+MIN_SOP = 0.4
+cur = {frozenset([a]) for a in E if B[a].mean() >= MIN_SOP}
+print("L1:", len(cur))  # 11
+k = 2
+while cur:
+    cands = {u for i, A in enumerate(sorted(cur, key=sorted))
+             for A2 in sorted(cur, key=sorted)[i+1:]
+             for u in [A | A2] if len(u) == k
+             and all(frozenset(s) in cur for s in itertools.combinations(u, k-1))}
+    cur = {c for c in cands if B[list(c)].all(axis=1).mean() >= MIN_SOP}
+    if cur: print(f"L{k}: {len(cands)} candidatos -> {len(cur)} frecuentes")
+    k += 1
+# L2: 55 -> 47 · L3: 115 -> 88 · … · L7: 1 -> 1 (total 280)</code></pre>
+  <p><strong>Tu turno:</strong> cambiá <code>MIN_SOP</code> a 0,3 y 0,6 y verificá los totales 787 y 70 de la Fig. 1.
+  Luego generá reglas de un frecuente L3 con la función de la
+  <a href="0040-reglas-confianza-lift.html">lección 0040</a> y ordenalas por lift.</p>
+
+  <h2>4 · Cierre del curso: el mapa completo (41 lecciones)</h2>
+  <table>
+    <tr><th>Unidad</th><th>Lecciones</th><th>El hilo Toyota</th></tr>
+    <tr><td>U1 · Datos y muestreo</td><td>0001, 0002, 0038</td><td>Tipos, TDSP, muestreo honesto</td></tr>
+    <tr><td>U2 · Exploración</td><td>0004–0008</td><td>Limpieza, <code>?</code>, KM=1, outliers</td></tr>
+    <tr><td>U3 · Visualización</td><td>0009–0014</td><td>Gráficos honestos, redes, mapas</td></tr>
+    <tr><td>U4 · Faltantes</td><td>0015–0018</td><td>Inyección seed-42, 5 imputaciones</td></tr>
+    <tr><td>U5 · Selección</td><td>0019–0022</td><td>Subset k=4, Lasso, SCAD</td></tr>
+    <tr><td>U6 · Regresión</td><td>0003, 0023–0027</td><td>OLS réplica, polinomial, GLM</td></tr>
+    <tr><td>U7 · Clustering</td><td>0028–0032</td><td>k=3 validado, PCA 68 %</td></tr>
+    <tr><td>U8 · Clasificación</td><td>0033–0037</td><td>Torneo: SVM 87,7 %</td></tr>
+    <tr><td>U9 · Ítems frecuentes</td><td>0039–0041</td><td>Lift ×2,43, Apriori 280</td></tr>
+  </table>
+
+  <h2>5 · Quiz (auto-chequeo inmediato)</h2>
+  <p class="meta">Elegí una opción por pregunta: el feedback es inmediato.</p>
+
+  <div class="quiz" id="q1">
+    <strong>P1 · Apriori poda un candidato cuando…</strong>
+    <label><input type="radio" name="q1" value="0"> Un subconjunto suyo es infrecuente</label>
+    <label><input type="radio" name="q1" value="1"> Supera el soporte mínimo</label>
+    <label><input type="radio" name="q1" value="2"> Tiene lift menor a uno</label>
+    <label><input type="radio" name="q1" value="3"> Aparece en nivel uno</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <div class="quiz" id="q2">
+    <strong>P2 · L3 genera 115 y no 165 porque…</strong>
+    <label><input type="radio" name="q2" value="0"> 50 tríos tenían pares infrecuentes</label>
+    <label><input type="radio" name="q2" value="1"> El dataset tiene 115 filas</label>
+    <label><input type="radio" name="q2" value="2"> min_sop prohíbe los tríos</label>
+    <label><input type="radio" name="q2" value="3"> Solo hay 115 extras</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <div class="quiz" id="q3">
+    <strong>P3 · Bajar min_sop de 0,6 a 0,3…</strong>
+    <label><input type="radio" name="q3" value="0"> Multiplica ×11 los frecuentes</label>
+    <label><input type="radio" name="q3" value="1"> Reduce el costo total</label>
+    <label><input type="radio" name="q3" value="2"> No cambia nada jamás</label>
+    <label><input type="radio" name="q3" value="3"> Elimina la poda total</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <h2>6 · Fuente primaria y cierre</h2>
+  <p><strong>Para profundizar (1 fuente):</strong>
+  Agrawal &amp; Srikant (1994), <em>Fast Algorithms for Mining Association Rules</em> (VLDB).
+  Más contexto en <a href="../RESOURCES.md">RESOURCES</a>.</p>
+  <p><strong>Fin del curso.</strong> Volvé al <a href="../index.html">índice</a>, rehecé los quizzes y —
+  sobre todo — corré cada bloque de código: el análisis de datos se aprende con las manos en el CSV.</p>
+
+  <nav class="lesson-nav">
+    <a href="0040-reglas-confianza-lift.html">← 0040 Reglas</a>
+    <a href="../index.html">Índice ↑</a>
+    <a href="0042-inferencia-pvalor-t.html">0042 Inferencia →</a>
+  </nav>
+</main>
+<script>
+(function(){
+  var answers = {q1: 0, q2: 0, q3: 0};
+  var msgs = {
+    q1: ["Correcto: monotonicidad en acción.",
+         "No: subconjunto falla → poda."],
+    q2: ["Correcto: poda antes de contar.",
+         "No: 165 − 115 = 50 podados."],
+    q3: ["Correcto: 70 → 787 totales.",
+         "No: mirá el panel derecho."]
+  };
+  ["q1","q2","q3"].forEach(function(id){
+    var box = document.getElementById(id);
+    var fb = box.querySelector(".feedback");
+    box.addEventListener("change", function(e){
+      var ok = parseInt(e.target.value, 10) === answers[id];
+      fb.textContent = ok ? msgs[id][0] : msgs[id][1];
+      fb.className = "feedback " + (ok ? "ok" : "no");
+    });
+  });
+})();
+</script>
+</body>
+</html>

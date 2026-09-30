@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>0017 · Hot deck, cold deck y KNN — Unidad 4</title>
+  <link rel="stylesheet" href="../assets/styles.css">
+</head>
+<body>
+<main>
+  <header class="course">
+    <p class="kicker">Unidad 4 · Datos faltantes e imputación · Lección 0017</p>
+    <h1>Donantes y vecinos: hot deck, cold deck, KNN</h1>
+    <p><strong>Win de hoy:</strong> imputar <code>HP</code> copiando donantes reales
+    (<strong><abbr title="Hot deck: rellenar copiando el valor de un caso parecido del mismo dataset">hot deck</abbr></strong> 18,9),
+    tabla externa (<strong><abbr title="Cold deck: rellenar con una tabla externa fija (ej. manual del fabricante)">cold deck</abbr></strong> 2,8)
+    y 5 vecinos (<strong><abbr title="KNN: k vecinos más cercanos; acá promedia los 5 autos más parecidos">KNN</abbr></strong> 8,1).</p>
+    <p class="meta"><a href="../index.html">← Índice</a> ·
+    <a href="../reference/toyota-data-dictionary.html">Diccionario Toyota</a> ·
+    <a href="../ToyotaCorolla.csv">CSV</a></p>
+  </header>
+
+  <h2>1 · Hot deck: copiarle al parecido (RMSE 18,9)</h2>
+  <p>Cada hueco copia el valor de un <strong>donante</strong> parecido del mismo dataset. Variante
+  <strong><abbr title="Random hot deck: donante sorteado al azar dentro del mismo grupo (tramo)">random hot deck</abbr></strong>:
+  sortear un donante del mismo tramo de edad (semilla 7). RMSE 18,9: <em>peor</em> que la media (14,1) punto por
+  punto… pero los 205 rellenos son valores <strong>reales</strong> (86, 110, 69…), sin pico falso. Hot deck resigna
+  precisión y preserva distribución: para histogramas y varianzas, eso vale oro.</p>
+  <pre><code>rd = np.random.default_rng(7)
+donante = rd.choice(df.loc[completos_mismo_tramo, "HP"])</code></pre>
+
+  <h2>2 · Cold deck: la tabla externa (RMSE 2,8)</h2>
+  <p>Si existe una fuente externa confiable (manual del fabricante, censo), se usa como tabla fija: cada motor
+  recibe su HP típico (1.3→86, 1.4→97, 1.6→110, 1.8→192, 1.9→69, 2.0→72). RMSE <strong>2,8</strong>: casi adivina,
+  porque el motor <em>casi define</em> al HP. Riesgo honesto: si la tabla envejece (nuevos motores), el relleno
+  miente con cara seria. Cold deck es tan bueno como su fuente.</p>
+
+  <h2>3 · KNN: promediar a los 5 vecinos (RMSE 8,1)</h2>
+  <p><code>KNNImputer(k=5)</code> busca los 5 autos más parecidos en <code>KM/HP/Edad/Peso/Price</code>
+  <strong>estandarizados</strong> (0008: sin escalar, KM domina) y promedia sus HP. RMSE 8,1: mejor que la media,
+  con valores variados (sin pico). k chico = sensible al ruido; k grande = tiende a la media. Detalle técnico: la
+  distancia ignora celdas vacías (<code>nan_euclidean</code>), por eso funciona con huecos por todos lados.</p>
+  <pre><code>from sklearn.impute import KNNImputer
+Xs = (X - X.mean()) / X.std()          # estandarizar IGNORANDO NaN
+imp = KNNImputer(n_neighbors=5).fit_transform(Xs)</code></pre>
+
+  <h2>4 · Figura: forma preservada y ranking RMSE</h2>
+  <figure>
+    <img src="../assets/img/toyota/0017-hot-deck-cold-deck-knn-fig1.png" alt="Histograma de HP real vs imputado KNN y barras de RMSE por método">
+    <figcaption>Fig. 1 — Izquierda: KNN conserva la forma del histograma (sin pico). Derecha: RMSE vs verdad —
+    cold deck 2,8, KNN 8,1, media 14,1, hot deck 18,9. El ranking puntual no cuenta la historia completa.</figcaption>
+  </figure>
+  <p>Regenerar la figura (mismo resultado versionado en <code>assets/img/toyota/</code>):</p>
+  <pre><code>python scripts/make_figures.py --only hot-deck-cold-deck-knn</code></pre>
+
+  <h2>5 · Quiz (auto-chequeo inmediato)</h2>
+  <p class="meta">Elegí una opción por pregunta: el feedback es inmediato.</p>
+
+  <div class="quiz" id="q1">
+    <strong>P1 · Hot deck copia el valor de…</strong>
+    <label><input type="radio" name="q1" value="0"> Un donante real y parecido</label>
+    <label><input type="radio" name="q1" value="1"> La media general de todos</label>
+    <label><input type="radio" name="q1" value="2"> Una tabla externa siempre fija</label>
+    <label><input type="radio" name="q1" value="3"> Solo ceros para cada hueco</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <div class="quiz" id="q2">
+    <strong>P2 · Cold deck con RMSE 2,8 gana porque…</strong>
+    <label><input type="radio" name="q2" value="0"> Usa cinco vecinos siempre juntos</label>
+    <label><input type="radio" name="q2" value="1"> El motor casi define HP</label>
+    <label><input type="radio" name="q2" value="2"> Rellena todo con la media</label>
+    <label><input type="radio" name="q2" value="3"> Borra las filas ruidosas siempre</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <div class="quiz" id="q3">
+    <strong>P3 · Hot deck pierde RMSE pero…</strong>
+    <label><input type="radio" name="q3" value="0"> Es más rápido que todos</label>
+    <label><input type="radio" name="q3" value="1"> No usa donantes nunca reales</label>
+    <label><input type="radio" name="q3" value="2"> Preserva la forma real entera</label>
+    <label><input type="radio" name="q3" value="3"> Elimina la varianza por completo</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <h2>6 · Fuente primaria y cierre</h2>
+  <p><strong>Para profundizar (1 fuente):</strong>
+  Kuhn &amp; Johnson, <em>Applied Predictive Modeling</em> — capítulo de preprocesamiento (imputación por
+  vecinos y donantes)
+  (<a href="http://appliedpredictivemodeling.com/">appliedpredictivemodeling.com</a>, también en
+  <a href="../RESOURCES.md">RESOURCES.md</a> del curso).</p>
+  <p>¿Algo no quedó claro? <strong>Preguntame al agente</strong>: cuándo hot vs cold deck, cómo elegir k, o por qué
+  el RMSE no lo es todo. Esa pregunta vale más que releer.</p>
+
+  <nav class="lesson-nav">
+    <a href="0016-relleno-simple-media-razon.html">← 0016 Relleno simple</a>
+    <a href="0018-imputacion-con-modelos.html">Siguiente: 0018 Con modelos →</a>
+  </nav>
+  <p class="meta">Ver también: <a href="../index.html">índice del curso</a> ·
+  <a href="../reference/toyota-data-dictionary.html">diccionario Toyota</a> ·
+  <a href="../reference/analisis-ejemplo-ols.html">análisis OLS de ejemplo</a></p>
+</main>
+<script>
+(function(){
+  var answers = {q1: 0, q2: 1, q3: 2};
+  var msgs = {
+    q1: ["Correcto: hot = donante vivo del mismo dataset.",
+         "No: hot deck copia de un donante parecido real."],
+    q2: ["Correcto: motor→HP es casi función; la tabla acierta.",
+         "No: cold deck gana porque el motor casi define HP."],
+    q3: ["Correcto: valores reales preservan forma y varianza.",
+         "No: hot deck preserva la distribución aunque erre puntos."]
+  };
+  ["q1","q2","q3"].forEach(function(id){
+    var box = document.getElementById(id);
+    var fb = box.querySelector(".feedback");
+    box.addEventListener("change", function(e){
+      var ok = parseInt(e.target.value, 10) === answers[id];
+      fb.textContent = ok ? msgs[id][0] : msgs[id][1];
+      fb.className = "feedback " + (ok ? "ok" : "no");
+    });
+  });
+})();
+</script>
+</body>
+</html>

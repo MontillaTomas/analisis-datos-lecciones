@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>0021 · Ridge y Lasso — Unidad 5</title>
+  <link rel="stylesheet" href="../assets/styles.css">
+</head>
+<body>
+<main>
+  <header class="course">
+    <p class="kicker">Unidad 5 · Selección de variables y regularización · Lección 0021</p>
+    <h1>Ridge y Lasso: achicar vs elegir</h1>
+    <p><strong>Win de hoy:</strong> regularizar las 8 candidatas: <strong><abbr title="Ridge: penaliza la suma de cuadrados; achica todos sin matar ninguno">Ridge</abbr></strong>
+    achica sin matar (reparte entre duplicadas), <strong><abbr title="Lasso: penaliza la suma de valores absolutos; lleva a 0 y elige variables">Lasso</abbr></strong>
+    lleva a 0 y elige (mata 6/6 ruidos en n=80).</p>
+    <p class="meta"><a href="../index.html">← Índice</a> ·
+    <a href="../reference/toyota-data-dictionary.html">Diccionario Toyota</a> ·
+    <a href="../ToyotaCorolla.csv">CSV</a></p>
+  </header>
+
+  <h2>1 · Regularizar: multar coeficientes grandes</h2>
+  <p><strong><abbr title="Regularización: multar coeficientes grandes en el ajuste; frena el sobreajuste">Regularizar</abbr></strong>
+  es agregar una multa por coeficientes grandes al ajuste: el modelo equilibra “pegarle a los datos” con “no
+  pasarse de rosca”. La perilla es <strong><abbr title="α (alpha): perilla del castigo; 0 = OLS puro, grande = coeficientes chicos">α</abbr></strong>:
+  α = 0 es OLS puro, α grande aplasta todo. Ojo previo: regularizar exige
+  <abbr title="Estandarización: media 0 desvío 1; sin ella la multa castiga según la escala">estandarizar</abbr>
+  (0008), o la multa castiga según la escala y no según la importancia.</p>
+
+  <h2>2 · Lasso: la multa que mata (elige variables)</h2>
+  <p>Lasso multa la suma de <em>valores absolutos</em> (|β|). Esa geometría (esquinas) lleva coeficientes
+  <strong>exacto a 0</strong>: variable muerta = variable no elegida. En el camino (figura) se ve morir una por una
+  al subir α. Demo fuerte: con n=80 y 6 ruidos, <code>LassoCV</code> (α = 129,3) mata los <strong>6/6 ruidos</strong>
+  y se queda con KM, HP, Weight, Year, Guarantee. (Con las 1436, CV casi no poda: sobran datos.)</p>
+  <pre><code>from sklearn.linear_model import LassoCV
+lz = LassoCV(cv=5, random_state=42).fit(X_estandarizada, y)</code></pre>
+
+  <h2>3 · Ridge: la multa que reparte (achica todo)</h2>
+  <p>Ridge multa la suma de <em>cuadrados</em> (β²): achica todos los coeficientes pero <strong>nunca a 0</strong>.
+  Su talento: duplicadas. Con Age+Year (r = −0,98), OLS loteriza (0019); Ridge (α = 10) reparte el peso entre ambas
+  (−594 / +1.709 vs −359 / +1.950 OLS) y estabiliza. Ridge no elige: calma.</p>
+  <div class="callout"><strong>Regla de bolsillo:</strong> ¿muchas columnas y pocas filas, querés un equipo corto?
+  Lasso. ¿Duplicadas molestas y querés estabilidad? Ridge. ¿Ambas cosas? Elastic net (0022).</div>
+
+  <h2>4 · Figura: dos caminos, un veredicto</h2>
+  <figure>
+    <img src="../assets/img/toyota/0021-ridge-lasso-caminos-fig1.png" alt="Caminos de coeficientes Lasso y Ridge y selección Lasso en muestra chica">
+    <figcaption>Fig. 1 — Izquierda: Lasso lleva coeficientes a 0 al subir α. Centro: Ridge los achica sin matarlos.
+    Derecha: Lasso en n=80 mata los 6 ruidos y conserva 5 útiles.</figcaption>
+  </figure>
+  <p>Regenerar la figura (mismo resultado versionado en <code>assets/img/toyota/</code>):</p>
+  <pre><code>python scripts/make_figures.py --only ridge-lasso-caminos</code></pre>
+
+  <h2>5 · Quiz (auto-chequeo inmediato)</h2>
+  <p class="meta">Elegí una opción por pregunta: el feedback es inmediato.</p>
+
+  <div class="quiz" id="q1">
+    <strong>P1 · Lasso lleva coeficientes a…</strong>
+    <label><input type="radio" name="q1" value="0"> Infinito siempre sin freno</label>
+    <label><input type="radio" name="q1" value="1"> Exacto cero y elige</label>
+    <label><input type="radio" name="q1" value="2"> Nunca jamás los toca</label>
+    <label><input type="radio" name="q1" value="3"> Solo valores negativos puros</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <div class="quiz" id="q2">
+    <strong>P2 · Ridge frente a duplicadas…</strong>
+    <label><input type="radio" name="q2" value="0"> Mata una de ellas</label>
+    <label><input type="radio" name="q2" value="1"> Las ignora por completo</label>
+    <label><input type="radio" name="q2" value="2"> Reparte peso entre ambas</label>
+    <label><input type="radio" name="q2" value="3"> Duplica sus coeficientes siempre</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <div class="quiz" id="q3">
+    <strong>P3 · Regularizar sin estandarizar…</strong>
+    <label><input type="radio" name="q3" value="0"> Castiga según la escala</label>
+    <label><input type="radio" name="q3" value="1"> Funciona igual de bien</label>
+    <label><input type="radio" name="q3" value="2"> Elige mejor las variables</label>
+    <label><input type="radio" name="q3" value="3"> Baja siempre el alfa</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <h2>6 · Fuente primaria y cierre</h2>
+  <p><strong>Para profundizar (1 fuente):</strong>
+  James et al., <em>An Introduction to Statistical Learning</em> — capítulo de regularización (Ridge, Lasso)
+  (<a href="https://www.statlearning.com/">statlearning.com</a>, PDF libre; también en
+  <a href="../RESOURCES.md">RESOURCES.md</a> del curso).</p>
+  <p>¿Algo no quedó claro? <strong>Preguntame al agente</strong>: leer un camino de coeficientes, elegir α por CV,
+  o Ridge vs Lasso para tu caso. Esa pregunta vale más que releer.</p>
+
+  <nav class="lesson-nav">
+    <a href="0020-best-subset-stepwise.html">← 0020 Best subset</a>
+    <a href="0022-scad-elastic-filtros.html">Siguiente: 0022 SCAD y filtros →</a>
+  </nav>
+  <p class="meta">Ver también: <a href="../index.html">índice del curso</a> ·
+  <a href="../reference/toyota-data-dictionary.html">diccionario Toyota</a> ·
+  <a href="../reference/analisis-ejemplo-ols.html">análisis OLS de ejemplo</a></p>
+</main>
+<script>
+(function(){
+  var answers = {q1: 1, q2: 2, q3: 0};
+  var msgs = {
+    q1: ["Correcto: |β| lleva a 0 exacto y elige.",
+         "No: Lasso mata a 0 exacto y así elige."],
+    q2: ["Correcto: Ridge reparte y estabiliza duplicadas.",
+         "No: Ridge reparte peso, no elige una."],
+    q3: ["Correcto: sin escalar, KM paga más que Edad.",
+         "No: la multa debe castigar importancia, no escala."]
+  };
+  ["q1","q2","q3"].forEach(function(id){
+    var box = document.getElementById(id);
+    var fb = box.querySelector(".feedback");
+    box.addEventListener("change", function(e){
+      var ok = parseInt(e.target.value, 10) === answers[id];
+      fb.textContent = ok ? msgs[id][0] : msgs[id][1];
+      fb.className = "feedback " + (ok ? "ok" : "no");
+    });
+  });
+})();
+</script>
+</body>
+</html>

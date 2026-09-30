@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>0040 · Reglas: confianza y lift — Unidad 9</title>
+  <link rel="stylesheet" href="../assets/styles.css">
+</head>
+<body>
+<main>
+  <header class="course">
+    <p class="kicker">Unidad 9 · Ítems frecuentes · Lección 0040</p>
+    <h1>Reglas: confianza y lift (la confianza miente, el lift ordena)</h1>
+    <p><strong>Win de hoy:</strong> «garantía fábrica → BOVAG» tiene confianza 98 %… y lift 1,10 (obviedad:
+    BOVAG la tienen casi todos). «CD → computadora» tiene confianza 72 % pero lift ×2,43: ese sí es un hallazgo.</p>
+    <p class="meta"><a href="../index.html">← Índice</a> ·
+    <a href="../reference/toyota-data-dictionary.html">Diccionario Toyota</a> ·
+    <a href="../ToyotaCorolla.csv">CSV</a></p>
+  </header>
+
+  <h2>1 · De combos a flechas: A → B</h2>
+  <p>Un itemset frecuente (<a href="0039-soporte-itemsets.html">lección 0039</a>) se parte en regla:
+  «si el auto trae A, trae B». Tres números la describen: el
+  <strong><abbr title="Soporte de regla: fracción de autos con A y B a la vez">soporte</abbr></strong>
+  (¿cuántos la cumplen?), la
+  <strong><abbr title="Confianza: entre los autos con A, fracción que también tiene B">confianza</abbr></strong>
+  P(B|A) (¿cuánto acertamos?) y el
+  <strong><abbr title="Lift: confianza dividida por la frecuencia base de B; 1 = azar, >1 = asociación real">lift</abbr></strong>
+  (¿cuánto mejor que el azar?).</p>
+
+  <h2>2 · La confianza miente cuando B es común</h2>
+  <p>BOVAG la tienen el 90 %: <em>cualquier</em> regla «X → BOVAG» tendrá confianza altísima sin decir nada.
+  El lift corrige dividiendo por la frecuencia base de B: lift 1 = «A no informa nada sobre B».</p>
+  <figure>
+    <img src="../assets/img/toyota/0040-reglas-confianza-lift-fig1.png" alt="Ranking de reglas por confianza y por lift">
+    <figcaption>Fig. 1 — Izquierda: por confianza gana «Mfr → BOVAG» (98 %). Derecha: por lift esa regla cae a 1,10
+    (casi azar) y gana «CD → computadora» (×2,43): los CD vienen con computadora 2,4 veces más que el promedio.</figcaption>
+  </figure>
+  <p>El ranking se da vuelta por completo: las 3 reglas de confianza &gt; 93 % tienen lift ≤ 1,66, y la de lift ×2,43
+  está 6ª en confianza. <strong>Regla de oro: filtrar por soporte, ordenar por lift, reportar los tres números.</strong></p>
+  <p>Regenerar la figura (mismo resultado versionado en <code>assets/img/toyota/</code>):</p>
+  <pre><code>python scripts/make_figures.py --only reglas-confianza-lift</code></pre>
+
+  <h2>3 · Tabla completa de las 7 reglas</h2>
+  <table>
+    <tr><th>Regla A → B</th><th>Soporte</th><th>Confianza</th><th>Lift</th><th>Lectura</th></tr>
+    <tr><td>Garantía fab. → BOVAG</td><td>0,402</td><td><strong>0,981</strong></td><td>1,10</td><td>Obvia: BOVAG la tienen todos</td></tr>
+    <tr><td>Airbag_2 → ABS</td><td>0,703</td><td>0,973</td><td>1,20</td><td>Alta pero poco informativa</td></tr>
+    <tr><td>Vidrios → Cierre</td><td>0,540</td><td>0,962</td><td>1,66</td><td>Pack eléctrico real</td></tr>
+    <tr><td>Cierre → Vidrios</td><td>0,540</td><td>0,932</td><td>1,66</td><td>La vuelta del pack (asimétrica)</td></tr>
+    <tr><td>Aire → Airbag_2</td><td>0,409</td><td>0,804</td><td>1,11</td><td>Apenas sobre el azar</td></tr>
+    <tr><td>Gancho → Metálico</td><td>0,219</td><td>0,787</td><td>1,17</td><td>Soporte bajo, lift pobre</td></tr>
+    <tr><td>CD → Computadora</td><td>0,157</td><td>0,717</td><td><strong>2,43</strong></td><td>El hallazgo: pack tech</td></tr>
+  </table>
+  <p>Notá la asimetría: Cierre → Vidrios (0,932) ≠ Vidrios → Cierre (0,962). Las reglas tienen dirección;
+  el lift, en cambio, es simétrico (1,66 en ambas): mide asociación mutua.</p>
+
+  <h2>4 · Reglas en 10 líneas (reproducí la tabla)</h2>
+  <pre><code>import pandas as pd
+E = ["ABS","Airbag_1","Airbag_2","Airco","Backseat_Divider","BOVAG_Guarantee",
+     "Boardcomputer","CD_Player","Central_Lock","Met_Color","Mfr_Guarantee",
+     "Mistlamps","Power_Steering","Powered_Windows","Sport_Model","Tow_Bar"]
+B = pd.read_csv("../ToyotaCorolla.csv")[E]
+def regla(a, b):
+    sop = (B[a] & B[b]).mean()
+    conf = sop / B[a].mean()
+    print(f"{a} -> {b}: sop={sop:.3f} conf={conf:.3f} lift={conf/B[b].mean():.2f}")
+regla("CD_Player", "Boardcomputer")      # lift 2.43: hallazgo
+regla("Mfr_Guarantee", "BOVAG_Guarantee")  # conf 0.98, lift 1.10: humo</code></pre>
+  <p><strong>Tu turno:</strong> inventá dos reglas propias (ej. <code>Airco → CD_Player</code>) y decidí por lift
+  si descubriste algo o solo obviedad.</p>
+
+  <h2>5 · Quiz (auto-chequeo inmediato)</h2>
+  <p class="meta">Elegí una opción por pregunta: el feedback es inmediato.</p>
+
+  <div class="quiz" id="q1">
+    <strong>P1 · Confianza 0,98 de Mfr → BOVAG…</strong>
+    <label><input type="radio" name="q1" value="0"> Esconde lift 1,10, casi azar</label>
+    <label><input type="radio" name="q1" value="1"> Prueba causalidad total directa</label>
+    <label><input type="radio" name="q1" value="2"> Vale más que lift</label>
+    <label><input type="radio" name="q1" value="3"> Exige subir min_sop ya</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <div class="quiz" id="q2">
+    <strong>P2 · Lift 2,43 significa…</strong>
+    <label><input type="radio" name="q2" value="0"> 2,43 veces sobre el azar</label>
+    <label><input type="radio" name="q2" value="1"> 243 reglas encontradas total</label>
+    <label><input type="radio" name="q2" value="2"> Confianza de 243 por ciento</label>
+    <label><input type="radio" name="q2" value="3"> Soporte 2,43 veces mayor</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <div class="quiz" id="q3">
+    <strong>P3 · Cierre → Vidrios ≠ Vidrios → Cierre porque…</strong>
+    <label><input type="radio" name="q3" value="0"> Las reglas tienen dirección propia</label>
+    <label><input type="radio" name="q3" value="1"> El lift es siempre asimétrico</label>
+    <label><input type="radio" name="q3" value="2"> El soporte cambia de lado</label>
+    <label><input type="radio" name="q3" value="3"> Hay un error de cálculo</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <h2>6 · Fuente primaria y cierre</h2>
+  <p><strong>Para profundizar (1 fuente):</strong>
+  Tan, Steinbach &amp; Kumar, <em>Introduction to Data Mining</em> — cap. 6 (reglas de asociación).
+  Más contexto en <a href="../RESOURCES.md">RESOURCES</a>.</p>
+  <p>Siguiente: <a href="0041-algoritmo-apriori.html">0041 · El algoritmo Apriori</a>:
+  generar candidatos, podar con monotonicidad y contar — nivel por nivel.</p>
+
+  <nav class="lesson-nav">
+    <a href="0039-soporte-itemsets.html">← 0039 Soporte</a>
+    <a href="../index.html">Índice ↑</a>
+    <a href="0041-algoritmo-apriori.html">0041 Apriori →</a>
+  </nav>
+</main>
+<script>
+(function(){
+  var answers = {q1: 0, q2: 0, q3: 0};
+  var msgs = {
+    q1: ["Correcto: BOVAG la tienen todos.",
+         "No: 98 % con base 90 % es humo."],
+    q2: ["Correcto: pack tech real.",
+         "No: lift = veces sobre azar."],
+    q3: ["Correcto: P(B|A) ≠ P(A|B).",
+         "No: la confianza tiene dirección."]
+  };
+  ["q1","q2","q3"].forEach(function(id){
+    var box = document.getElementById(id);
+    var fb = box.querySelector(".feedback");
+    box.addEventListener("change", function(e){
+      var ok = parseInt(e.target.value, 10) === answers[id];
+      fb.textContent = ok ? msgs[id][0] : msgs[id][1];
+      fb.className = "feedback " + (ok ? "ok" : "no");
+    });
+  });
+})();
+</script>
+</body>
+</html>

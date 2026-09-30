@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>0006 · EDA sistemático con Toyota — Unidad 2</title>
+  <link rel="stylesheet" href="../assets/styles.css">
+</head>
+<body>
+<main>
+  <header class="course">
+    <p class="kicker">Unidad 2 · Exploración de datos · Lección 0006</p>
+    <h1>EDA sistemático: describir, agrupar, correlacionar</h1>
+    <p><strong>Win de hoy:</strong> aplicar la receta de 3 pasos
+    (<code>describe</code> → <code>groupby</code> → <code>corr</code>) y salir con 3 hallazgos:
+    el gradiente de la edad, la trampa del <code>Id</code> y el <code>NaN</code> de <code>Cylinders</code>.</p>
+    <p class="meta"><a href="../index.html">← Índice</a> ·
+    <a href="../reference/toyota-data-dictionary.html">Diccionario Toyota</a> ·
+    <a href="../ToyotaCorolla.csv">CSV</a></p>
+  </header>
+
+  <h2>1 · EDA: mirar antes de modelar (con método)</h2>
+  <p><strong><abbr title="EDA: exploratory data analysis; mirar los datos con resúmenes y gráficos antes de modelar">EDA</abbr></strong>
+  es la exploración sistemática: resumir cada columna, comparar grupos y medir relaciones <em>antes</em> de ajustar
+  ningún modelo. Sin EDA, el modelo aprende a ciegas; con EDA, ya sabés qué esperar de él. La receta de hoy, siempre
+  en este orden:</p>
+  <ol>
+    <li><strong>Describir:</strong> <code>describe()</code> por columna (centro, dispersión, extremos).</li>
+    <li><strong>Agrupar:</strong> <code>groupby()</code> por categorías (¿quién vale más: diésel o naftero?).</li>
+    <li><strong>Correlacionar:</strong> <code>corr()</code> entre numéricas (¿qué se mueve junto al precio?).</li>
+  </ol>
+
+  <h2>2 · Describir: media vs mediana (el diésel miente con la media)</h2>
+  <p>El <code>describe()</code> da <abbr title="Media: promedio aritmético; los valores extremos la arrastran">media</abbr>,
+  <abbr title="Mediana: valor del medio con los datos ordenados; resiste a los extremos">mediana</abbr> y cuartiles.
+  Cuando media y mediana difieren, hay <strong><abbr title="Sesgo (skew): asimetría; unos pocos valores extremos tiran del promedio hacia su lado">sesgo</abbr></strong>.
+  El trío univariado lo completan la <strong><abbr title="Moda: el valor que más se repite; útil en discretas y categóricas">moda</abbr></strong>
+  (el valor más repetido: <code>Gears = 5</code> en 1.390 autos) y el
+  <strong><abbr title="Desvío estándar: distancia típica de los datos a su media; mide dispersión">desvío estándar</abbr></strong>
+  (distancia típica a la media: Price ≈ 3.630 €). Centro sin dispersión miente la mitad.
+  Mirá el precio por combustible:</p>
+  <table>
+    <tr><th>Fuel_Type</th><th>Media (€)</th><th>Mediana (€)</th><th>Casos</th><th>Lectura</th></tr>
+    <tr><td>Petrol</td><td>10.679</td><td>9.940</td><td>1264</td><td>Sesgo leve a la derecha (típico en precios)</td></tr>
+    <tr><td>Diesel</td><td>11.295</td><td>8.950</td><td>155</td><td>Sesgo fuerte: pocos diésel caros tiran arriba</td></tr>
+    <tr><td>CNG</td><td>9.421</td><td>8.950</td><td>17</td><td>Ojo: n=17, cualquier promedio es frágil</td></tr>
+  </table>
+  <p>Lección doble: el diésel “promedio” engaña (la mediana cuenta mejor la historia), y con 17 casos (CNG) ningún
+  resumen es sólido. El EDA no solo describe: también avisa dónde no pisar.</p>
+  <pre><code>df.groupby("Fuel_Type")["Price"].agg(["mean", "median", "count"]).round(0)</code></pre>
+
+  <h2>3 · Agrupar: el gradiente de la edad (joven vale doble)</h2>
+  <p>Para agrupar por una numérica primero se corta en tramos con
+  <code><abbr title="cut: función de pandas que corta una numérica en intervalos (tramos) para agrupar">cut</abbr></code>.
+  Tres tramos de <code>Age_08_04</code> bastan para ver el patrón más fuerte del dataset:</p>
+  <pre><code>tramos = pd.cut(df["Age_08_04"], [0, 30, 60, 81],
+                labels=["joven≤30", "medio31-60", "viejo61+"])
+df.assign(t=tramos).groupby("t")["Price"].agg(["mean", "count"]).round(0)
+# joven≤30    18394 (n=176)
+# medio31-60  11175 (n=535)
+# viejo61+     8543 (n=725)</code></pre>
+  <p>Un Corolla joven promedia <strong>más del doble</strong> que uno viejo (18.394 € vs 8.543 €). Este gradiente
+  va a reaparecer en regresión (U6): la edad será de las primeras variables del modelo. El EDA ya lo anticipó gratis.</p>
+
+  <h2>4 · Correlacionar: qué se mueve con el precio (y dos trampas)</h2>
+  <p>La <strong><abbr title="Correlación: número entre -1 y 1 que mide si dos columnas suben y bajan juntas">correlación</abbr></strong>
+  (acá la de Pearson, fórmula en U6) dice qué columnas suben y bajan junto al precio. Top con <code>Price</code>:</p>
+  <pre><code>df.select_dtypes("number").corr()["Price"].drop("Price").sort_values(ascending=False)
+# Mfg_Year          0.885   ← año de fabricación
+# Boardcomputer     0.601
+# Automatic_airco   0.588
+# Weight            0.581
+# ...
+# KM               -0.570
+# Id               -0.738   ← ¡TRAMPA!
+# Age_08_04        -0.877
+# Cylinders           NaN   ← constante: sin variación no hay correlación</code></pre>
+  <div class="callout"><strong>Trampa 1 — <code>Id</code> (−0,74):</strong> el número de fila “correlaciona” porque el
+  archivo viene ordenado (los baratos quedaron al final), no porque el número cause nada. Es una
+  <strong><abbr title="Correlación espuria: relación numérica sin causa real; suele venir de un orden o un tercero oculto">correlación espuria</abbr></strong>:
+  el número más peligroso es el que parece decir algo. <strong>Trampa 2 — redundancia:</strong>
+  <code>Mfg_Year</code> (+0,89) y <code>Age_08_04</code> (−0,88) son la misma información dos veces (año vs edad);
+  meter ambas al modelo es pagar dos veces (en U5/U6 se llama
+  <abbr title="Multicolinealidad: dos variables que dicen casi lo mismo y confunden al modelo">multicolinealidad</abbr>).</div>
+
+  <h2>5 · Figura: agrupar revela, correlacionar sugiere</h2>
+  <figure>
+    <img src="../assets/img/toyota/0006-eda-sistematico-toyota-fig1.png" alt="Precio medio por tramo de edad y barras de correlación con Price con Id resaltado">
+    <figcaption>Fig. 1 — Izquierda: el gradiente de la edad (joven 18.394 €, viejo 8.543 €). Derecha: top de
+    correlaciones con <code>Price</code>; <code>Id</code> en rojo porque es espuria (orden de archivo, no causa).</figcaption>
+  </figure>
+  <p>Regenerar la figura (mismo resultado versionado en <code>assets/img/toyota/</code>):</p>
+  <pre><code>python scripts/make_figures.py --only eda-sistematico-toyota</code></pre>
+
+  <h2>6 · Quiz (auto-chequeo inmediato)</h2>
+  <p class="meta">Elegí una opción por pregunta: el feedback es inmediato.</p>
+
+  <div class="quiz" id="q1">
+    <strong>P1 · Diésel: media 11.295, mediana 8.950…</strong>
+    <label><input type="radio" name="q1" value="0"> Los diésel valen todos igual</label>
+    <label><input type="radio" name="q1" value="1"> Hay un error de cálculo</label>
+    <label><input type="radio" name="q1" value="2"> Pocos diésel caros tiran arriba</label>
+    <label><input type="radio" name="q1" value="3"> El diésel pierde valor siempre</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <div class="quiz" id="q2">
+    <strong>P2 · Id correlaciona −0,74 con Price: es…</strong>
+    <label><input type="radio" name="q2" value="0"> Orden de carga, no causa</label>
+    <label><input type="radio" name="q2" value="1"> Prueba firme de causalidad directa</label>
+    <label><input type="radio" name="q2" value="2"> Un error del método corr</label>
+    <label><input type="radio" name="q2" value="3"> Ruido puro sin ningún patrón</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <div class="quiz" id="q3">
+    <strong>P3 · corr() de Cylinders da NaN porque…</strong>
+    <label><input type="radio" name="q3" value="0"> Tiene muchos valores vacíos escondidos</label>
+    <label><input type="radio" name="q3" value="1"> Es constante y no varía</label>
+    <label><input type="radio" name="q3" value="2"> Es texto y no numérico</label>
+    <label><input type="radio" name="q3" value="3"> Supera el millón de filas</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <h2>7 · Fuente primaria y cierre</h2>
+  <p><strong>Para profundizar (1 fuente):</strong>
+  Tan, Steinbach &amp; Kumar, <em>Introduction to Data Mining</em> — capítulo 2 (datos: tipos, calidad,
+  exploración y similaridad)
+  (<a href="https://www-users.cs.umn.edu/~kumar001/dmbook/">dmbook</a>, también en
+  <a href="../RESOURCES.md">RESOURCES.md</a> del curso). Es la referencia para el EDA sistemático y la
+  noción de calidad de datos.</p>
+  <p>¿Algo no quedó claro? <strong>Preguntame al agente</strong>: cuándo mirar la mediana en vez de la media,
+  cómo armar tramos con sentido, o cómo olfatear una correlación espuria. Esa pregunta vale más que releer.</p>
+
+  <nav class="lesson-nav">
+    <a href="0005-wrangling-regex-model.html">← 0005 Wrangling y regex</a>
+    <a href="0007-outliers-estadisticos-iqr-z.html">Siguiente: 0007 Outliers IQR y z →</a>
+  </nav>
+  <p class="meta">Ver también: <a href="../index.html">índice del curso</a> ·
+  <a href="../reference/toyota-data-dictionary.html">diccionario Toyota</a> ·
+  <a href="../reference/analisis-ejemplo-ols.html">análisis OLS de ejemplo</a></p>
+</main>
+<script>
+(function(){
+  var answers = {q1: 2, q2: 0, q3: 1};
+  var msgs = {
+    q1: ["Correcto: media muy arriba de la mediana es sesgo por pocos caros.",
+         "No: la media supera a la mediana por pocos diésel caros (sesgo)."],
+    q2: ["Correcto: Id ordena el archivo; correlaciona sin causar nada.",
+         "No: Id es el número de fila; su correlación es espuria."],
+    q3: ["Correcto: vale 4 siempre; sin variación no hay correlación posible.",
+         "No: Cylinders es constante (4), por eso corr() devuelve NaN."]
+  };
+  ["q1","q2","q3"].forEach(function(id){
+    var box = document.getElementById(id);
+    var fb = box.querySelector(".feedback");
+    box.addEventListener("change", function(e){
+      var ok = parseInt(e.target.value, 10) === answers[id];
+      fb.textContent = ok ? msgs[id][0] : msgs[id][1];
+      fb.className = "feedback " + (ok ? "ok" : "no");
+    });
+  });
+})();
+</script>
+</body>
+</html>

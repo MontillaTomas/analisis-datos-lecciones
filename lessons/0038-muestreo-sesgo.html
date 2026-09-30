@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>0038 · Muestreo y sesgo — Unidad 1</title>
+  <link rel="stylesheet" href="../assets/styles.css">
+</head>
+<body>
+<main>
+  <header class="course">
+    <p class="kicker">Unidad 1 · Introducción · Lección 0038</p>
+    <h1>Muestreo y sesgo: por qué 30 autos al azar valen más que 725 elegidos mal</h1>
+    <p><strong>Win de hoy:</strong> con 2.000 muestras simuladas: n=30 da medias entre 9.553 y 12.106 (mucho ruido),
+    n=500 entre 10.477 y 10.989 (puntería)… y 725 autos «solo viejos» dan 8.543: precisos, pero <em>precisamente mal</em>.</p>
+    <p class="meta"><a href="../index.html">← Índice</a> ·
+    <a href="../reference/toyota-data-dictionary.html">Diccionario Toyota</a> ·
+    <a href="../ToyotaCorolla.csv">CSV</a></p>
+  </header>
+
+  <h2>1 · Población, muestra y la pregunta de toda la materia</h2>
+  <p>La <strong><abbr title="Población: el conjunto completo que queremos describir (acá, los 1.436 autos)">población</abbr></strong>
+  son los 1.436 autos (media real: 10.731 €). Una
+  <strong><abbr title="Muestra: subconjunto observado; si es aleatoria, sus medias se centran en la real">muestra</abbr></strong>
+  es el puñado que miramos. Toda la materia vive de una pregunta: <em>¿qué nos dice el puñado sobre el montón?</em>
+  Dos enemigos: el <strong>ruido</strong> (la muestra baila) y el
+  <strong><abbr title="Sesgo: error sistemático: la muestra apunta siempre al mismo lado equivocado">sesgo</abbr></strong>
+  (la muestra apunta siempre al lado equivocado).</p>
+
+  <h2>2 · Más n, menos baile (pero el sesgo no se achica)</h2>
+  <p>Simulamos 2.000 muestras aleatorias de cada tamaño y miramos dónde caen sus medias:</p>
+  <figure>
+    <img src="../assets/img/toyota/0038-muestreo-sesgo-fig1.png" alt="Distribución de medias muestrales y efecto del sesgo">
+    <figcaption>Fig. 1 — Izquierda: las medias con n=500 (verde) se abrazan a la real (10.731); con n=30 (naranja) se desparraman.
+    La línea roja (solo viejos, 8.543) ni siquiera toca la zona: derecha: el intervalo del 95 % se achica con n, pero el sesgo queda fijo.</figcaption>
+  </figure>
+  <p>Doble moraleja: <strong>(1)</strong> cuadruplicar n achica el ruido a la mitad (sd 660 → 354 → 130):
+  la precisión se compra con muestra. <strong>(2)</strong> Ningún n arregla el sesgo: 725 viejos dan 8.543 con total
+  «precisión»… 2.188 € abajo de la verdad. Por eso <em>cómo</em> elegís importa más que <em>cuántos</em> juntás.</p>
+  <p>Regenerar la figura (mismo resultado versionado en <code>assets/img/toyota/</code>):</p>
+  <pre><code>python scripts/make_figures.py --only muestreo-sesgo</code></pre>
+
+  <h2>3 · Tres sesgos con nombre y apellido (en nuestro dataset)</h2>
+  <table>
+    <tr><th>Sesgo</th><th>Ejemplo Toyota</th><th>Media que obtendrías</th></tr>
+    <tr><td>De selección</td><td>Medir solo autos viejos (Age &gt; 60)</td><td>8.543 € (−2.188 €)</td></tr>
+    <tr><td>De selección</td><td>Medir solo Diesel (155 autos)</td><td>11.295 € (+564 €)</td></tr>
+    <tr><td>De supervivencia</td><td>Faltan los autos ya desguazados (los peores viejos no están)</td><td>La media «real» ya viene optimista</td></tr>
+  </table>
+  <p>El tercero es el más tramposo: ni siquiera la «población» del CSV es la población real de Toyotas.
+  Todo análisis hereda los sesgos de cómo se juntaron los datos — documentarlos es parte del trabajo
+  (como hicimos con KM=1 y los <code>?</code> en U2).</p>
+
+  <h2>4 · Simulación en 10 líneas (reproducí la Fig. 1)</h2>
+  <pre><code>import pandas as pd, numpy as np
+df = pd.read_csv("../ToyotaCorolla.csv")
+p = df["Price"].values
+print("real:", round(p.mean(), 1))  # 10730.8
+rng = np.random.default_rng(42)
+for n in [30, 100, 500]:
+    ms = [rng.choice(p, n, replace=False).mean() for _ in range(2000)]
+    lo, hi = np.percentile(ms, [2.5, 97.5])
+    print(f"n={n}: sd={np.std(ms):.0f} intervalo=({lo:.0f}, {hi:.0f})")
+print("solo viejos:", round(df.loc[df["Age_08_04"]>60, "Price"].mean(), 1))  # 8542.9</code></pre>
+  <p><strong>Tu turno:</strong> cambiá la semilla (<code>default_rng(7)</code>) y verificá que los intervalos apenas se mueven:
+  el ruido muestral es estable; el sesgo, testarudo.</p>
+
+  <h2>5 · Quiz (auto-chequeo inmediato)</h2>
+  <p class="meta">Elegí una opción por pregunta: el feedback es inmediato.</p>
+
+  <div class="quiz" id="q1">
+    <strong>P1 · n=30 vs n=500…</strong>
+    <label><input type="radio" name="q1" value="0"> Más n, menos baile muestral</label>
+    <label><input type="radio" name="q1" value="1"> Más n, más sesgo seguro</label>
+    <label><input type="radio" name="q1" value="2"> El n no cambia nada</label>
+    <label><input type="radio" name="q1" value="3"> Treinta siempre alcanza todo</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <div class="quiz" id="q2">
+    <strong>P2 · 725 viejos dan 8.543: el problema es…</strong>
+    <label><input type="radio" name="q2" value="0"> Poco n, falta muestra</label>
+    <label><input type="radio" name="q2" value="1"> Sesgo: apuntan siempre abajo</label>
+    <label><input type="radio" name="q2" value="2"> Mucho ruido aleatorio puro</label>
+    <label><input type="radio" name="q2" value="3"> La media está mal sumada</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <div class="quiz" id="q3">
+    <strong>P3 · Los autos desguazados que faltan son…</strong>
+    <label><input type="radio" name="q3" value="0"> Ruido que se promedia solo</label>
+    <label><input type="radio" name="q3" value="1"> Sesgo de supervivencia oculto</label>
+    <label><input type="radio" name="q3" value="2"> Datos faltantes tipo MCAR</label>
+    <label><input type="radio" name="q3" value="3"> Un problema de escala</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <h2>6 · Fuente primaria y cierre</h2>
+  <p><strong>Para profundizar (1 fuente):</strong>
+  Diez, Barr &amp; Çetinkaya-Rundel, <em>OpenIntro Statistics</em> — cap. 1 (muestreo y sesgos).
+  Más contexto en <a href="../RESOURCES.md">RESOURCES</a>.</p>
+  <p>Cierre U1: con muestreo honesto, todo lo anterior (EDA, modelos, torneo) generaliza; sin él, es aritmética sobre arena.
+  Siguiente unidad: <a href="0039-soporte-itemsets.html">0039 · Soporte e itemsets (Unidad 9)</a>.</p>
+
+  <nav class="lesson-nav">
+    <a href="0037-svm-comparacion.html">← 0037 SVM</a>
+    <a href="../index.html">Índice ↑</a>
+    <a href="0039-soporte-itemsets.html">0039 Soporte →</a>
+  </nav>
+</main>
+<script>
+(function(){
+  var answers = {q1: 0, q2: 1, q3: 1};
+  var msgs = {
+    q1: ["Correcto: sd 660 → 130.",
+         "No: más n achica el baile."],
+    q2: ["Correcto: precisos pero mal.",
+         "No: n=725 sobra; hay sesgo."],
+    q3: ["Correcto: los peores faltan.",
+         "No: lo que falta también sesga."]
+  };
+  ["q1","q2","q3"].forEach(function(id){
+    var box = document.getElementById(id);
+    var fb = box.querySelector(".feedback");
+    box.addEventListener("change", function(e){
+      var ok = parseInt(e.target.value, 10) === answers[id];
+      fb.textContent = ok ? msgs[id][0] : msgs[id][1];
+      fb.className = "feedback " + (ok ? "ok" : "no");
+    });
+  });
+})();
+</script>
+</body>
+</html>

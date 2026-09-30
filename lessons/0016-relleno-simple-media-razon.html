@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>0016 · Relleno simple y reponderación — Unidad 4</title>
+  <link rel="stylesheet" href="../assets/styles.css">
+</head>
+<body>
+<main>
+  <header class="course">
+    <p class="kicker">Unidad 4 · Datos faltantes e imputación · Lección 0016</p>
+    <h1>Relleno simple: media, razón y reponderación</h1>
+    <p><strong>Win de hoy:</strong> rellenar con media/mediana/constante/razón sobre la inyección 0015
+    (RMSE HP ≈ 14), ver el pico falso que deja la media y corregir el sesgo +205 € reponderando.</p>
+    <p class="meta"><a href="../index.html">← Índice</a> ·
+    <a href="../reference/toyota-data-dictionary.html">Diccionario Toyota</a> ·
+    <a href="../ToyotaCorolla.csv">CSV</a></p>
+  </header>
+
+  <h2>1 · Sustitución por la media (y su pico falso)</h2>
+  <p>El relleno más viejo: cada hueco recibe la media de los observados
+  (<code>SimpleImputer(strategy="mean")</code>). En <code>HP</code> erra por <strong>RMSE 14,1</strong> contra la
+  verdad tapada (0015). Pero achica la varianza (desvío 15,0 → 14,0) y deja un <strong>pico falso</strong> en el
+  histograma: 139 autos con <code>KM = 68.567</code> idénticos, algo que ningún km real hace. La media preserva el
+  centro y miente la forma.</p>
+  <pre><code>from sklearn.impute import SimpleImputer
+imp = SimpleImputer(strategy="mean").fit_transform(df[["KM", "HP"]])</code></pre>
+
+  <h2>2 · Mediana, constante y razón (el resto del menú simple)</h2>
+  <ul>
+    <li><strong><abbr title="Mediana: valor del medio; robusta a extremos pero peor para RMSE por construcción">Mediana</abbr>:</strong>
+    robusta a extremos; acá RMSE 16,5 en HP (peor que la media: el RMSE premia a la media por matemática).</li>
+    <li><strong><abbr title="Constante: rellenar con un valor fijo (moda en categorías, marcador en números)">Constante</abbr>:</strong>
+    la <abbr title="Moda: el valor más frecuente de la columna">moda</abbr> en categorías, o un marcador
+    (ej. −1) + columna bandera “faltaba” en números. Simple y transparente.</li>
+    <li><strong><abbr title="Razón: imputar con una proporción de otra columna (HP ≈ 0,0947 × Weight)">Razón</abbr>:</strong>
+    <code>HP ≈ 0,0947 × Weight</code> (promedio en observados), RMSE 14,2 ≈ media. Usa información auxiliar; brilla
+    cuando la proporción es estable (acá apenas empata).</li>
+  </ul>
+
+  <h2>3 · Reponderación: corregir sin rellenar</h2>
+  <p>Si el hueco es MAR por edad, los completos no representan: los viejos (baratos) faltan más y la media de
+  <code>Price</code> en HP-completos da <strong>10.936 €</strong> (+205 de sesgo). La
+  <strong><abbr title="Reponderación: pesar cada completo por 1/prob-respuesta de su grupo; corrige el sesgo MAR">reponderación</abbr></strong>
+  pesa cada auto por 1/probabilidad-de-respuesta de su tramo (viejos pesan 1/0,808 ≈ 1,24): media corregida
+  <strong>10.730 €</strong> (sesgo −1). Sin inventar un solo dato.</p>
+  <pre><code>resp = 1 - pd.Series(m_hp).groupby(tramos).mean()  # 0,983 / 0,882 / 0,808
+w = 1.0 / tramos.map(resp)                             # jóvenes ≈1, viejos ≈1,24
+media_pond = (df.loc[~m_hp, "Price"] * w[~m_hp]).sum() / w[~m_hp].sum()  # 10730</code></pre>
+
+  <h2>4 · Figura: el pico falso y el rescate</h2>
+  <figure>
+    <img src="../assets/img/toyota/0016-relleno-simple-media-razon-fig1.png" alt="Histograma de KM con pico en la media y barras de sesgo corregido">
+    <figcaption>Fig. 1 — Izquierda: la media deja un pico antinatural en 68.567. Derecha: sesgo de la media de
+    Price (+205 €) corregido a −1 € reponderando por tramo.</figcaption>
+  </figure>
+  <p>Regenerar la figura (mismo resultado versionado en <code>assets/img/toyota/</code>):</p>
+  <pre><code>python scripts/make_figures.py --only relleno-simple-media-razon</code></pre>
+
+  <h2>5 · Quiz (auto-chequeo inmediato)</h2>
+  <p class="meta">Elegí una opción por pregunta: el feedback es inmediato.</p>
+
+  <div class="quiz" id="q1">
+    <strong>P1 · Rellenar todo con la media achica…</strong>
+    <label><input type="radio" name="q1" value="0"> La cantidad total de filas</label>
+    <label><input type="radio" name="q1" value="1"> El sesgo del mecanismo MAR</label>
+    <label><input type="radio" name="q1" value="2"> La varianza real de verdad</label>
+    <label><input type="radio" name="q1" value="3"> El tamaño total del archivo</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <div class="quiz" id="q2">
+    <strong>P2 · La razón 0,0947 imputa HP como…</strong>
+    <label><input type="radio" name="q2" value="0"> Peso por casi un décimo</label>
+    <label><input type="radio" name="q2" value="1"> Media más sus tres desvíos</label>
+    <label><input type="radio" name="q2" value="2"> Moda de todo el dataset</label>
+    <label><input type="radio" name="q2" value="3"> Cero para todo el auto</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <div class="quiz" id="q3">
+    <strong>P3 · Pasar de 10.936 a 10.730 corrige…</strong>
+    <label><input type="radio" name="q3" value="0"> El mecanismo hacia MCAR puro</label>
+    <label><input type="radio" name="q3" value="1"> El sesgo por selección etaria</label>
+    <label><input type="radio" name="q3" value="2"> Los outliers del precio medio</label>
+    <label><input type="radio" name="q3" value="3"> La varianza achicada de antes</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <h2>6 · Fuente primaria y cierre</h2>
+  <p><strong>Para profundizar (1 fuente):</strong>
+  Kuhn &amp; Johnson, <em>Applied Predictive Modeling</em> — capítulo de preprocesamiento (imputación simple,
+  <code>preProcess</code>)
+  (<a href="http://appliedpredictivemodeling.com/">appliedpredictivemodeling.com</a>, también en
+  <a href="../RESOURCES.md">RESOURCES.md</a> del curso).</p>
+  <p>¿Algo no quedó claro? <strong>Preguntame al agente</strong>: cuándo la media alcanza, cómo elegir la constante,
+  o por qué ponderar rescata sin rellenar. Esa pregunta vale más que releer.</p>
+
+  <nav class="lesson-nav">
+    <a href="0015-faltantes-mecanismos-listwise.html">← 0015 Faltantes</a>
+    <a href="0017-hot-deck-cold-deck-knn.html">Siguiente: 0017 Donantes y vecinos →</a>
+  </nav>
+  <p class="meta">Ver también: <a href="../index.html">índice del curso</a> ·
+  <a href="../reference/toyota-data-dictionary.html">diccionario Toyota</a> ·
+  <a href="../reference/analisis-ejemplo-ols.html">análisis OLS de ejemplo</a></p>
+</main>
+<script>
+(function(){
+  var answers = {q1: 2, q2: 0, q3: 1};
+  var msgs = {
+    q1: ["Correcto: 139 valores idénticos aplanan la dispersión.",
+         "No: la media preserva el centro pero achica la varianza."],
+    q2: ["Correcto: HP ≈ 0,0947 × peso, proporción observada.",
+         "No: la razón multiplica el peso por 0,0947."],
+    q3: ["Correcto: los viejos pesaban poco; ponderar los devuelve.",
+         "No: reponderar corrige la selección por edad."]
+  };
+  ["q1","q2","q3"].forEach(function(id){
+    var box = document.getElementById(id);
+    var fb = box.querySelector(".feedback");
+    box.addEventListener("change", function(e){
+      var ok = parseInt(e.target.value, 10) === answers[id];
+      fb.textContent = ok ? msgs[id][0] : msgs[id][1];
+      fb.className = "feedback " + (ok ? "ok" : "no");
+    });
+  });
+})();
+</script>
+</body>
+</html>

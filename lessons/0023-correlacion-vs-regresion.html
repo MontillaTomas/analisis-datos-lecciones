@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>0023 · Correlación vs regresión — Unidad 6</title>
+  <link rel="stylesheet" href="../assets/styles.css">
+</head>
+<body>
+<main>
+  <header class="course">
+    <p class="kicker">Unidad 6 · Regresión lineal simple y múltiple · Lección 0023</p>
+    <h1>Correlación vs regresión: de Galton a r</h1>
+    <p><strong>Win de hoy:</strong> medir asociación con <strong><abbr title="Covarianza: promedio de productos de desvíos; signo útil, magnitud en unidades locas">covarianza</abbr></strong>
+    (−77M €·km), normalizarla a <strong><abbr title="r de Pearson: covarianza estandarizada entre −1 y 1">r = −0,57</abbr></strong>
+    y conectar r² = 0,325 con el R² de la 0003.</p>
+    <p class="meta"><a href="../index.html">← Índice</a> ·
+    <a href="../reference/toyota-data-dictionary.html">Diccionario Toyota</a> ·
+    <a href="../ToyotaCorolla.csv">CSV</a></p>
+  </header>
+
+  <h2>1 · Orígenes: Galton y la regresión a la media (1886)</h2>
+  <p>Francis Galton cruzó alturas de padres e hijos: hijos de padres altísimos eran altos… pero <em>menos</em> extremos
+  que sus padres. Lo llamó <strong><abbr title="Regresión a la media: los extremos tienden a acercarse al centro en la siguiente medición">regresión a la media</abbr></strong>,
+  y de ahí viene la palabra “regresión”. Pearson la formalizó con <code>r</code>; Legendre y Gauss ya ajustaban rectas
+  por mínimos cuadrados. Todo U6 desciende de esa tabla de alturas.</p>
+
+  <h2>2 · Covarianza: el signo sirve, el número no</h2>
+  <p>La covarianza promedia <code>(x − x̄)·(y − ȳ)</code>: cada auto vota + (cuadrantes I/III) o − (II/IV). KM–Price da
+  <strong>−77.534.281</strong>: el signo dice “van opuestos” (gana el rojo en la figura), pero ¿−77M es mucho o poco?
+  Imposible saberlo: las unidades (€·km) no se comparan con nada (Edad–Price da −59.136 €·mes: ¿mayor? incomparable).</p>
+  <pre><code>df["KM"].cov(df["Price"])  # -77534281.0 (€·km, ininterpretable)</code></pre>
+
+  <h2>3 · Pearson r: covarianza en escala −1…+1</h2>
+  <p><strong>r de Pearson</strong> divide por ambos desvíos: −1 (opuestos perfectos), 0 (nada lineal), +1 (juntos
+  perfectos). KM–Price: <strong>r = −0,57</strong>; Edad: −0,88; Año: +0,89. Prima robusta:
+  <strong><abbr title="Spearman: correlación con rangos (1º, 2º…); tolera outliers y curvas monótonas">Spearman</abbr></strong>
+  (−0,62 en KM) usa rangos en vez de valores: aguanta outliers y curvas. Ambas miden <em>fuerza lineal</em>, no causalidad
+  (el Id −0,74 de la 0006 saluda).</p>
+
+  <h2>4 · Correlación vs regresión (y el puente r² = R²)</h2>
+  <ul>
+    <li><strong>Correlación:</strong> un número simétrico (−0,57): “qué tan juntos se mueven”. Sin fórmula ni dirección.</li>
+    <li><strong>Regresión:</strong> una fórmula asimétrica (<code>Price = 14.508 − 0,055·KM</code>): “cuánto vale dado KM”.</li>
+  </ul>
+  <p>El puente: en regresión <strong>simple</strong>, r² = R². Acá (−0,57)² = <strong>0,3249</strong> = el 0,325 de la 0003.
+  La recta explica exactamente lo que la correlación promete. (En múltiple, 0024, el puente se ensancha.)</p>
+  <p><strong>Receta bivariada (4 pasos de clase):</strong> 1) mirar la naturaleza (¿directa o inversa?);
+  2) identificar niveles de medición (nominal, ordinal, ratio); 3) exigir significancia (¿se repite en otra muestra?);
+  4) cuantificar con rigor (Pearson, o Spearman si hay outliers).</p>
+
+  <h2>5 · Figura: cuadrantes y r comparables</h2>
+  <figure>
+    <img src="../assets/img/toyota/0023-correlacion-vs-regresion-fig1.png" alt="Scatter KM-Price coloreado por cuadrantes y barras de correlación">
+    <figcaption>Fig. 1 — Izquierda: cada punto vota + (azul) o − (rojo) según su cuadrante; gana el rojo.
+    Derecha: r en escala común, de Año (+0,89) a Edad (−0,88).</figcaption>
+  </figure>
+  <p>Regenerar la figura (mismo resultado versionado en <code>assets/img/toyota/</code>):</p>
+  <pre><code>python scripts/make_figures.py --only correlacion-vs-regresion</code></pre>
+
+  <h2>6 · Quiz (auto-chequeo inmediato)</h2>
+  <p class="meta">Elegí una opción por pregunta: el feedback es inmediato.</p>
+
+  <div class="quiz" id="q1">
+    <strong>P1 · La covarianza −77M informa…</strong>
+    <label><input type="radio" name="q1" value="0"> Solo dirección negativa nada más</label>
+    <label><input type="radio" name="q1" value="1"> Fuerza exacta de menos setenta</label>
+    <label><input type="radio" name="q1" value="2"> Demuestra causalidad del todo ya</label>
+    <label><input type="radio" name="q1" value="3"> No dice nada útil jamás</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <div class="quiz" id="q2">
+    <strong>P2 · r² = 0,325 conecta con…</strong>
+    <label><input type="radio" name="q2" value="0"> El p-valor exacto del modelo</label>
+    <label><input type="radio" name="q2" value="1"> El R² visto en 0003</label>
+    <label><input type="radio" name="q2" value="2"> La media exacta de Price</label>
+    <label><input type="radio" name="q2" value="3"> El VIF calculado en 0019</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <div class="quiz" id="q3">
+    <strong>P3 · Spearman usa rangos y…</strong>
+    <label><input type="radio" name="q3" value="0"> Da cero en todo caso</label>
+    <label><input type="radio" name="q3" value="1"> Sirve solo con rectas puras</label>
+    <label><input type="radio" name="q3" value="2"> Tolera mucho mejor los outliers</label>
+    <label><input type="radio" name="q3" value="3"> Nunca jamás baja de cero</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <h2>7 · Fuente primaria y cierre</h2>
+  <p><strong>Para profundizar (1 fuente):</strong>
+  James et al., <em>An Introduction to Statistical Learning</em> — capítulo de regresión lineal
+  (<a href="https://www.statlearning.com/">statlearning.com</a>, PDF libre; también en
+  <a href="../RESOURCES.md">RESOURCES.md</a> del curso).</p>
+  <p>¿Algo no quedó claro? <strong>Preguntame al agente</strong>: por qué r² = R², cuándo Spearman le gana a Pearson,
+  o qué “regresa” en regresión a la media. Esa pregunta vale más que releer.</p>
+
+  <nav class="lesson-nav">
+    <a href="0022-scad-elastic-filtros.html">← 0022 SCAD y filtros</a>
+    <a href="0024-regresion-multiple-ols.html">Siguiente: 0024 Múltiple →</a>
+  </nav>
+  <p class="meta">Ver también: <a href="../index.html">índice del curso</a> ·
+  <a href="../reference/toyota-data-dictionary.html">diccionario Toyota</a> ·
+  <a href="../reference/analisis-ejemplo-ols.html">análisis OLS de ejemplo</a></p>
+</main>
+<script>
+(function(){
+  var answers = {q1: 0, q2: 1, q3: 2};
+  var msgs = {
+    q1: ["Correcto: signo sí, magnitud en €·km no.",
+         "No: solo el signo es legible; −77M no se interpreta."],
+    q2: ["Correcto: en simple, r² es el R² (0,325).",
+         "No: r² = 0,3249 es el R² de la 0003."],
+    q3: ["Correcto: rangos amortiguan extremos y curvas.",
+         "No: Spearman con rangos tolera outliers."]
+  };
+  ["q1","q2","q3"].forEach(function(id){
+    var box = document.getElementById(id);
+    var fb = box.querySelector(".feedback");
+    box.addEventListener("change", function(e){
+      var ok = parseInt(e.target.value, 10) === answers[id];
+      fb.textContent = ok ? msgs[id][0] : msgs[id][1];
+      fb.className = "feedback " + (ok ? "ok" : "no");
+    });
+  });
+})();
+</script>
+</body>
+</html>

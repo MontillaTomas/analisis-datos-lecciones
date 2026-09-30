@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>0022 · SCAD, elastic net y filtros — Unidad 5</title>
+  <link rel="stylesheet" href="../assets/styles.css">
+</head>
+<body>
+<main>
+  <header class="course">
+    <p class="kicker">Unidad 5 · Selección de variables y regularización · Lección 0022</p>
+    <h1>SCAD, elastic net y filtros: el resto del arsenal</h1>
+    <p><strong>Win de hoy:</strong> entender <strong><abbr title="SCAD: penalización que mata chicos como Lasso pero perdona a los grandes (menos sesgo)">SCAD</abbr></strong>
+    (perdona fuertes), probar <strong><abbr title="Elastic net: mezcla Lasso+Ridge; elige y estabiliza a la vez">elastic net</abbr></strong>
+    (α=1: CV 0,846) y rankear con <strong><abbr title="Filtro: ranking univariado barato (f_regression); ignora redundancias">filtros</abbr></strong>
+    (Year &gt; Age &gt; Weight &gt; KM…).</p>
+    <p class="meta"><a href="../index.html">← Índice</a> ·
+    <a href="../reference/toyota-data-dictionary.html">Diccionario Toyota</a> ·
+    <a href="../ToyotaCorolla.csv">CSV</a></p>
+  </header>
+
+  <h2>1 · SCAD: matar chicos sin castigar grandes</h2>
+  <p>Lasso tiene un defecto: achica <em>hasta a los coeficientes importantes</em> (sesgo). SCAD
+  (<em>smoothly clipped absolute deviation</em>, Fan &amp; Li) lo corrige: castiga como Lasso cerca de 0 (mata chicos)
+  pero <strong>se aplana</strong> con coeficientes grandes (los deja en paz). En el esquema: la curva verde sube y se
+  queda plana, mientras L1/L2 siguen subiendo. Detalle honesto: SCAD <strong>no está en scikit-learn</strong>
+  (penalización no convexa, otro optimizador); en este curso va por concepto, con la referencia teórica (ESL).</p>
+
+  <h2>2 · Elastic net: Lasso + Ridge en una perilla</h2>
+  <p>Mezcla ambas multas con <code>l1_ratio</code> (1 = Lasso puro, 0 = Ridge puro). Con <code>l1_ratio=0,5</code> y
+  α=1: CV 0,846, las 8 vivas. ¿Cuándo? Duplicadas <em>y</em> ganas de podar: Ridge estabiliza el grupo, Lasso corta
+  afuera. Advertencia medida: α=10 hunde el CV a 0,50 y α=100 a 0,08 — elastic net exige calibrar α con CV, no a ojo.</p>
+  <pre><code>from sklearn.linear_model import ElasticNetCV
+ElasticNetCV(l1_ratio=0.5, cv=5).fit(X_estandarizada, y)</code></pre>
+
+  <h2>3 · Filtros: rankear barato (y su ceguera)</h2>
+  <p>Los <strong>filtros</strong> rankean cada columna <em>sola</em> contra el target (<code>f_regression</code>):
+  Year (5190) &gt; Age (4758) &gt; Weight (731) &gt; KM (690) &gt; HP &gt; Tax &gt; Guarantee &gt; cc. Barato y útil
+  para pre-filtrar miles de columnas… pero <strong>ciego a redundancias</strong>: Year y Age ocupan el top-2 juntas
+  pese a r = −0,98. El filtro propone; la selección multivariada (0020–0021) dispone. Con target categórico el filtro
+  análogo es <strong><abbr title="Chi-cuadrado: test de asociación entre una variable categórica y la clase; alto = la columna informa">Chi-cuadrado</abbr></strong>:
+  <code>Fuel_Type</code> vs caro/barato da χ² = 4,9 (p = 0,087): el combustible <em>no</em> informa el tramo de precio —
+  el filtro también sirve para descartar.</p>
+
+  <h2>4 · Figura: ranking y castigos</h2>
+  <figure>
+    <img src="../assets/img/toyota/0022-scad-elastic-filtros-fig1.png" alt="Ranking f_regression y curvas de penalización L1 L2 y SCAD">
+    <figcaption>Fig. 1 — Izquierda: scores F (escala log; Year y Age dominan). Derecha: esquema de castigos —
+    SCAD (verde) se aplana con β grande mientras Lasso y Ridge siguen castigando.</figcaption>
+  </figure>
+  <p>Regenerar la figura (mismo resultado versionado en <code>assets/img/toyota/</code>):</p>
+  <pre><code>python scripts/make_figures.py --only scad-elastic-filtros</code></pre>
+  <div class="callout"><strong>Cierre de Unidad 5.</strong> 0019 mostró el daño, 0020 buscó equipos, 0021 multó con
+  Ridge/Lasso, hoy sumó SCAD, elastic net y filtros. Lo que sigue: U6 cierra regresión (múltiple, polinomial, GLM).</div>
+
+  <h2>5 · Quiz (auto-chequeo inmediato)</h2>
+  <p class="meta">Elegí una opción por pregunta: el feedback es inmediato.</p>
+
+  <div class="quiz" id="q1">
+    <strong>P1 · SCAD perdona a los coeficientes…</strong>
+    <label><input type="radio" name="q1" value="0"> Solo los coeficientes chicos</label>
+    <label><input type="radio" name="q1" value="1"> Solo los coeficientes nulos</label>
+    <label><input type="radio" name="q1" value="2"> Los grandes y fuertes</label>
+    <label><input type="radio" name="q1" value="3"> Todos por igual siempre</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <div class="quiz" id="q2">
+    <strong>P2 · El filtro pone Year y Age top porque…</strong>
+    <label><input type="radio" name="q2" value="0"> Detecta toda la redundancia</label>
+    <label><input type="radio" name="q2" value="1"> Mira de a una sola</label>
+    <label><input type="radio" name="q2" value="2"> Usa validación cruzada de cinco</label>
+    <label><input type="radio" name="q2" value="3"> Multa bien fuerte coeficientes grandes</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <div class="quiz" id="q3">
+    <strong>P3 · Elastic net mezcla…</strong>
+    <label><input type="radio" name="q3" value="0"> Lasso y Ridge juntos</label>
+    <label><input type="radio" name="q3" value="1"> AIC y BIC juntos</label>
+    <label><input type="radio" name="q3" value="2"> Hot y cold deck</label>
+    <label><input type="radio" name="q3" value="3"> Train y test juntos</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <h2>6 · Fuente primaria y cierre</h2>
+  <p><strong>Para profundizar (1 fuente):</strong>
+  Hastie, Tibshirani &amp; Friedman, <em>The Elements of Statistical Learning</em> — capítulo de selección y
+  regularización (Lasso, elastic net, SCAD)
+  (<a href="https://hastie.su.domains/ElemStatLearn/">ElemStatLearn</a>, PDF libre; también en
+  <a href="../RESOURCES.md">RESOURCES.md</a> del curso).</p>
+  <p>¿Algo no quedó claro? <strong>Preguntame al agente</strong>: cuándo SCAD le gana a Lasso, cómo calibrar elastic
+  net, o filtros vs selección real. Esa pregunta vale más que releer.</p>
+
+  <nav class="lesson-nav">
+    <a href="0021-ridge-lasso-caminos.html">← 0021 Ridge y Lasso</a>
+    <a href="0023-correlacion-vs-regresion.html">Siguiente: 0023 Correlación →</a>
+  </nav>
+  <p class="meta">Ver también: <a href="../index.html">índice del curso</a> ·
+  <a href="../reference/toyota-data-dictionary.html">diccionario Toyota</a> ·
+  <a href="../reference/analisis-ejemplo-ols.html">análisis OLS de ejemplo</a></p>
+</main>
+<script>
+(function(){
+  var answers = {q1: 2, q2: 1, q3: 0};
+  var msgs = {
+    q1: ["Correcto: SCAD se aplana y no sesga fuertes.",
+         "No: SCAD perdona grandes, mata chicos."],
+    q2: ["Correcto: univariado = ciego a redundancia.",
+         "No: el filtro mira de a una sola."],
+    q3: ["Correcto: l1_ratio mezcla ambas multas.",
+         "No: elastic net = Lasso + Ridge."]
+  };
+  ["q1","q2","q3"].forEach(function(id){
+    var box = document.getElementById(id);
+    var fb = box.querySelector(".feedback");
+    box.addEventListener("change", function(e){
+      var ok = parseInt(e.target.value, 10) === answers[id];
+      fb.textContent = ok ? msgs[id][0] : msgs[id][1];
+      fb.className = "feedback " + (ok ? "ok" : "no");
+    });
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>0043 · Métricas y split 80/20 — Unidad 6</title>
+  <link rel="stylesheet" href="../assets/styles.css">
+</head>
+<body>
+<main>
+  <header class="course">
+    <p class="kicker">Unidad 6 · Regresión lineal simple y múltiple · Lección 0043</p>
+    <h1>Métricas y split 80/20: el flujo de la pizarra, con números</h1>
+    <p><strong>Win de hoy:</strong> entrenar en el 80 %, medir en el 20 % escondido:
+    la simple erra 2.988 € (MAPE 20,5 %) y la múltiple 1.413 € (MAPE 10,0 %) —
+    y cada métrica (RMSE, <strong><abbr title="MAE: Mean Absolute Error; error promedio en euros, sin castigar extra los grandes">MAE</abbr></strong>,
+    <strong><abbr title="MAPE: Mean Absolute Percentage Error; error promedio en porcentaje del precio real">MAPE</abbr></strong>) cuenta algo distinto.</p>
+    <p class="meta"><a href="../index.html">← Índice</a> ·
+    <a href="../reference/toyota-data-dictionary.html">Diccionario Toyota</a> ·
+    <a href="../ToyotaCorolla.csv">CSV</a></p>
+  </header>
+
+  <h2>1 · El flujo: EDA → dropout → split → fit → test</h2>
+  <p>El flujo recomendado de clase, paso a paso: <strong>EDA</strong> (mirar, <a href="0006-eda-sistematico-toyota.html">lección 0006</a>) →
+  <strong>dropout</strong> consciente de columnas (0019) → <strong>split</strong> 80 % train / 20 % test →
+  <strong>fit</strong> en train → <strong>medir</strong> solo en test. La regla de oro: el test no se mira hasta el final;
+  si elegís el modelo mirando el test, el test deja de ser honesto (para elegir, usá CV como en
+  <a href="0003-regresion-lineal-precio-km.html">0003</a>).</p>
+
+  <h2>2 · Tres métricas, tres personalidades</h2>
+  <ul>
+    <li><strong>RMSE</strong> (0003): raíz del error cuadrático medio. Castiga <em>extra</em> los errores grandes (un fallo de 4.000 € pesa ×4, no ×2). En euros.</li>
+    <li><strong>MAE</strong>: error absoluto promedio. Democrático: cada euro de error pesa lo mismo. En euros. Siempre ≤ RMSE.</li>
+    <li><strong>MAPE</strong>: lo mismo que MAE pero en % del precio real. «Le erro por 10 %» lo entiende cualquiera; pero explota si hay precios ≈ 0.</li>
+  </ul>
+  <figure>
+    <img src="../assets/img/toyota/0043-metricas-split-80-20-fig1.png" alt="RMSE, MAE, MAPE y R2 en test: simple vs múltiple">
+    <figcaption>Fig. 1 — Test 20 % (287 autos nunca vistos). Izquierda: RMSE 2.988 → 1.413 €, MAE 2.147 → 999 €.
+    Derecha: MAPE 20,5 → 10,0 %, R² 0,331 → 0,850. Las cuatro métricas, mismo veredicto.</figcaption>
+  </figure>
+  <p>Lectura: <strong>(1)</strong> RMSE &gt; MAE siempre (2.988 vs 2.147): la brecha delata errores grandes esporádicos.
+  <strong>(2)</strong> MAPE traduce a negocio: «10 % de error típico» vs «20 %».
+  <strong>(3)</strong> Test R² (0,331 / 0,850) ≈ train R² (0,323 / 0,864): sin overfitting; medir en train habría mentido apenas, pero medir en test lo <em>prueba</em>.</p>
+  <p>Regenerar la figura (mismo resultado versionado en <code>assets/img/toyota/</code>):</p>
+  <pre><code>python scripts/make_figures.py --only metricas-split-80-20</code></pre>
+
+  <h2>3 · ¿Cuándo mirar cada una?</h2>
+  <table>
+    <tr><th>Métrica</th><th>Mirala cuando…</th><th>Cuidado con…</th></tr>
+    <tr><td>RMSE</td><td>Un error gigante duele más que varios chicos (stock, garantías)</td><td>Una sola bestia (KM=1) lo dispara</td></tr>
+    <tr><td>MAE</td><td>Querés «el error típico» honesto en euros</td><td>Subestima el riesgo de cola</td></tr>
+    <tr><td>MAPE</td><td>Hablás con negocio («10 %» cierra acuerdos)</td><td>Precios ≈ 0; asimétrico (castiga más subestimar)</td></tr>
+    <tr><td>R²</td><td>Comparás explicabilidad entre datasets distintos</td><td>Es relativo: 0,33 puede ser buen negocio igual</td></tr>
+  </table>
+
+  <h2>4 · El flujo en 12 líneas (reproducí la Fig. 1)</h2>
+  <pre><code>import pandas as pd, numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error, mean_absolute_error
+
+df = pd.read_csv("../ToyotaCorolla.csv")
+cols = ["Age_08_04","KM","HP","cc","Weight"]
+d = df.dropna(subset=cols + ["Price"])
+Xtr, Xte, ytr, yte = train_test_split(d[cols], d["Price"], test_size=0.2, random_state=42)
+m = LinearRegression().fit(Xtr, ytr)  # fit SOLO en train
+yp = m.predict(Xte)                   # medir SOLO en test
+print("RMSE %.1f" % (mean_squared_error(yte, yp) ** 0.5))  # 1412.8
+print("MAE %.1f" % mean_absolute_error(yte, yp))           # 998.5
+print("MAPE %.2f%%" % (np.mean(np.abs(yte - yp) / yte) * 100))  # 10.02%</code></pre>
+  <p><strong>Tu turno:</strong> repetí con <code>d[["KM"]]</code> y verificá 2.988 / 2.147 / 20,46 %.
+  Luego medí las mismas métricas en <code>Xtr</code>: si train ≪ test, hay overfitting.</p>
+
+  <h2>5 · Quiz (auto-chequeo inmediato)</h2>
+  <p class="meta">Elegí una opción por pregunta: el feedback es inmediato.</p>
+
+  <div class="quiz" id="q1">
+    <strong>P1 · RMSE 2.988 vs MAE 2.147: la brecha delata…</strong>
+    <label><input type="radio" name="q1" value="0"> Errores grandes esporádicos</label>
+    <label><input type="radio" name="q1" value="1"> Overfitting grave seguro total</label>
+    <label><input type="radio" name="q1" value="2"> Que MAE está mal calculado</label>
+    <label><input type="radio" name="q1" value="3"> Datos faltantes ocultos</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <div class="quiz" id="q2">
+    <strong>P2 · El test 20 % sirve si…</strong>
+    <label><input type="radio" name="q2" value="0"> Se mira solo al final</label>
+    <label><input type="radio" name="q2" value="1"> Se usa para elegir modelo</label>
+    <label><input type="radio" name="q2" value="2"> Entra también al fit</label>
+    <label><input type="radio" name="q2" value="3"> Tiene los mismos autos</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <div class="quiz" id="q3">
+    <strong>P3 · MAPE 10 % es mejor que RMSE para…</strong>
+    <label><input type="radio" name="q3" value="0"> Hablar con negocio en porcentaje</label>
+    <label><input type="radio" name="q3" value="1"> Castigar errores gigantescos</label>
+    <label><input type="radio" name="q3" value="2"> Detectar overfitting puro</label>
+    <label><input type="radio" name="q3" value="3"> Precios cercanos a cero</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <h2>6 · Fuente primaria y cierre</h2>
+  <p><strong>Para profundizar (1 fuente):</strong>
+  James et al., <em>An Introduction to Statistical Learning</em> — cap. 3.2–3.3 y 5.1 (métricas, train/test).
+  Más contexto en <a href="../RESOURCES.md">RESOURCES</a>.</p>
+  <p>Siguiente: <a href="0044-anova-comparar-medias.html">0044 · ANOVA</a>:
+  ¿los tres combustibles valen distinto de verdad, o es ruido? (F = 3,12, p = 0,045… justito).</p>
+
+  <nav class="lesson-nav">
+    <a href="0042-inferencia-pvalor-t.html">← 0042 Inferencia</a>
+    <a href="../index.html">Índice ↑</a>
+    <a href="0044-anova-comparar-medias.html">0044 ANOVA →</a>
+  </nav>
+</main>
+<script>
+(function(){
+  var answers = {q1: 0, q2: 0, q3: 0};
+  var msgs = {
+    q1: ["Correcto: RMSE castiga ×cuadrado.",
+         "No: la brecha = cola pesada."],
+    q2: ["Correcto: test honesto = ciego.",
+         "No: mirar test contamina todo."],
+    q3: ["Correcto: % cierra acuerdos.",
+         "No: MAPE habla en porcentaje."]
+  };
+  ["q1","q2","q3"].forEach(function(id){
+    var box = document.getElementById(id);
+    var fb = box.querySelector(".feedback");
+    box.addEventListener("change", function(e){
+      var ok = parseInt(e.target.value, 10) === answers[id];
+      fb.textContent = ok ? msgs[id][0] : msgs[id][1];
+      fb.className = "feedback " + (ok ? "ok" : "no");
+    });
+  });
+})();
+</script>
+</body>
+</html>

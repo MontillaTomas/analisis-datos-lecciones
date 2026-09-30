@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>0012 · Multivariado: burbujas y heatmaps — Unidad 3</title>
+  <link rel="stylesheet" href="../assets/styles.css">
+</head>
+<body>
+<main>
+  <header class="course">
+    <p class="kicker">Unidad 3 · Visualización de datos · Lección 0012</p>
+    <h1>Multivariado: 4 variables en un gráfico</h1>
+    <p><strong>Win de hoy:</strong> meter <code>KM+Price+Fuel+Edad</code> en un scatter de burbujas y leer la
+    matriz de correlaciones 6×6 como heatmap (con el −0,98 de edad↔año incluido).</p>
+    <p class="meta"><a href="../index.html">← Índice</a> ·
+    <a href="../reference/toyota-data-dictionary.html">Diccionario Toyota</a> ·
+    <a href="../ToyotaCorolla.csv">CSV</a></p>
+  </header>
+
+  <h2>1 · Más de 2 variables: sumar estéticas</h2>
+  <p>Un scatter común muestra 2 variables (x, y). Para la 3ra y 4ta se suman
+  <strong><abbr title="Estética: canal visual extra (color, tamaño, forma) que carga otra variable">estéticas</abbr></strong>:
+  color, tamaño, forma o paneles pequeños (<abbr title="Facetas: mini-gráficos repetidos por categoría; lo mismo visto por grupo">facetas</abbr>).
+  Límite práctico: 4–5 variables por gráfico; más es sopa. La receta de hoy combina dos vistas que se complementan.</p>
+
+  <h2>2 · Burbujas: KM + Price + Fuel + Edad</h2>
+  <p>Cada auto es una burbuja: posición = <code>KM</code> y <code>Price</code>, color = <code>Fuel_Type</code>,
+  tamaño = <code>Age_08_04</code>. Lectura guiada: abajo a la derecha viven burbujas grandes (viejos, muchos km,
+  baratos); arriba a la izquierda, chicas y caras (jóvenes). Los diésel (un color) se amontonan arriba: confirman
+  visualmente su media alta de la 0006.</p>
+  <pre><code>sns.scatterplot(data=df.sample(500, random_state=42),
+                x="KM", y="Price", hue="Fuel_Type", size="Age_08_04")</code></pre>
+
+  <h2>3 · Heatmap de correlaciones: todas contra todas</h2>
+  <p>La matriz de <code>corr()</code> de 6 variables son 36 números: como tabla no se lee, como
+  <abbr title="Heatmap: matriz coloreada por valor; acá cada celda es una correlación">heatmap</abbr> divergente sí.
+  Tres lecturas: <code>Age↔Mfg_Year = −0,98</code> (la redundancia de la 0006, ahora rojo furioso),
+  <code>Price</code> ama al año (+0,89) y odia a la edad (−0,88), y <code>Weight↔HP</code> andan juntas (motores
+  grandes en autos pesados). Todo el EDA numérico, en un vistazo.</p>
+
+  <h2>4 · El primo caro: pairplot (y cuándo evitarlo)</h2>
+  <p>El <strong><abbr title="Pairplot: grilla con todos los cruces de a pares (scatters + distribuciones)">pairplot</abbr></strong>
+  dibuja todos los cruces de a pares: con 4 variables son 16 paneles, con 10 ya 100. Útil para 3–5 variables,
+  imposible más allá. Por eso el heatmap escala mejor: resume cada par en un número con color. Regla: pairplot para
+  mirar formas, heatmap para barrer muchas variables.</p>
+
+  <h2>5 · Figura: burbujas + heatmap</h2>
+  <figure>
+    <img src="../assets/img/toyota/0012-multivariado-burbujas-heatmap-fig1.png" alt="Scatter de burbujas KM-Price por combustible y edad, y heatmap de correlaciones">
+    <figcaption>Fig. 1 — Izquierda: 4 variables en un scatter (posición, color, tamaño). Derecha: heatmap 6×6;
+    el rojo fuerte entre edad y año (−0,98) grita redundancia.</figcaption>
+  </figure>
+  <p>Regenerar la figura (mismo resultado versionado en <code>assets/img/toyota/</code>):</p>
+  <pre><code>python scripts/make_figures.py --only multivariado-burbujas-heatmap</code></pre>
+
+  <h2>6 · Quiz (auto-chequeo inmediato)</h2>
+  <p class="meta">Elegí una opción por pregunta: el feedback es inmediato.</p>
+
+  <div class="quiz" id="q1">
+    <strong>P1 · La 4ta variable entra vía…</strong>
+    <label><input type="radio" name="q1" value="0"> Un tercer eje siempre fijo</label>
+    <label><input type="radio" name="q1" value="1"> Color o tamaño del punto</label>
+    <label><input type="radio" name="q1" value="2"> Abrir otra figura separada siempre</label>
+    <label><input type="radio" name="q1" value="3"> Hay que borrar una variable</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <div class="quiz" id="q2">
+    <strong>P2 · El heatmap muestra Age↔Year…</strong>
+    <label><input type="radio" name="q2" value="0"> Casi nula en todo sentido</label>
+    <label><input type="radio" name="q2" value="1"> Positiva muy fuerte y clara</label>
+    <label><input type="radio" name="q2" value="2"> Negativa muy fuerte y clara</label>
+    <label><input type="radio" name="q2" value="3"> No calcula nunca esos valores</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <div class="quiz" id="q3">
+    <strong>P3 · Un pairplot de 4 vars genera…</strong>
+    <label><input type="radio" name="q3" value="0"> Los dieciséis paneles cruzados siempre</label>
+    <label><input type="radio" name="q3" value="1"> Cuatro barras simples nada más</label>
+    <label><input type="radio" name="q3" value="2"> Un solo gran histograma final</label>
+    <label><input type="radio" name="q3" value="3"> Tres líneas de tiempo juntas</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <h2>7 · Fuente primaria y cierre</h2>
+  <p><strong>Para profundizar (1 fuente):</strong>
+  Wilke, <em>Fundamentals of Data Visualization</em> — capítulos de visualización multivariada
+  (<a href="https://clauswilke.com/dataviz/">clauswilke.com/dataviz</a>, también en
+  <a href="../RESOURCES.md">RESOURCES.md</a> del curso).</p>
+  <p>¿Algo no quedó claro? <strong>Preguntame al agente</strong>: cómo leer una burbuja difícil, cuándo heatmap
+  vs pairplot, o qué estética sumar a tu gráfico. Esa pregunta vale más que releer.</p>
+
+  <nav class="lesson-nav">
+    <a href="0011-eje-truncado-honestidad.html">← 0011 Eje truncado</a>
+    <a href="0013-redes-arboles-equipamiento.html">Siguiente: 0013 Redes y árboles →</a>
+  </nav>
+  <p class="meta">Ver también: <a href="../index.html">índice del curso</a> ·
+  <a href="../reference/toyota-data-dictionary.html">diccionario Toyota</a> ·
+  <a href="../reference/analisis-ejemplo-ols.html">análisis OLS de ejemplo</a></p>
+</main>
+<script>
+(function(){
+  var answers = {q1: 1, q2: 2, q3: 0};
+  var msgs = {
+    q1: ["Correcto: color, tamaño o forma cargan variables extra.",
+         "No: la 4ta variable entra por estética (color, tamaño)."],
+    q2: ["Correcto: −0,98, año y edad son la misma info.",
+         "No: edad y año correlacionan −0,98 (rojo fuerte)."],
+    q3: ["Correcto: 4×4 cruces = 16 paneles; por eso no escala.",
+         "No: pairplot cruza todo con todo: 16 paneles."]
+  };
+  ["q1","q2","q3"].forEach(function(id){
+    var box = document.getElementById(id);
+    var fb = box.querySelector(".feedback");
+    box.addEventListener("change", function(e){
+      var ok = parseInt(e.target.value, 10) === answers[id];
+      fb.textContent = ok ? msgs[id][0] : msgs[id][1];
+      fb.className = "feedback " + (ok ? "ok" : "no");
+    });
+  });
+})();
+</script>
+</body>
+</html>

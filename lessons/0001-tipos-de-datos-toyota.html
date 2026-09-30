@@ -159,17 +159,17 @@ fig.savefig("../assets/img/toyota/0001-tipos-de-datos-toyota-fig1.png", dpi=100)
 
   <div class="quiz" id="q1">
     <strong>P1 · El precio Price (4.350–32.500) es un dato…</strong>
-    <label><input type="radio" name="q1" value="0"> Numérica continua de razón</label>
-    <label><input type="radio" name="q1" value="1"> Numérica discreta de razón</label>
-    <label><input type="radio" name="q1" value="2"> Categórica nominal sin orden</label>
+    <label><input type="radio" name="q1" value="0"> Numérica discreta de razón</label>
+    <label><input type="radio" name="q1" value="1"> Categórica nominal sin orden</label>
+    <label><input type="radio" name="q1" value="2"> Numérica continua de razón</label>
     <label><input type="radio" name="q1" value="3"> Binaria de equipamiento 0/1</label>
     <div class="feedback" aria-live="polite"></div>
   </div>
 
   <div class="quiz" id="q2">
     <strong>P2 · Fuel_Type (Petrol 1264 / Diesel 155 / CNG 17) es…</strong>
-    <label><input type="radio" name="q2" value="0"> Categórica nominal desbalanceada</label>
-    <label><input type="radio" name="q2" value="1"> Numérica continua balanceada</label>
+    <label><input type="radio" name="q2" value="0"> Numérica continua balanceada</label>
+    <label><input type="radio" name="q2" value="1"> Categórica nominal desbalanceada</label>
     <label><input type="radio" name="q2" value="2"> Numérica discreta bien simétrica</label>
     <label><input type="radio" name="q2" value="3"> Binaria de presencia cero o uno</label>
     <div class="feedback" aria-live="polite"></div>
@@ -177,17 +177,17 @@ fig.savefig("../assets/img/toyota/0001-tipos-de-datos-toyota-fig1.png", dpi=100)
 
   <div class="quiz" id="q3">
     <strong>P3 · Train perfecto pero test malo al predecir Price: es…</strong>
-    <label><input type="radio" name="q3" value="0"> Overfitting: varianza muy alta</label>
-    <label><input type="radio" name="q3" value="1"> Underfitting: sesgo muy alto</label>
-    <label><input type="radio" name="q3" value="2"> Punto óptimo: error mínimo total</label>
-    <label><input type="radio" name="q3" value="3"> Ruido irreducible: error nulo ya</label>
+    <label><input type="radio" name="q3" value="0"> Underfitting: sesgo muy alto</label>
+    <label><input type="radio" name="q3" value="1"> Punto óptimo: error mínimo total</label>
+    <label><input type="radio" name="q3" value="2"> Ruido irreducible: error nulo ya</label>
+    <label><input type="radio" name="q3" value="3"> Overfitting: varianza muy alta</label>
     <div class="feedback" aria-live="polite"></div>
   </div>
 
   <h2>7 · Fuente primaria y cierre</h2>
   <p><strong>Para profundizar (1 fuente):</strong>
   McKinney, <em>Python for Data Analysis</em> — capítulos de tipos de datos, pandas y limpieza
-  (<a href="https://wesmckinney.com/book/">wesmckinney.com/book</a>, también en <a href="../index.html">RESOURCES.md</a> del índice).
+  (<a href="https://wesmckinney.com/book/">wesmckinney.com/book</a>, también en <a href="../RESOURCES.md">RESOURCES.md</a> del curso).
   Es la referencia del curso para todo lo que hoy verificaste con <code><abbr title="select_dtypes: método de pandas que filtra las columnas por tipo (numéricas, texto, …)">select_dtypes</abbr></code> y
   <code><abbr title="value_counts: método de pandas que cuenta cuántos casos hay por categoría">value_counts</abbr></code>.</p>
   <p>¿Algo no quedó claro? <strong>Preguntame al agente</strong>: qué parte de la escalera dato → sabiduría,
@@ -203,7 +203,7 @@ fig.savefig("../assets/img/toyota/0001-tipos-de-datos-toyota-fig1.png", dpi=100)
 </main>
 <script>
 (function(){
-  var answers = {q1: 0, q2: 0, q3: 0};
+  var answers = {q1: 2, q2: 1, q3: 3};
   var msgs = {
     q1: ["Correcto: Price admite cualquier valor en un rango, es continua.",
          "No: discreta sería solo enteros contables (como Age_08_04). Price es continua."],

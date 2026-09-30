@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>0019 · Por qué seleccionar variables — Unidad 5</title>
+  <link rel="stylesheet" href="../assets/styles.css">
+</head>
+<body>
+<main>
+  <header class="course">
+    <p class="kicker">Unidad 5 · Selección de variables y regularización · Lección 0019</p>
+    <h1>Por qué seleccionar: basura, duplicadas y constantes</h1>
+    <p><strong>Win de hoy:</strong> ver con números por qué sobran columnas: 15 ruidos bajan el CV de 0,823 a 0,751,
+    una casi-duplicada multiplica ×900 la lotería del coeficiente, y <code>Cylinders</code> aporta cero.</p>
+    <p class="meta"><a href="../index.html">← Índice</a> ·
+    <a href="../reference/toyota-data-dictionary.html">Diccionario Toyota</a> ·
+    <a href="../ToyotaCorolla.csv">CSV</a></p>
+  </header>
+
+  <h2>1 · Las 3 basuras (Toyota las trae todas)</h2>
+  <ul>
+    <li><strong>Ruido:</strong> columnas sin señal (acá fabricadas: 15 gaussianas). El modelo gasta
+    <abbr title="Grados de libertad: margen del modelo para adaptarse; cada columna gasta uno">grados de libertad</abbr>
+    memorizándolas.</li>
+    <li><strong>Duplicadas:</strong> la misma info dos veces (<code>Age_08_04</code> y <code>Mfg_Year</code>, r = −0,98
+    en 0012). El modelo no sabe a cuál creerle.</li>
+    <li><strong>Constantes:</strong> <code>Cylinders = 4</code> siempre (0004). Sin variación no hay explicación;
+    su coeficiente es 0 decorativo.</li>
+    <li><strong>IDs:</strong> <code>Id</code> (1…1436, todos distintos) memoriza filas en vez de aprender patrones:
+    fuera siempre, como las constantes. Y el <strong>dropout se hace consciente</strong>: cada baja se justifica
+    (basura medida, p alto, sinsentido de negocio) — nunca porque «total sobra».</li>
+  </ul>
+
+  <h2>2 · Demo basura: train sube, CV baja (n = 80)</h2>
+  <p>Con pocos autos (80) y 4 útiles + 15 ruidos, la regresión memoriza: R² de train <strong>sube</strong> 0,906 →
+  0,926 pero el CV-5 <strong>baja</strong> 0,823 → 0,751. Siete puntos perdidos por columnas que no dicen nada: el
+  <abbr title="Sobreajuste: el modelo memoriza el entrenamiento y falla con datos nuevos">sobreajuste</abbr> de la 0001,
+  ahora con culpable identificado. (Con 1436 autos el daño se diluye; con 80 se ve.)</p>
+
+  <h2>3 · Demo duplicada: el coeficiente lotería (×900)</h2>
+  <p>Agrego <code>Edad2 = Edad + ruido tiny</code> (correlación 0,9999): el coeficiente de Edad salta entre folds con
+  desvío <strong>2,5 → 2.245,9</strong> (×900). Mismo R², coeficientes ininterpretables: lo que una fold le suma a Edad
+  se lo resta a Edad2. El
+  <strong><abbr title="VIF: variance inflation factor; cuánto infla la redundancia la varianza del coeficiente (acá ≈145 mil)">VIF ≈ 145.000</abbr></strong>
+  lo confirma (sano: &lt; 5–10). Moraleja: duplicadas no rompen la predicción; rompen la <em>explicación</em>.</p>
+
+  <h2>4 · Figura: el costo de no elegir</h2>
+  <figure>
+    <img src="../assets/img/toyota/0019-por-que-seleccionar-fig1.png" alt="Barras train-CV con y sin ruido e inestabilidad del coeficiente con duplicada">
+    <figcaption>Fig. 1 — Izquierda: 15 ruidos suben train y hunden CV. Derecha: la casi-duplicada multiplica ×900
+    el desvío del coeficiente entre folds (escala log).</figcaption>
+  </figure>
+  <p>Regenerar la figura (mismo resultado versionado en <code>assets/img/toyota/</code>):</p>
+  <pre><code>python scripts/make_figures.py --only por-que-seleccionar</code></pre>
+
+  <h2>5 · Quiz (auto-chequeo inmediato)</h2>
+  <p class="meta">Elegí una opción por pregunta: el feedback es inmediato.</p>
+
+  <div class="quiz" id="q1">
+    <strong>P1 · +15 ruidos: train sube, CV baja: es…</strong>
+    <label><input type="radio" name="q1" value="0"> Sobreajuste por variables de basura</label>
+    <label><input type="radio" name="q1" value="1"> Más datos para entrenar siempre</label>
+    <label><input type="radio" name="q1" value="2"> Un mejor modelo seguro total</label>
+    <label><input type="radio" name="q1" value="3"> Menos varianza y más sesgo</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <div class="quiz" id="q2">
+    <strong>P2 · La casi-duplicada vuelve al coeficiente…</strong>
+    <label><input type="radio" name="q2" value="0"> Más preciso y más estable</label>
+    <label><input type="radio" name="q2" value="1"> Igual a cero para siempre</label>
+    <label><input type="radio" name="q2" value="2"> Pura lotería entre los pliegues</label>
+    <label><input type="radio" name="q2" value="3"> Negativo y fijo para siempre</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <div class="quiz" id="q3">
+    <strong>P3 · Cylinders = 4 en el modelo…</strong>
+    <label><input type="radio" name="q3" value="0"> Aporta un enorme valor predictivo</label>
+    <label><input type="radio" name="q3" value="1"> No aporta nada de nada</label>
+    <label><input type="radio" name="q3" value="2"> Duplica exactamente a la edad</label>
+    <label><input type="radio" name="q3" value="3"> Centra todas las variables juntas</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <h2>6 · Fuente primaria y cierre</h2>
+  <p><strong>Para profundizar (1 fuente):</strong>
+  James et al., <em>An Introduction to Statistical Learning</em> — capítulo de selección de variables
+  (<a href="https://www.statlearning.com/">statlearning.com</a>, PDF libre; también en
+  <a href="../RESOURCES.md">RESOURCES.md</a> del curso). La referencia teórica de toda la Unidad 5.</p>
+  <p>¿Algo no quedó claro? <strong>Preguntame al agente</strong>: qué basura tiene tu dataset, cómo leer un VIF,
+  o cuándo 4 columnas le ganan a 37. Esa pregunta vale más que releer.</p>
+
+  <nav class="lesson-nav">
+    <a href="0018-imputacion-con-modelos.html">← 0018 Con modelos</a>
+    <a href="0020-best-subset-stepwise.html">Siguiente: 0020 Best subset →</a>
+  </nav>
+  <p class="meta">Ver también: <a href="../index.html">índice del curso</a> ·
+  <a href="../reference/toyota-data-dictionary.html">diccionario Toyota</a> ·
+  <a href="../reference/analisis-ejemplo-ols.html">análisis OLS de ejemplo</a></p>
+</main>
+<script>
+(function(){
+  var answers = {q1: 0, q2: 2, q3: 1};
+  var msgs = {
+    q1: ["Correcto: train 0,926 pero CV 0,751 = memorizó ruido.",
+         "No: train que sube con CV que baja es sobreajuste."],
+    q2: ["Correcto: desvío ×900 entre folds, pura lotería.",
+         "No: la duplicada loteriza el coeficiente (VIF enorme)."],
+    q3: ["Correcto: constante = sin señal, coeficiente decorativo.",
+         "No: si no varía, no explica nada."]
+  };
+  ["q1","q2","q3"].forEach(function(id){
+    var box = document.getElementById(id);
+    var fb = box.querySelector(".feedback");
+    box.addEventListener("change", function(e){
+      var ok = parseInt(e.target.value, 10) === answers[id];
+      fb.textContent = ok ? msgs[id][0] : msgs[id][1];
+      fb.className = "feedback " + (ok ? "ok" : "no");
+    });
+  });
+})();
+</script>
+</body>
+</html>

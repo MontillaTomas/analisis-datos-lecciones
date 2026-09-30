@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>0013 · Redes y árboles — Unidad 3</title>
+  <link rel="stylesheet" href="../assets/styles.css">
+</head>
+<body>
+<main>
+  <header class="course">
+    <p class="kicker">Unidad 3 · Visualización de datos · Lección 0013</p>
+    <h1>Redes y árboles: equipamiento conectado</h1>
+    <p><strong>Win de hoy:</strong> dibujar la red de extras que vienen juntos
+    (cierre+vidrios: 54 %) y un árbol de 2 preguntas que adivina caro/barato con 86 % de acierto.</p>
+    <p class="meta"><a href="../index.html">← Índice</a> ·
+    <a href="../reference/toyota-data-dictionary.html">Diccionario Toyota</a> ·
+    <a href="../ToyotaCorolla.csv">CSV</a></p>
+  </header>
+
+  <h2>1 · Grafos: nodos y aristas (¿qué viene con qué?)</h2>
+  <p>Un <strong><abbr title="Grafo: dibujo de relaciones; puntos (nodos) unidos por líneas (aristas)">grafo</abbr></strong>
+  dibuja relaciones: <strong><abbr title="Nodo: punto del grafo; acá cada extra del auto">nodos</abbr></strong> (los extras)
+  unidos por <strong><abbr title="Arista: línea entre nodos; acá mide qué % de autos trae ambos extras">aristas</abbr></strong>
+  (co-ocurrencia). Reglas del dibujo: nodo grande = extra común (ABS en 81 %), arista gruesa = pack frecuente.
+  Solo se dibujan pares que co-ocurren en ≥40 % de los autos, para que la red respire.</p>
+  <p>Lecturas: <code>Central_Lock + Powered_Windows = 54 %</code> (el pack confort: cierre y levanta-vidrios viajan
+  juntos) y ABS es el <em>hub</em> (conecta con todo porque casi todos lo traen). Esta red es la puerta visual a la
+  Unidad 9: co-ocurrir 54 % es el “soporte” del algoritmo Apriori.</p>
+
+  <h2>2 · Árboles: preguntas que separan (¿caro o barato?)</h2>
+  <p>Un <strong><abbr title="Árbol de decisión: preguntas sí/no encadenadas que separan casos hasta decidir">árbol de decisión</abbr></strong>
+  encadena preguntas sí/no hasta decidir. Con solo 2 niveles sobre <code>Edad/KM/HP</code> ya separa caro de barato
+  (corte en la mediana, 9.900 €) con <strong>86,3 %</strong> de acierto en entrenamiento:</p>
+  <pre><code>from sklearn.tree import DecisionTreeClassifier
+y = (df["Price"] > df["Price"].median()).astype(int)  # caro = 1
+t = DecisionTreeClassifier(max_depth=2, random_state=42).fit(df[["KM", "Age_08_04", "HP"]], y)
+# raíz: ¿Edad ≤ 57,5 meses? (los jóvenes van a la rama "caro")</code></pre>
+  <p>La raíz pregunta edad (≤ 57,5 meses): tiene sentido, es el gradiente de la 0006. Los árboles completos
+  (poda, bosques, boosting) son Unidad 8; hoy importa la idea visual: <strong>reglas legibles</strong>.</p>
+
+  <h2>3 · Red vs árbol (y el primo dendrograma)</h2>
+  <ul>
+    <li><strong>Red:</strong> para relaciones simétricas (A viene con B). No hay dirección ni jerarquía.</li>
+    <li><strong>Árbol:</strong> para decisiones jerárquicas (primero edad, después KM). Se lee de arriba abajo.</li>
+    <li><strong><abbr title="Dendrograma: árbol que muestra cómo se agrupan los casos por parecido (clustering jerárquico)">Dendrograma</abbr>:</strong>
+    primo del árbol que muestra agrupamientos por parecido; vuelve en la Unidad 7 con clustering jerárquico.</li>
+  </ul>
+
+  <h2>4 · Figura: la red de packs y el árbol stump</h2>
+  <figure>
+    <img src="../assets/img/toyota/0013-redes-arboles-equipamiento-fig1.png" alt="Red de co-ocurrencia de equipamiento y árbol de decisión de profundidad 2">
+    <figcaption>Fig. 1 — Izquierda: red de extras (nodo = soporte %, arista = co-ocurrencia %).
+    Derecha: árbol de 2 niveles; la raíz corta por edad en 57,5 meses.</figcaption>
+  </figure>
+  <p>Regenerar la figura (mismo resultado versionado en <code>assets/img/toyota/</code>):</p>
+  <pre><code>python scripts/make_figures.py --only redes-arboles-equipamiento</code></pre>
+
+  <h2>5 · Quiz (auto-chequeo inmediato)</h2>
+  <p class="meta">Elegí una opción por pregunta: el feedback es inmediato.</p>
+
+  <div class="quiz" id="q1">
+    <strong>P1 · El nodo ABS es grande porque…</strong>
+    <label><input type="radio" name="q1" value="0"> Que vale más dinero siempre</label>
+    <label><input type="radio" name="q1" value="1"> Que es el más nuevo</label>
+    <label><input type="radio" name="q1" value="2"> Que aparece en el 81%</label>
+    <label><input type="radio" name="q1" value="3"> Que tiene muchas más aristas</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <div class="quiz" id="q2">
+    <strong>P2 · La arista cierre+vidrios 54 % dice…</strong>
+    <label><input type="radio" name="q2" value="0"> Vienen juntos en el 54%</label>
+    <label><input type="radio" name="q2" value="1"> Uno siempre causa al otro</label>
+    <label><input type="radio" name="q2" value="2"> Suman 54 caballos entre ambos</label>
+    <label><input type="radio" name="q2" value="3"> Cuestan 54 euros siempre más</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <div class="quiz" id="q3">
+    <strong>P3 · El árbol acierta 86 % porque…</strong>
+    <label><input type="radio" name="q3" value="0"> Memoriza cada auto por entero</label>
+    <label><input type="radio" name="q3" value="1"> Edad y KM separan bien</label>
+    <label><input type="radio" name="q3" value="2"> Usa las 37 columnas siempre</label>
+    <label><input type="radio" name="q3" value="3"> Adivina siempre lo mismo igual</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <h2>6 · Fuente primaria y cierre</h2>
+  <p><strong>Para profundizar (1 fuente):</strong>
+  Géron, <em>Hands-On Machine Learning</em> — capítulo de árboles de decisión
+  (<a href="https://www.oreilly.com/library/view/hands-on-machine-learning/9781098125967/">O'Reilly</a>,
+  también en <a href="../RESOURCES.md">RESOURCES.md</a> del curso).</p>
+  <p>¿Algo no quedó claro? <strong>Preguntame al agente</strong>: cómo leer una arista, por qué la raíz pregunta
+  edad, o cuándo una red le gana a una tabla. Esa pregunta vale más que releer.</p>
+
+  <nav class="lesson-nav">
+    <a href="0012-multivariado-burbujas-heatmap.html">← 0012 Multivariado</a>
+    <a href="0014-mapas-texto-dos-visualizaciones.html">Siguiente: 0014 Mapas y texto →</a>
+  </nav>
+  <p class="meta">Ver también: <a href="../index.html">índice del curso</a> ·
+  <a href="../reference/toyota-data-dictionary.html">diccionario Toyota</a> ·
+  <a href="../reference/analisis-ejemplo-ols.html">análisis OLS de ejemplo</a></p>
+</main>
+<script>
+(function(){
+  var answers = {q1: 2, q2: 0, q3: 1};
+  var msgs = {
+    q1: ["Correcto: tamaño = soporte; ABS está en 81 % de los autos.",
+         "No: el tamaño del nodo codifica soporte (ABS: 81 %)."],
+    q2: ["Correcto: 54 % de los autos trae ambos extras juntos.",
+         "No: la arista mide co-ocurrencia, no causalidad ni precio."],
+    q3: ["Correcto: 2 preguntas bien puestas (edad, KM) casi alcanzan.",
+         "No: edad y KM separan bien; por eso 2 niveles bastan."]
+  };
+  ["q1","q2","q3"].forEach(function(id){
+    var box = document.getElementById(id);
+    var fb = box.querySelector(".feedback");
+    box.addEventListener("change", function(e){
+      var ok = parseInt(e.target.value, 10) === answers[id];
+      fb.textContent = ok ? msgs[id][0] : msgs[id][1];
+      fb.className = "feedback " + (ok ? "ok" : "no");
+    });
+  });
+})();
+</script>
+</body>
+</html>

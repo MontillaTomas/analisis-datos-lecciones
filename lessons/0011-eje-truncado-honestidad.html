@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>0011 · El eje truncado miente — Unidad 3</title>
+  <link rel="stylesheet" href="../assets/styles.css">
+</head>
+<body>
+<main>
+  <header class="course">
+    <p class="kicker">Unidad 3 · Visualización de datos · Lección 0011</p>
+    <h1>El eje truncado miente: foco sin perder contexto</h1>
+    <p><strong>Win de hoy:</strong> ver cómo el mismo promedio (diésel 11.295 € vs CNG 9.421 €) parece +20 %
+    o ×5 según dónde arranque el eje, y aprender cuándo truncar sí vale.</p>
+    <p class="meta"><a href="../index.html">← Índice</a> ·
+    <a href="../reference/toyota-data-dictionary.html">Diccionario Toyota</a> ·
+    <a href="../ToyotaCorolla.csv">CSV</a></p>
+  </header>
+
+  <h2>1 · El problema de la presentación: foco y contexto</h2>
+  <p>Todo gráfico negocia entre <strong><abbr title="Foco: el detalle que querés mostrar (la diferencia entre grupos)">foco</abbr></strong>
+  (el detalle: ¿cuánto más vale el diésel?) y
+  <strong><abbr title="Contexto: el marco completo que evita leer de más (el cero, el total)">contexto</abbr></strong>
+  (el marco: ¿20 % es mucho o poco?). Acercar el foco ayuda a ver… hasta que deforma. El caso clásico: truncar el <abbr title="Eje: línea de referencia con escala; truncarlo es empezarla lejos del 0">eje</abbr>
+  de un gráfico de barras.</p>
+
+  <h2>2 · La demo: +20 % que parece ×5</h2>
+  <p>Precio <abbr title="Media: promedio aritmético; los valores extremos la arrastran">medio</abbr> real: diésel 11.295 €, nafta 10.679 €, CNG 9.421 €. El diésel supera al CNG en
+  (11.295 − 9.421) / 9.421 = <strong>19,9 %</strong>. Con el eje en 0, las barras muestran eso: una diferencia
+  visible pero modesta. Pero si el eje arranca en 9.000, la barra del diésel mide 2.295 píxeles contra 421 del CNG:
+  <strong>5,45 veces más larga</strong>. Misma data, dos historias: el ojo compara largos, y el truncado le miente.</p>
+  <pre><code>med = df.groupby("Fuel_Type")["Price"].mean()
+ax.set_ylim(0, 13000)      # honesto: el largo es proporcional
+ax.set_ylim(9000, 12000)   # truncado: exagera ×5,4</code></pre>
+
+  <h2>3 · ¿Truncar está prohibido? No: depende de qué compare el ojo</h2>
+  <ul>
+    <li><strong>Barras y <abbr title="Torta: gráfico de porciones de un total; exige el contexto del 100 %">tortas</abbr>: no truncar.</strong> Comparan largo y área contra el 0; sin 0, la proporción se rompe.</li>
+    <li><strong>Líneas y scatters: suele valer.</strong> Comparan <em>posición</em>, no largo desde 0. La línea de
+    precio por año (0009) puede arrancar en 8.000 sin mentir: nadie mide el largo hasta el piso.</li>
+    <li><strong>Si truncás, avisá.</strong> Eje visible, rotulado, y —mejor— mostrar el contexto al lado (como la
+    figura de hoy: honesto vs truncado juntos).</li>
+  </ul>
+  <div class="callout"><strong>Regla Cairo:</strong> un gráfico debe ser <em>veraz</em> antes que impactante. Si tu
+  conclusión necesita el eje truncado para “verse”, probablemente la conclusión es más débil de lo que creés.</div>
+
+  <h2>4 · Figura: la misma data, dos honestidades</h2>
+  <figure>
+    <img src="../assets/img/toyota/0011-eje-truncado-honestidad-fig1.png" alt="Barras de precio medio con eje en cero y con eje truncado en 9000">
+    <figcaption>Fig. 1 — Izquierda: eje en 0, Diesel apenas supera a CNG (+20 %). Derecha: eje en 9.000, la misma
+    diferencia parece quíntuple. Los números no cambiaron; cambió el marco.</figcaption>
+  </figure>
+  <p>Regenerar la figura (mismo resultado versionado en <code>assets/img/toyota/</code>):</p>
+  <pre><code>python scripts/make_figures.py --only eje-truncado-honestidad</code></pre>
+
+  <h2>5 · Quiz (auto-chequeo inmediato)</h2>
+  <p class="meta">Elegí una opción por pregunta: el feedback es inmediato.</p>
+
+  <div class="quiz" id="q1">
+    <strong>P1 · Las barras honestas arrancan en…</strong>
+    <label><input type="radio" name="q1" value="0"> En cero siempre sin falta</label>
+    <label><input type="radio" name="q1" value="1"> En nueve mil justo siempre</label>
+    <label><input type="radio" name="q1" value="2"> En la media siempre general</label>
+    <label><input type="radio" name="q1" value="3"> Donde al relato convenga más</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <div class="quiz" id="q2">
+    <strong>P2 · El eje en 9.000 vuelve 20 % en…</strong>
+    <label><input type="radio" name="q2" value="0"> Nada porque todo queda igual</label>
+    <label><input type="radio" name="q2" value="1"> Casi quíntuple a simple vista</label>
+    <label><input type="radio" name="q2" value="2"> Cero porque todo se borra</label>
+    <label><input type="radio" name="q2" value="3"> Negativa y mirando hacia abajo</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <div class="quiz" id="q3">
+    <strong>P3 · Truncar el eje se permite en…</strong>
+    <label><input type="radio" name="q3" value="0"> Barras de conteos siempre fieles</label>
+    <label><input type="radio" name="q3" value="1"> Tortas de todo el total</label>
+    <label><input type="radio" name="q3" value="2"> Líneas que comparan por posición</label>
+    <label><input type="radio" name="q3" value="3"> Nada, nunca jamás se trunca</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <h2>6 · Fuente primaria y cierre</h2>
+  <p><strong>Para profundizar (1 fuente):</strong>
+  Cairo, <em>The Truthful Art</em> — capítulos de honestidad visual y manipulación con ejes y escalas
+  (<a href="https://www.thefunctionalart.com/p/the-truthful-art-book.html">thefunctionalart.com</a>, también en
+  <a href="../RESOURCES.md">RESOURCES.md</a> del curso).</p>
+  <p>¿Algo no quedó claro? <strong>Preguntame al agente</strong>: cuándo tu gráfico necesita el 0, cómo mostrar foco
+  y contexto juntos, o si tu conclusión sobrevive al eje honesto. Esa pregunta vale más que releer.</p>
+
+  <nav class="lesson-nav">
+    <a href="0010-color-con-criterio.html">← 0010 Color con criterio</a>
+    <a href="0012-multivariado-burbujas-heatmap.html">Siguiente: 0012 Multivariado →</a>
+  </nav>
+  <p class="meta">Ver también: <a href="../index.html">índice del curso</a> ·
+  <a href="../reference/toyota-data-dictionary.html">diccionario Toyota</a> ·
+  <a href="../reference/analisis-ejemplo-ols.html">análisis OLS de ejemplo</a></p>
+</main>
+<script>
+(function(){
+  var answers = {q1: 0, q2: 1, q3: 2};
+  var msgs = {
+    q1: ["Correcto: barras comparan largos y el largo se mide desde 0.",
+         "No: en barras el eje arranca en 0 o los largos mienten."],
+    q2: ["Correcto: 2.295 vs 421 píxeles = ×5,45 visual para +20 % real.",
+         "No: el truncado exagera ×5,45 una diferencia de 20 %."],
+    q3: ["Correcto: líneas comparan posición, no largo desde el piso.",
+         "No: líneas y scatters comparan posición; ahí truncar vale."]
+  };
+  ["q1","q2","q3"].forEach(function(id){
+    var box = document.getElementById(id);
+    var fb = box.querySelector(".feedback");
+    box.addEventListener("change", function(e){
+      var ok = parseInt(e.target.value, 10) === answers[id];
+      fb.textContent = ok ? msgs[id][0] : msgs[id][1];
+      fb.className = "feedback " + (ok ? "ok" : "no");
+    });
+  });
+})();
+</script>
+</body>
+</html>
