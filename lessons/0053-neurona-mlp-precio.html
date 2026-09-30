@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>0053 · La neurona y el MLP: precio Toyota con red neuronal — Bloque H</title>
+  <link rel="stylesheet" href="../assets/styles.css">
+</head>
+<body>
+<main>
+  <header class="course">
+    <p class="kicker">Bloque H · RNA en el análisis de datos · Lección 0053 · mié 25 nov</p>
+    <h1>La neurona y el MLP: tu primer precio predicho por una red</h1>
+    <p><strong>Win de hoy:</strong> una <strong>neurona</strong> es una suma ponderada más una activación que la dobla;
+    20 neuronas en una capa oculta predicen Price desde KM y Edad con
+    <strong>R² 0,83 en train y 0,82 en test</strong>. Y la lección gratis del día: sin escalar, la misma red
+    explota (R² −3,29 con miles de warnings).</p>
+    <p class="meta"><a href="../index.html">← Índice</a> ·
+    <a href="../reference/toyota-data-dictionary.html">Diccionario Toyota</a> ·
+    <a href="../ToyotaCorolla.csv">CSV</a></p>
+  </header>
+
+  <h2>1 · Qué es una RNA en una frase</h2>
+  <p>Una <strong><abbr title="RNA: red neuronal artificial, muchas neuronas chiquitas que aprenden de ejemplos">RNA</abbr></strong>
+  es muchas neuronas chiquitas que aprenden de ejemplos. Cada
+  <strong><abbr title="Neurona artificial: suma ponderada de sus entradas, pasada por una función de activación">neurona</abbr></strong>
+  hace solo dos cosas: primero una suma ponderada de sus entradas, después pasa ese resultado por una
+  <strong><abbr title="Función de activación: dobla la suma ponderada para agregar no-linealidad (sigmoide, ReLU)">función de activación</abbr></strong>
+  que la dobla. En símbolos, con dos entradas (KM y Edad): ŷ = f(w1·x1 + w2·x2 + b). Los
+  <strong><abbr title="Peso: número que aprende la red; multiplica cada entrada según su importancia">pesos</abbr></strong>
+  (w1, w2) dicen cuánto pesa cada entrada, y el
+  <strong><abbr title="Sesgo (bias): término extra que corre la suma aunque las entradas valgan cero">sesgo</abbr></strong>
+  (b) corre el total aunque las entradas valgan cero. Pesos y sesgo no se eligen a mano: la red los aprende (§2).</p>
+  <p>¿Por qué la activación f? Sin ella, la neurona sería una regresión lineal más (la de la
+  <a href="0003-regresion-lineal-precio-km.html">lección 0003</a>), y apilar lineales sobre lineales seguiría siendo
+  lineal. La activación es lo que le da a la red su poder: doblar rectas para seguir curvas. Ya conocés una:
+  la <a href="0034-regresion-logistica-roc.html">sigmoide de la lección 0034</a>, la S que aplasta cualquier número
+  al rango 0–1 — ahora reaparece como activación. La otra que importa hoy es la
+  <strong><abbr title="ReLU: activación que deja pasar lo positivo y corta lo negativo en cero">ReLU</abbr></strong>:
+  deja pasar lo positivo y corta lo negativo en cero. Dos líneas y listo: es la activación por defecto del §3
+  porque es barata y casi nunca se rompe.</p>
+
+  <h2>2 · El MLP, capa por capa</h2>
+  <p>El <strong><abbr title="MLP: perceptrón multicapa, red con una o más capas ocultas entre entrada y salida">MLP</abbr></strong>
+  (perceptrón multicapa) es la RNA más simple que sirve para datos tabulares como Toyota: tres pisos de neuronas.
+  <strong>Entrada:</strong> una neurona por feature (KM y Edad, estandarizados — el §3 muestra por qué es obligatorio).
+  <strong>Capa oculta:</strong> N neuronas ReLU que mezclan las entradas de N maneras distintas; es
+  <strong><abbr title="Capa oculta: neuronas entre la entrada y la salida; ahí vive la no-linealidad aprendida">oculta</abbr></strong>
+  porque nadie le dice qué debe valer: la red inventa ahí adentro las combinaciones que le sirven.
+  <strong>Salida:</strong> una neurona que junta todo y escupe el precio. Dibujo mental: 2 → 20 → 1.</p>
+  <p>¿Cómo aprende? En tres líneas, sin matemática. <strong>1) Forward:</strong> un auto viaja de izquierda a derecha
+  y sale una predicción (al principio, pésima). <strong>2)</strong> Se compara con el precio real y se mide el error.
+  <strong>3) <abbr title="Backprop: retropropagación, reparte el error hacia atrás ajustando cada peso un poquito">Backprop</abbr>:</strong>
+  el error se reparte hacia atrás, ajustando cada peso un poquito en la dirección que lo achica. Repetir miles de
+  veces con los 1436 autos hasta que el error deja de bajar: eso es entrenar (§4 muestra la curva).</p>
+
+  <h2>3 · Demo runnable: MLP sobre Toyota (~19 líneas)</h2>
+  <p>Todo con sklearn (en el stack del curso): <code>StandardScaler</code> + <code>MLPRegressor</code> con una capa
+  oculta de 20 neuronas, prediciendo Price con KM y Edad. Dos decisiones documentadas: escalo X <strong>y</strong>
+  también Price (anda por los miles y los gradientes explotan igual), y <code>max_iter=2000</code> es un techo —
+  la red frena sola cuando la mejora se achica (verdad: convergió en 95 iteraciones).</p>
+  <pre><code>import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.neural_network import MLPRegressor
+
+df = pd.read_csv("../ToyotaCorolla.csv")
+X = df[["KM", "Age_08_04"]].values
+y = df["Price"].values
+Xtr, Xte, ytr, yte = train_test_split(X, y, test_size=0.2, random_state=42)
+sc = StandardScaler().fit(Xtr)  # Xs: sin esto explota
+sy = StandardScaler().fit(ytr.reshape(-1, 1))  # Price igual
+Xtr_s = sc.transform(Xtr)
+Xte_s = sc.transform(Xte)
+ytr_s = sy.transform(ytr.reshape(-1, 1)).ravel()
+yte_s = sy.transform(yte.reshape(-1, 1)).ravel()
+mlp = MLPRegressor(hidden_layer_sizes=(20,), max_iter=2000, random_state=42)
+mlp.fit(Xtr_s, ytr_s)
+print("iters:", mlp.n_iter_, "| loss final:", round(float(mlp.loss_), 4))
+print("R² train:", round(mlp.score(Xtr_s, ytr_s), 4))
+print("R² test:", round(mlp.score(Xte_s, yte_s), 4))</code></pre>
+  <p>Salida real (semilla 42, split 80/20): <code>iters: 95 | loss final: 0.0869</code>,
+  <code>R² train: 0.8263</code>, <code>R² test: 0.8185</code>. Línea honesta: la regresión lineal con las mismas 2
+  features da R² 0,79/0,78 — con 2 features el lineal de la
+  <a href="0003-regresion-lineal-precio-km.html">lección 0003</a> compite; el MLP brilla cuando la relación se tuerce
+  (no-linealidad de verdad, no este caso casi-recto).</p>
+  <p>La enseñanza del día: el mismo código <strong>sin</strong> escalar escupe miles de
+  <code>RuntimeWarning</code> (overflow en las multiplicaciones), frena a las 32 iteraciones con loss 28,7 millones y
+  termina en R² −3,38/−3,29 — peor que predecir siempre la media. Ojo honesto: con scaler también aparecen warnings
+  sueltos al inicio (este entorno avisa mucho), pero la red igual converge — 95 iters, loss 0,0869, R² 0,83/0,82 —,
+  mientras que sin scaler diverge y frena rota. Moraleja: los Xs de la
+  <a href="0028-distancias-similaridad.html">lección 0028 §4</a> (un voto por variable) y la
+  <a href="0029-kmeans-segmentos.html">lección 0029</a> valen otra vez acá: el MLP vive de comparar magnitudes, y KM
+  crudo (~70.000) aplasta a todo lo demás.</p>
+
+  <h2>4 · Figura: la neurona y su curva de aprendizaje</h2>
+  <figure>
+    <img src="../assets/img/toyota/0053-neurona-mlp-precio-fig1.png" alt="Esquema de neurona y pérdida del MLP por iteración">
+    <figcaption>Fig. 1 — Izquierda: la neurona del §1 (entradas × pesos + sesgo, suma Σ, ReLU, precio).
+    Derecha: pérdida del MLP del §3 por iteración (semilla 42): cae rápido y converge en 95 iters
+    (loss final 0,0869).</figcaption>
+  </figure>
+  <p>Regenerar la figura (mismo resultado versionado en <code>assets/img/toyota/</code>):</p>
+  <pre><code>python3 scripts/make_figures.py --only neurona-mlp-precio</code></pre>
+
+  <h2>5 · Quiz (auto-chequeo inmediato)</h2>
+  <p class="meta">Elegí una opción por pregunta: el feedback es inmediato.</p>
+
+  <div class="quiz" id="q1">
+    <strong>P1 · La activación sirve para…</strong>
+    <label><input type="radio" name="q1" value="0"> Doblar la recta con no-linealidad</label>
+    <label><input type="radio" name="q1" value="1"> Sumar pesos sin cambiar nada</label>
+    <label><input type="radio" name="q1" value="2"> Ordenar los datos al entrenar</label>
+    <label><input type="radio" name="q1" value="3"> Fijar la semilla del sorteo</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <div class="quiz" id="q2">
+    <strong>P2 · Sin escalar, el MLP de hoy…</strong>
+    <label><input type="radio" name="q2" value="0"> Explota: R² negativo con warnings</label>
+    <label><input type="radio" name="q2" value="1"> Converge igual pero más lento</label>
+    <label><input type="radio" name="q2" value="2"> Ignora KM y usa Edad</label>
+    <label><input type="radio" name="q2" value="3"> Pide más capas ocultas siempre</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <div class="quiz" id="q3">
+    <strong>P3 · Con backprop, cada peso aprende…</strong>
+    <label><input type="radio" name="q3" value="0"> Su parte del error atrás</label>
+    <label><input type="radio" name="q3" value="1"> El promedio de la columna</label>
+    <label><input type="radio" name="q3" value="2"> Un valor fijo sin entrenar</label>
+    <label><input type="radio" name="q3" value="3"> La semilla aleatoria del inicio</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <h2>6 · Fuente primaria y cierre</h2>
+  <p><strong>Para profundizar (1 fuente + docs):</strong>
+  James, Witten, Hastie &amp; Tibshirani, <em>An Introduction to Statistical Learning</em> — cap. 10
+  (redes neuronales). Secundaria: docs de sklearn
+  (<a href="https://scikit-learn.org/stable/modules/neural_networks_supervised.html">MLPRegressor</a>).
+  Más contexto en <a href="../RESOURCES.md">RESOURCES</a>.</p>
+  <p>Cierre: neurona (§1) → MLP capa por capa (§2) → precio Toyota con R² 0,82 (§3–§4).
+  Siguiente: <a href="0054-arquitecturas-criterios-cierre.html">0054 (mar 1 dic: arquitecturas, overfitting
+  y cuándo usar cada una)</a>.</p>
+
+  <nav class="lesson-nav">
+    <a href="0052-fpgrowth-eclat-sin-candidatos.html">← 0052 FP-Growth</a>
+    <a href="../index.html">Índice ↑</a>
+    <a href="0054-arquitecturas-criterios-cierre.html">0054 Arquitecturas →</a>
+  </nav>
+</main>
+<script>
+(function(){
+  var answers = {q1: 0, q2: 0, q3: 0};
+  var msgs = {
+    q1: ["Correcto: sin activación todo es lineal.",
+         "No: la activación dobla la recta."],
+    q2: ["Correcto: sin Xs, overflow y R² negativo.",
+         "No: sin escalar explota (§3)."],
+    q3: ["Correcto: backprop reparte el error.",
+         "No: cada peso ajusta su parte."]
+  };
+  ["q1","q2","q3"].forEach(function(id){
+    var box = document.getElementById(id);
+    var fb = box.querySelector(".feedback");
+    box.addEventListener("change", function(e){
+      var ok = parseInt(e.target.value, 10) === answers[id];
+      fb.textContent = ok ? msgs[id][0] : msgs[id][1];
+      fb.className = "feedback " + (ok ? "ok" : "no");
+    });
+  });
+})();
+</script>
+</body>
+</html>

@@ -163,6 +163,14 @@ FIGURE_REGISTRY: dict[str, list[tuple[str, str, str]]] = {
         ("0031-validar-grupos-codo-silueta-fig1.png", "fig_u7_val",
          "Codo de inercia + silueta por k (premia k=2)."),
     ],
+    "kmedoids-medoides-robustos": [
+        ("0050-kmedoids-medoides-robustos-fig1.png", "fig_u7_kmedoids",
+         "PAM k=3: medoides (★, autos reales) vs centroides (X)."),
+    ],
+    "calidad-ventajas-cierre": [
+        ("0051-calidad-ventajas-cierre-fig1.png", "fig_u7_estabilidad",
+         "Estabilidad K-Means k=3: silueta por semilla."),
+    ],
     "pca-biplot-pcr": [
         ("0032-pca-biplot-pcr-fig1.png", "fig_u7_pca",
          "Scree 8 vars + biplot PC1-PC2 con clusters."),
@@ -203,6 +211,10 @@ FIGURE_REGISTRY: dict[str, list[tuple[str, str, str]]] = {
         ("0041-algoritmo-apriori-fig1.png", "fig_u9_apriori",
          "Candidatos vs frecuentes por nivel + total vs min_sop."),
     ],
+    "fpgrowth-eclat-sin-candidatos": [
+        ("0052-fpgrowth-eclat-sin-candidatos-fig1.png", "fig_u9_alternativas",
+         "Mismo resultado, distinto costo: pasadas y candidatos por algoritmo."),
+    ],
     "inferencia-pvalor-t": [
         ("0042-inferencia-pvalor-t-fig1.png", "fig_u6_inf",
          "Distribución t con zonas de rechazo + barras t por variable."),
@@ -210,6 +222,16 @@ FIGURE_REGISTRY: dict[str, list[tuple[str, str, str]]] = {
     "metricas-split-80-20": [
         ("0043-metricas-split-80-20-fig1.png", "fig_u6_met",
          "RMSE/MAE simple vs múltiple en test + MAPE/R²."),
+    ],
+    "remuestreo-bootstrap-cv": [
+        ("0047-remuestreo-bootstrap-cv-fig1.png", "fig_u6_cvboot",
+         "K-Fold k=5 + bootstrap de β₁ KM (1000 réplicas, IC 95 %)."),
+    ],
+    "salida-tercera-parte-residuales-mse": [
+        ("0048-salida-tercera-parte-residuales-mse-fig1.png", "fig_u6_tercera",
+         "Residuos OLS múltiple: tests de normalidad + efecto log."),
+        ("0048-salida-tercera-parte-residuales-mse-fig2.png", "fig_u6_tercera_mse",
+         "MSE/RMSE/MAE en test: simple vs múltiple."),
     ],
     "anova-comparar-medias": [
         ("0044-anova-comparar-medias-fig1.png", "fig_u6_anova",
@@ -222,6 +244,30 @@ FIGURE_REGISTRY: dict[str, list[tuple[str, str, str]]] = {
     "transformaciones-log-discretizar": [
         ("0046-transformaciones-log-discretizar-fig1.png", "fig_u2_trans",
          "Price crudo vs log (skew) + edad discretizada."),
+    ],
+    "tecnologias-stack-clase": [  # Bloque A
+        ("0049-tecnologias-stack-clase-fig1.png", "fig_u0_stack_check",
+         "Versiones instaladas + histograma Price (prueba de entorno)."),
+    ],
+    "neurona-mlp-precio": [
+        ("0053-neurona-mlp-precio-fig1.png", "fig_u10_neurona_loss",
+         "Neurona artificial y pérdida del MLP por iteración."),
+    ],
+    "arquitecturas-criterios-cierre": [
+        ("0054-arquitecturas-criterios-cierre-fig1.png", "fig_u10_capacidad",
+         "Más capacidad: train sube, validación se dobla."),
+    ],
+    "one-hot-encoding": [
+        ("0055-one-hot-encoding-fig1.png", "fig_u2_onehot_fuel",
+         "Barras de Fuel_Type + matriz dummy 0/1 (get_dummies 1436x3)."),
+    ],
+    "intervalos-confianza": [
+        ("0056-intervalos-confianza-fig1.png", "fig_u6_ic_beta",
+         "IC 95% de beta: KM lejos de 0 vs Mfg_Month cruzando 0."),
+    ],
+    "errores-tipo-1-2": [
+        ("0057-errores-tipo-1-2-fig1.png", "fig_u6_errores_tipo",
+         "Colas alfa=5% bajo H0 + tabla 2x2 de errores tipo I/II."),
     ],
 }
 
@@ -283,7 +329,8 @@ def fig_u1_bias_variance_tradeoff(out: Path) -> Path:
     ax.axhline(1.0, linestyle="--", label="Error irreducible (ruido)", color="#7f7f7f")
     ax.axvline(k_opt, linestyle=":", linewidth=1.5, color="#333333")
     ax.text(k_opt + 0.15, float(total.min()) + 0.15, "óptimo\n(no sobre ni sub)",
-            fontsize=9)
+            fontsize=9, bbox=dict(boxstyle="round,pad=0.3", facecolor="white",
+                                  edgecolor="none", alpha=0.85))
     ax.set_xlabel("Complejidad del modelo → (underfit a la izquierda, overfit a la derecha)")
     ax.set_ylabel("Error")
     ax.set_title("Bias–variance tradeoff: el error total es mínimo en el medio")
@@ -571,6 +618,7 @@ def fig_u2_wrangling_validacion(out: Path) -> Path:
     axes[0].set_title("Premio del wrangling: precio medio por motor extraído")
     axes[0].set_xlabel("Motor extraído del texto (litros)")
     axes[0].set_ylabel("Precio medio (€)")
+    axes[0].set_ylim(0, float(precio.values.max()) * 1.28)
     for i, (v, n) in enumerate(zip(precio.values, n_motor.values)):
         axes[0].text(i, v + 200, f"{v:,.0f}€\n(n={n})".replace(",", "."),
                      ha="center", fontsize=8)
@@ -580,7 +628,7 @@ def fig_u2_wrangling_validacion(out: Path) -> Path:
     axes[1].set_title("Validación: ¿el texto dice lo mismo que la columna?")
     axes[1].set_xlabel("Comparación")
     axes[1].set_ylabel("% de acuerdo")
-    axes[1].set_ylim(0, 100)
+    axes[1].set_ylim(0, 118)
     for i, v in enumerate([acuerdo_cc, acuerdo_doors]):
         axes[1].text(i, v + 1, f"{v:.1f}%", ha="center", fontsize=10)
 
@@ -618,6 +666,7 @@ def fig_u2_eda_tramos_corr(out: Path) -> Path:
     for i, (v, n) in enumerate(zip(med.values, cnt.values)):
         axes[0].text(i, v + 250, f"{v:,.0f}€\n(n={n})".replace(",", "."),
                      ha="center", fontsize=8)
+    axes[0].set_ylim(0, med.max() * 1.28)
 
     colores = ["#d62728" if c == "Id" else "#2ca02c" for c in top.index]
     axes[1].barh(top.index.tolist()[::-1], top.values.tolist()[::-1], color=colores[::-1])
@@ -1084,7 +1133,7 @@ def fig_u4_simple(out: Path) -> Path:
     axes[1].set_xlabel("Estimación de la media de Price")
     axes[1].set_ylabel("Sesgo vs media real (€)")
     for i, v in enumerate(sesgos):
-        axes[1].text(i, v + (8 if v >= 0 else -18), f"{v:+,.0f} €".replace(",", "."),
+        axes[1].text(i, v + 8, f"{v:+,.0f} €".replace(",", "."),
                      ha="center", fontsize=10)
 
     fig.suptitle("Relleno simple aplana; reponderar corrige sin rellenar",
@@ -1909,6 +1958,7 @@ def fig_u7_jer(out: Path) -> Path:
     dendrogram(Z, truncate_mode="lastp", p=12, ax=axes[0],
                color_threshold=corte3)
     axes[0].axhline(corte3, color="#d62728", linestyle="--", linewidth=1.2)
+    axes[0].tick_params(axis="x", labelrotation=35, labelsize=8)
     axes[0].set_title("Dendrograma Ward (corte → 3 grupos)")
     axes[0].set_xlabel("Autos (últimas 12 juntadas)")
     axes[0].set_ylabel("Distancia de juntada")
@@ -1974,6 +2024,147 @@ def fig_u7_val(out: Path) -> Path:
         axes[1].text(i, v + 0.01, f"{v:.2f}", ha="center", fontsize=8)
 
     fig.suptitle("Validar: métricas guían, negocio decide (k=3)", fontsize=11)
+    fig.tight_layout()
+    out.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(out, dpi=100)
+    plt.close(fig)
+    return out
+
+
+def fig_u7_kmedoids(out: Path) -> Path:
+    """PAM k=3: medoides (autos reales) vs centroides K-Means."""
+    _need_deps()
+    import warnings
+    import numpy as np
+    import pandas as pd
+    import matplotlib.pyplot as plt
+    from sklearn.cluster import KMeans
+    from sklearn.metrics import pairwise_distances
+
+    df = pd.read_csv(CSV)
+    cols = ["KM", "Price", "Age_08_04"]
+    X = df[cols].to_numpy(dtype=float)
+    mu, sd = X.mean(axis=0), X.std(axis=0)
+    Xs = (X - mu) / sd
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        km = KMeans(n_clusters=3, n_init=10, random_state=42).fit(Xs)
+    cent = km.cluster_centers_ * sd + mu
+
+    # PAM (idéntico al snippet enseñable de 0050 §2).
+    D = pairwise_distances(Xs)
+    rng = np.random.default_rng(42)
+    med = np.sort(rng.choice(len(Xs), 3, replace=False))
+
+    def costo(m):
+        return D[:, m].min(axis=1).sum()
+
+    actual = costo(med)
+    mejora = True
+    while mejora:
+        mejora = False
+        for i, m in enumerate(med):
+            for j in range(len(Xs)):
+                if j in med:
+                    continue
+                prueba = med.copy()
+                prueba[i] = j
+                if costo(prueba) < actual:
+                    med, actual, mejora = np.sort(prueba), costo(prueba), True
+    g = D[:, med].argmin(axis=1)
+    med_crudo = X[med]
+
+    # Nombres por precio medio del grupo PAM.
+    precio = np.array([df.loc[g == i, "Price"].mean() for i in range(3)])
+    por_precio = np.argsort(precio)
+    nombres = {int(por_precio[0]): "veteranos",
+               int(por_precio[1]): "medios", int(por_precio[2]): "nuevitos"}
+    colores = {int(por_precio[0]): "#ff7f0e", int(por_precio[1]): "#0b5cad",
+               int(por_precio[2]): "#2ca02c"}
+
+    fig, ax = plt.subplots(figsize=(12, 4.6))
+    for i in range(3):
+        m = g == i
+        ax.scatter(df.loc[m, "KM"], df.loc[m, "Price"], s=10, alpha=0.45,
+                   color=colores[i],
+                   label=f"{nombres[i]} PAM (n={int(m.sum())})")
+    ax.scatter(cent[:, 0], cent[:, 1], s=220, marker="X", color="#d62728",
+               edgecolors="#333333", linewidths=1.2, zorder=3,
+               label="Centroides K-Means (0029)")
+    ax.scatter(med_crudo[:, 0], med_crudo[:, 1], s=260, marker="*",
+               color="black", edgecolors="white", linewidths=0.8, zorder=4,
+               label="Medoides PAM (filas 75/515/1193)")
+    for i in range(3):
+        ax.annotate(f"fila {med[i]}", fontsize=9,
+                    xy=(med_crudo[i, 0], med_crudo[i, 1]), xytext=(8, 8),
+                    textcoords="offset points")
+    out109 = df.index[df["Price"] == 32500][0]
+    ax.annotate("Corolla 32.500 €\n(tira la media)",
+                xy=(df.loc[out109, "KM"], df.loc[out109, "Price"]),
+                xytext=(15, -30), textcoords="offset points", fontsize=9,
+                bbox=dict(boxstyle="round,pad=0.3", facecolor="white",
+                          edgecolor="#333333", alpha=0.95),
+                arrowprops=dict(arrowstyle="->", color="#333333"))
+    ax.set_title("PAM k=3: medoides ★ (reales) caen sobre centroides X (ideales)")
+    ax.set_xlabel("KM")
+    ax.set_ylabel("Precio (€)")
+    ax.legend(fontsize=9)
+
+    fig.suptitle("K-medoids: mismos 3 segmentos, inmunes al outlier", fontsize=11)
+    fig.tight_layout()
+    out.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(out, dpi=100)
+    plt.close(fig)
+    return out
+
+
+def fig_u7_estabilidad(out: Path) -> Path:
+    """Estabilidad K-Means k=3: silueta por semilla (10/10 iguales)."""
+    _need_deps()
+    import warnings
+    import numpy as np
+    import pandas as pd
+    import matplotlib.pyplot as plt
+    from sklearn.cluster import KMeans
+    from sklearn.metrics import silhouette_score
+
+    df = pd.read_csv(CSV)
+    X = df[["KM", "Price", "Age_08_04"]].to_numpy(dtype=float)
+    Xs = (X - X.mean(axis=0)) / X.std(axis=0)
+    n = len(Xs)
+    sils, labs = [], []
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        for s in range(10):
+            m = KMeans(n_clusters=3, n_init=10, random_state=s).fit(Xs)
+            labs.append(m.labels_)
+            sils.append(silhouette_score(Xs, m.labels_))
+    sils = np.array(sils)
+    media, desv = sils.mean(), sils.std(ddof=1)
+    iu = np.triu_indices(n, k=1)
+    acuerdos = [float((((a[:, None] == a[None, :])[iu]) ==
+                       ((b[:, None] == b[None, :])[iu])).mean())
+                for x, a in enumerate(labs) for b in labs[x + 1:]]
+    acuerdo = float(np.mean(acuerdos))
+
+    fig, ax = plt.subplots(figsize=(12, 4.6))
+    ax.bar([str(s) for s in range(10)], sils, color="#0b5cad")
+    ax.axhline(media, color="#d62728", linewidth=2,
+               label=f"Media {media:.4f} ± {desv:.4f}")
+    ax.set_ylim(0.30, 0.44)
+    for i, v in enumerate(sils):
+        ax.text(i, v + 0.004, f"{v:.2f}", ha="center", fontsize=8)
+    ax.text(0.98, 0.92,
+            f"Pares que quedan juntos:\n{acuerdo * 100:.0f} % (45/45 comparaciones)",
+            transform=ax.transAxes, ha="right", va="top", fontsize=10,
+            bbox=dict(boxstyle="round", facecolor="#eef6ee",
+                      edgecolor="#2ca02c"))
+    ax.set_title("Estabilidad k=3: silueta 0,37 en las 10 semillas")
+    ax.set_xlabel("Semilla (random_state)")
+    ax.set_ylabel("Silueta media (−1…+1)")
+    ax.legend(fontsize=9)
+
+    fig.suptitle("Estable: el k=3 no depende del arranque", fontsize=11)
     fig.tight_layout()
     out.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out, dpi=100)
@@ -2536,6 +2727,46 @@ def fig_u9_apriori(out: Path) -> Path:
     return out
 
 
+def fig_u9_alternativas(out: Path) -> Path:
+    """Apriori vs FP-Growth vs ECLAT: pasadas y candidatos (mismos frecuentes)."""
+    _need_deps()
+    import pandas as pd
+    import matplotlib.pyplot as plt
+
+    B = pd.read_csv(CSV)[EQUIPO_U9]
+    lv04 = _apriori_levels(B, EQUIPO_U9, 0.4)
+    n_pasadas = len(lv04)
+    n_cand = sum(c for c, _ in lv04)
+    n_freq = sum(f for _, f in lv04)
+    assert n_freq == 280, lv04
+    assert n_pasadas == 7, lv04
+    assert n_cand == 322, lv04
+
+    algos = ["Apriori", "FP-Growth", "ECLAT"]
+    pasadas = [n_pasadas, 2, 1]
+    cands = [n_cand, 0, 0]
+    fig, axes = plt.subplots(1, 2, figsize=(12, 4.8))
+    bars = axes[0].bar(algos, pasadas, color=["#0ea5e9", "#16a34a", "#8b5cf6"])
+    for b, v in zip(bars, pasadas):
+        axes[0].text(b.get_x() + b.get_width() / 2, v + 0.1, str(v),
+                     ha="center", fontsize=12)
+    axes[0].set_ylabel("Pasadas completas sobre el dataset")
+    axes[0].set_title("Pasadas (min_sop=0,4, 280 frecuentes)")
+    axes[0].set_ylim(0, 8)
+    bars = axes[1].bar(algos, cands, color=["#0ea5e9", "#16a34a", "#8b5cf6"])
+    axes[1].text(bars[0].get_x() + bars[0].get_width() / 2, n_cand + 8, str(n_cand),
+                 ha="center", fontsize=12)
+    axes[1].text(1, 12, "0\n(árbol directo)", ha="center", fontsize=10)
+    axes[1].text(2, 12, "0\n(intersecciones)", ha="center", fontsize=10)
+    axes[1].set_ylabel("Candidatos generados y contados")
+    axes[1].set_title("Candidatos: Apriori 322 vs 0 y 0")
+    fig.tight_layout()
+    out.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(out, dpi=100)
+    plt.close(fig)
+    return out
+
+
 BASURA_REF_U6 = ["Id", "Met_Color", "Airbag_1", "Airbag_2", "Gears", "Mistlamps",
                 "Radio_cassette", "Power_Steering", "Backseat_Divider", "Central_Lock",
                 "Radio", "cc", "Doors", "Cilynders", "CD_Player", "Airco", "Automatic",
@@ -2813,9 +3044,522 @@ def fig_u2_trans(out: Path) -> Path:
     for b, c in zip(bars, [cnt[i] for i in med.index]):
         axes[1].text(b.get_x() + b.get_width() / 2, b.get_height() + 150,
                      "%.0f €\n(n=%d)" % (b.get_height(), c), ha="center", fontsize=9)
+    axes[1].set_ylim(0, med.max() * 1.25)
     axes[1].set_ylabel("Precio medio (€)")
     axes[1].set_xlabel("Edad discretizada en cuartiles")
     axes[1].set_title("Discretizar: número → tramo con sentido")
+    fig.tight_layout()
+    out.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(out, dpi=100)
+    plt.close(fig)
+    return out
+
+
+def fig_u6_cvboot(out: Path) -> Path:
+    """Remuestreo Price~KM: esquema KFold k=5 + R² por fold y bootstrap de β₁."""
+    _need_deps()
+    import numpy as np
+    import pandas as pd
+    import matplotlib.pyplot as plt
+    from matplotlib import patches
+    from sklearn.model_selection import KFold, cross_val_score
+    from sklearn.linear_model import LinearRegression
+
+    d = pd.read_csv(CSV).dropna(subset=["Price", "KM"])
+    X, y = d[["KM"]], d["Price"]
+    m = LinearRegression()
+    kf = KFold(n_splits=5, shuffle=True, random_state=42)
+    r2 = cross_val_score(m, X, y, cv=kf, scoring="r2")
+    assert abs(r2.mean() - 0.315) < 0.005, r2
+    assert abs(r2.std() - 0.034) < 0.005, r2
+
+    rng = np.random.default_rng(42)
+    Xv, yv = d["KM"].values, d["Price"].values
+    n = len(d)
+    Xm = Xv - Xv.mean()
+    b0 = float((Xm * (yv - yv.mean())).sum() / (Xm ** 2).sum())
+    betas = np.empty(1000)
+    for i in range(1000):
+        idx = rng.integers(0, n, n)
+        xb, yb = Xv[idx], yv[idx]
+        xc = xb - xb.mean()
+        betas[i] = (xc * (yb - yb.mean())).sum() / (xc ** 2).sum()
+    lo, hi = np.percentile(betas, [2.5, 97.5])
+    assert abs(b0 - -0.0551) < 0.001, b0
+    assert abs(lo - -0.0606) < 0.002 and abs(hi - -0.0507) < 0.002, (lo, hi)
+
+    fig = plt.figure(figsize=(12, 5.2))
+    gs = fig.add_gridspec(1, 2, width_ratios=[1.05, 1])
+    ax0 = fig.add_subplot(gs[0, 0])
+    folds = np.arange(1, 6)
+    cols = ["#0ea5e9"] * 5
+    cols[int(np.argmin(r2))] = "#f59e0b"
+    bars = ax0.bar(folds, r2, color=cols, edgecolor="black")
+    ax0.axhline(r2.mean(), color="#dc2626", ls="--",
+                label="Media %.3f ± %.3f" % (r2.mean(), r2.std()))
+    for b, v in zip(bars, r2):
+        ax0.text(b.get_x() + b.get_width() / 2, v + 0.008, "%.3f" % v,
+                 ha="center", fontsize=10)
+    ax0.set_xticks(folds)
+    ax0.set_xlabel("Fold de test (k=5, barajado, semilla 42)")
+    ax0.set_ylabel("R² en test")
+    ax0.set_title("Validación cruzada: R² por fold")
+    ax0.set_ylim(0, 0.60)
+    ax0.legend(loc="lower right")
+    for i in range(5):
+        for j in range(5):
+            fc = "#dc2626" if i == j else "#e2e8f0"
+            ax0.add_patch(patches.Rectangle((0.60 + j * 0.072, 0.80 - i * 0.042),
+                                            0.062, 0.032, transform=ax0.transAxes,
+                                            facecolor=fc, edgecolor="black",
+                                            lw=0.8))
+    ax0.text(0.60, 0.875, "Esquema KFold: rojo = test, gris = train",
+             transform=ax0.transAxes, fontsize=8)
+    ax1 = fig.add_subplot(gs[0, 1])
+    ax1.hist(betas, bins=40, color="#0ea5e9", edgecolor="black", alpha=0.8)
+    ax1.axvline(b0, color="#dc2626", lw=2, label="β₁ puntual %.4f" % b0)
+    ax1.axvspan(lo, hi, color="#16a34a", alpha=0.25,
+                label="IC 95 %% [%.4f, %.4f]" % (lo, hi))
+    ax1.set_xlabel("Pendiente β₁ (€/km, 1000 réplicas bootstrap)")
+    ax1.set_ylabel("Réplicas")
+    ax1.set_title("Bootstrap con reposición: β₁ nunca cruza 0")
+    ax1.legend(fontsize=9)
+    fig.tight_layout()
+    out.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(out, dpi=100)
+    plt.close(fig)
+    return out
+
+
+def fig_u6_tercera(out: Path) -> Path:
+    """Tercera parte del summary OLS-9vars: residuos + efecto log en skew."""
+    _need_deps()
+    import numpy as np
+    import pandas as pd
+    import matplotlib.pyplot as plt
+    import statsmodels.api as sm
+
+    df = pd.read_csv(CSV)
+    dl = df[df.select_dtypes(include=[np.number]).columns].copy()
+    basura = ["Id", "Met_Color", "Airbag_1", "Airbag_2", "Gears", "Mistlamps",
+              "Radio_cassette", "Power_Steering", "Backseat_Divider",
+              "Central_Lock", "Radio", "cc", "Doors", "Cilynders", "CD_Player",
+              "Airco", "Automatic", "Tow_Bar", "Boardcomputer", "Metallic_Rim",
+              "Mfg_Year", "Mfr_Guarantee", "Cylinders", "ABS", "Sport_Model",
+              "Age_08_04"]
+    dl = dl.drop(columns=[c for c in basura if c in dl.columns]).fillna(dl.mean())
+    m = sm.OLS(dl["Price"], sm.add_constant(dl.drop(columns=["Price"]))).fit()
+    res = m.resid.values
+    from scipy import stats as st
+    from statsmodels.stats.stattools import omni_normtest, jarque_bera, durbin_watson
+    omni = float(omni_normtest(res)[0])
+    jb = float(jarque_bera(res)[0])
+    dw = float(durbin_watson(res))
+    skew, kurt = float(st.skew(res)), float(st.kurtosis(res, fisher=False))
+    assert abs(omni - 84.3) < 1.0, omni
+    assert abs(skew - -0.12) < 0.03, skew
+    assert abs(kurt - 5.28) < 0.1, kurt
+    assert abs(jb - 315.4) < 2.0, jb
+    assert abs(dw - 1.08) < 0.03, dw
+    sk_raw = float(st.skew(df["Price"]))
+    sk_log = float(st.skew(np.log1p(df["Price"])))
+    assert abs(sk_raw - 1.70) < 0.03, sk_raw
+    assert abs(sk_log - 0.73) < 0.03, sk_log
+
+    fig, axes = plt.subplots(1, 2, figsize=(12, 4.8))
+    axes[0].hist(res, bins=50, color="#0ea5e9", edgecolor="black", alpha=0.8,
+                 density=True)
+    xs = np.linspace(res.min(), res.max(), 300)
+    axes[0].plot(xs, st.norm.pdf(xs, res.mean(), res.std()), color="#dc2626",
+                 lw=2, label="Normal misma media/desvío")
+    axes[0].set_xlabel("Residuo OLS múltiple (€)")
+    axes[0].set_ylabel("Densidad")
+    axes[0].set_title("Residuos casi normales, colas pesadas")
+    axes[0].legend(fontsize=9)
+    axes[0].text(0.97, 0.95,
+                 "Omnibus %.1f (p≈0)\nSkew %.2f\nKurtosis %.2f\nJB %.1f (p≈0)\nDW %.2f"
+                 % (omni, skew, kurt, jb, dw), transform=axes[0].transAxes,
+                 ha="right", va="top", fontsize=10,
+                 bbox=dict(facecolor="white", edgecolor="black", alpha=0.9))
+    bars = axes[1].bar(["Price crudo", "log1p(Price)"], [sk_raw, sk_log],
+                       color=["#f59e0b", "#16a34a"], edgecolor="black")
+    axes[1].axhspan(-0.5, 0.5, color="#16a34a", alpha=0.15,
+                    label="Simétrico ±0,5 (cátedra)")
+    axes[1].axhspan(0.5, 1.0, color="#f59e0b", alpha=0.15,
+                    label="Moderado 0,5–1")
+    for b in bars:
+        axes[1].text(b.get_x() + b.get_width() / 2, b.get_height() + 0.04,
+                     "%.2f" % b.get_height(), ha="center", fontsize=11)
+    axes[1].set_ylabel("Skew (asimetría)")
+    axes[1].set_title("El log baja el skew de 1,70 a 0,73")
+    axes[1].legend(fontsize=9)
+    fig.tight_layout()
+    out.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(out, dpi=100)
+    plt.close(fig)
+    return out
+
+
+def fig_u6_tercera_mse(out: Path) -> Path:
+    """MSE/RMSE/MAE en test 80/20: simple (KM) vs múltiple (5 vars)."""
+    _need_deps()
+    import warnings
+    import numpy as np
+    import pandas as pd
+    import matplotlib.pyplot as plt
+    from sklearn.model_selection import train_test_split
+    from sklearn.linear_model import LinearRegression
+    from sklearn.metrics import mean_squared_error, mean_absolute_error
+
+    cols = ["Age_08_04", "KM", "HP", "cc", "Weight"]
+    d = pd.read_csv(CSV).dropna(subset=cols + ["Price"])
+    res = {}
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        for nom, cn in [("Simple\n(solo KM)", ["KM"]), ("Múltiple\n(5 vars)", cols)]:
+            Xtr, Xte, ytr, yte = train_test_split(d[cn], d["Price"],
+                                                  test_size=0.2, random_state=42)
+            m = LinearRegression().fit(Xtr, ytr)
+            yp = m.predict(Xte)
+            mse = mean_squared_error(yte, yp)
+            res[nom] = {"mse": mse, "rmse": mse ** 0.5,
+                        "mae": mean_absolute_error(yte, yp)}
+    s, q = res["Simple\n(solo KM)"], res["Múltiple\n(5 vars)"]
+    assert abs(s["rmse"] - 2988.3) < 2.0, res
+    assert abs(s["mae"] - 2146.6) < 2.0, res
+    assert abs(q["rmse"] - 1412.8) < 2.0, res
+    assert abs(q["mae"] - 998.5) < 2.0, res
+
+    fig, axes = plt.subplots(1, 2, figsize=(12, 4.8))
+    x = np.arange(2)
+    w = 0.35
+    names = list(res.keys())
+    mses = [res[k]["mse"] / 1e6 for k in names]
+    b1 = axes[0].bar(x, mses, w * 1.6, color="#dc2626", edgecolor="black",
+                     label="MSE = RSS/n (test)")
+    for b, v in zip(b1, [res[k]["mse"] for k in names]):
+        axes[0].text(b.get_x() + b.get_width() / 2, b.get_height() + 0.1,
+                     "%.2f M€²" % (v / 1e6), ha="center", fontsize=11)
+    axes[0].set_xticks(x)
+    axes[0].set_xticklabels(names)
+    axes[0].set_ylabel("MSE en test (millones de €²)")
+    axes[0].set_title("MSE: 8,93 → 2,00 M€² (×4,5)")
+    axes[0].legend()
+    rmses = [res[k]["rmse"] for k in names]
+    maes = [res[k]["mae"] for k in names]
+    b2 = axes[1].bar(x - w / 2, rmses, w, label="RMSE", color="#0ea5e9",
+                     edgecolor="black")
+    b3 = axes[1].bar(x + w / 2, maes, w, label="MAE", color="#16a34a",
+                     edgecolor="black")
+    for b in list(b2) + list(b3):
+        axes[1].text(b.get_x() + b.get_width() / 2, b.get_height() + 40,
+                     "%.0f €" % b.get_height(), ha="center", fontsize=10)
+    axes[1].set_xticks(x)
+    axes[1].set_xticklabels(names)
+    axes[1].set_ylabel("Error en test (€)")
+    axes[1].set_title("RMSE 2988→1413 € · MAE 2147→999 €")
+    axes[1].legend()
+    fig.tight_layout()
+    out.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(out, dpi=100)
+    plt.close(fig)
+    return out
+
+
+def fig_u0_stack_check(out: Path) -> Path:
+    """Prueba de entorno: versiones instaladas + histograma de Price."""
+    _need_deps()
+    import sys
+    import pandas as pd
+    import numpy as np
+    import matplotlib
+    import matplotlib.pyplot as plt
+    import seaborn as sns
+    import statsmodels
+    import sklearn
+
+    versions = [
+        ("python", f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}"),
+        ("pandas", pd.__version__),
+        ("numpy", np.__version__),
+        ("matplotlib", matplotlib.__version__),
+        ("seaborn", sns.__version__),
+        ("statsmodels", statsmodels.__version__),
+        ("scikit-learn", sklearn.__version__),
+    ]
+
+    df = pd.read_csv(CSV)
+    n = len(df)
+
+    fig, axes = plt.subplots(1, 2, figsize=(12, 4.8))
+
+    # (a) Versiones instaladas como bloque monoespaciado
+    axes[0].axis("off")
+    axes[0].set_title("Versiones instaladas (tu entorno)")
+    lines = ["$ python3 -c \"import ...\"  # este curso"] + [
+        f"{name:<12} {ver}" for name, ver in versions
+    ] + ["", f"filas leídas del CSV: n = {n}"]
+    axes[0].text(0.05, 0.95, "\n".join(lines), transform=axes[0].transAxes,
+                 fontsize=11, family="monospace", va="top",
+                 bbox=dict(boxstyle="round", facecolor="#f6f8fa", edgecolor="#999999"))
+
+    # (b) Histograma de Price como prueba de lectura del CSV
+    axes[1].hist(df["Price"], bins=30, color="#0b5cad", edgecolor="white")
+    axes[1].set_title(f"Prueba de entorno: histograma de Price (n={n})")
+    axes[1].set_xlabel("Precio (€)")
+    axes[1].set_ylabel("Cantidad de autos")
+
+    fig.tight_layout()
+    out.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(out, dpi=100)
+    plt.close(fig)
+    return out
+
+
+def fig_u10_neurona_loss(out: Path) -> Path:
+    """Neurona artificial (esquema) + pérdida del MLP de 0053 por iteración."""
+    _need_deps()
+    import warnings
+    import pandas as pd
+    import matplotlib.pyplot as plt
+    from matplotlib.patches import Circle, FancyArrowPatch, FancyBboxPatch
+    from sklearn.model_selection import train_test_split
+    from sklearn.preprocessing import StandardScaler
+    from sklearn.neural_network import MLPRegressor
+
+    df = pd.read_csv(CSV)
+    X = df[["KM", "Age_08_04"]].values
+    y = df["Price"].values
+    Xtr, _, ytr, _ = train_test_split(X, y, test_size=0.2, random_state=42)
+    sc = StandardScaler().fit(Xtr)
+    sy = StandardScaler().fit(ytr.reshape(-1, 1))
+    mlp = MLPRegressor(hidden_layer_sizes=(20,), max_iter=2000, random_state=42)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")  # RuntimeWarnings de adam; contados en 0053 §3
+        mlp.fit(sc.transform(Xtr), sy.transform(ytr.reshape(-1, 1)).ravel())
+
+    fig, axes = plt.subplots(1, 2, figsize=(12, 4.8))
+    ax = axes[0]
+    ax.set_xlim(0, 10)
+    ax.set_ylim(0, 6)
+    ax.axis("off")
+    ax.set_title("Una neurona: suma ponderada + activación")
+    for yy, txt in [(4.5, "x1\n(KM)"), (3.0, "x2\n(Edad)"), (1.5, "1\n(sesgo)")]:
+        ax.add_patch(Circle((1.2, yy), 0.7, fc="#dbeafe", ec="#0b5cad"))
+        ax.text(1.2, yy, txt, ha="center", va="center", fontsize=10)
+    ax.add_patch(Circle((4.6, 3.0), 0.7, fc="#fef3c7", ec="#b45309"))
+    ax.text(4.6, 3.0, "Σ", ha="center", va="center", fontsize=16)
+    for yy, w in [(4.5, "w1"), (3.0, "w2"), (1.5, "b")]:
+        ax.add_patch(FancyArrowPatch((1.95, yy), (3.95, 3.0),
+                                     arrowstyle="-|>", color="black",
+                                     connectionstyle="arc3,rad=0",
+                                     shrinkA=0, shrinkB=0, mutation_scale=12))
+        ax.text(2.9, (yy + 3.0) / 2 + 0.15, w, ha="center", fontsize=11,
+                style="italic")
+    ax.add_patch(FancyBboxPatch((6.0, 2.4), 1.6, 1.2, boxstyle="round,pad=0.05",
+                                fc="#dcfce7", ec="#15803d"))
+    ax.text(6.8, 3.0, "ReLU\n(activación)", ha="center", va="center",
+            fontsize=10)
+    ax.add_patch(Circle((8.8, 3.0), 0.7, fc="#fae8ff", ec="#a21caf"))
+    ax.text(8.8, 3.0, "ŷ\n(precio)", ha="center", va="center", fontsize=10)
+    for x0, x1 in [(5.3, 6.0), (7.6, 8.1)]:
+        ax.add_patch(FancyArrowPatch((x0, 3.0), (x1, 3.0), arrowstyle="-|>",
+                                     color="black", mutation_scale=12))
+    ax.text(5.0, 0.6, "ŷ = f(w1·x1 + w2·x2 + b)", ha="center", fontsize=12,
+            family="monospace")
+
+    axes[1].plot(range(1, len(mlp.loss_curve_) + 1), mlp.loss_curve_,
+                 color="#0b5cad")
+    axes[1].set_yscale("log")
+    axes[1].set_xlabel("Iteración")
+    axes[1].set_ylabel("Pérdida (loss_, escala log)")
+    axes[1].set_title(f"Pérdida por iteración (converge en {mlp.n_iter_} iters)")
+    axes[1].text(0.97, 0.95, f"loss final = {mlp.loss_:.4f}",
+                 transform=axes[1].transAxes, ha="right", va="top",
+                 fontsize=11, bbox=dict(boxstyle="round", facecolor="white",
+                                        edgecolor="#999999"))
+    fig.tight_layout()
+    out.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(out, dpi=100)
+    plt.close(fig)
+    return out
+
+
+def fig_u10_capacidad(out: Path) -> Path:
+    """R² train vs test al crecer la capa oculta: train sube, validación se dobla."""
+    _need_deps()
+    import warnings
+    import pandas as pd
+    import matplotlib.pyplot as plt
+    from sklearn.model_selection import train_test_split
+    from sklearn.preprocessing import StandardScaler
+    from sklearn.neural_network import MLPRegressor
+
+    df = pd.read_csv(CSV)
+    X = df[["KM", "Age_08_04"]].values
+    y = df["Price"].values
+    Xtr, Xte, ytr, yte = train_test_split(X, y, test_size=0.2, random_state=42)
+    sc = StandardScaler().fit(Xtr)
+    Ztr, Zte = sc.transform(Xtr), sc.transform(Xte)
+    sy = StandardScaler().fit(ytr.reshape(-1, 1))
+    ztr = sy.transform(ytr.reshape(-1, 1)).ravel()
+    zte = sy.transform(yte.reshape(-1, 1)).ravel()
+
+    capas = [(5,), (20,), (100,), (100, 50)]
+    r2tr, r2te = [], []
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")  # RuntimeWarnings de adam; contados en 0053 §3
+        for h in capas:
+            m = MLPRegressor(hidden_layer_sizes=h, max_iter=2000, random_state=42)
+            m.fit(Ztr, ztr)
+            r2tr.append(m.score(Ztr, ztr))
+            r2te.append(m.score(Zte, zte))
+
+    fig, ax = plt.subplots(figsize=(12, 4.8))
+    xs = range(len(capas))
+    w = 0.36
+    b1 = ax.bar([x - w / 2 for x in xs], r2tr, width=w, color="#0ea5e9",
+                label="train")
+    b2 = ax.bar([x + w / 2 for x in xs], r2te, width=w, color="#16a34a",
+                label="test")
+    for b, v in list(zip(b1, r2tr)) + list(zip(b2, r2te)):
+        ax.text(b.get_x() + b.get_width() / 2, v + 0.004, f"{v:.4f}",
+                ha="center", fontsize=10)
+    ax.set_xticks(list(xs))
+    ax.set_xticklabels(["(5,)", "(20,)", "(100,)", "(100, 50)"])
+    ax.set_xlabel("Capas ocultas (misma semilla 42, split 80/20)")
+    ax.set_ylabel("R²")
+    ax.set_ylim(0.70, 0.89)
+    ax.set_title("Más capacidad: train sube, validación se dobla")
+    ax.legend()
+    fig.tight_layout()
+    out.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(out, dpi=100)
+    plt.close(fig)
+    return out
+
+
+def fig_u2_onehot_fuel(out: Path) -> Path:
+    """One-hot: barras de Fuel_Type + matriz dummy 0/1 de los primeros autos."""
+    _need_deps()
+    import pandas as pd
+    import matplotlib.pyplot as plt
+
+    df = pd.read_csv(CSV)
+    vc = df["Fuel_Type"].value_counts()
+    assert vc["Petrol"] == 1264 and vc["Diesel"] == 155 and vc["CNG"] == 17, vc.to_dict()
+    dum = pd.get_dummies(df["Fuel_Type"], prefix="Fuel", dtype=int)
+    assert dum.shape == (1436, 3), dum.shape
+
+    fig, axes = plt.subplots(1, 2, figsize=(12, 4.8))
+    order = ["Petrol", "Diesel", "CNG"]
+    bars = axes[0].bar(order, [vc[c] for c in order],
+                       color=["#0ea5e9", "#f59e0b", "#16a34a"])
+    for b, v in zip(bars, [vc[c] for c in order]):
+        axes[0].text(b.get_x() + b.get_width() / 2, v + 20, f"{v}",
+                     ha="center", fontsize=11)
+    axes[0].set_ylabel("Autos")
+    axes[0].set_title("Fuel_Type: 3 etiquetas (no se promedian)")
+    muestra = dum.iloc[:12]
+    axes[1].matshow(muestra.values, cmap="Greens", vmin=0, vmax=1)
+    axes[1].set_xticks(range(3))
+    axes[1].set_xticklabels(list(muestra.columns))
+    axes[1].set_yticks(range(12))
+    axes[1].set_yticklabels([f"fila {i}" for i in range(12)], fontsize=8)
+    axes[1].xaxis.set_ticks_position("bottom")
+    for i in range(12):
+        for j in range(3):
+            v = muestra.values[i, j]
+            axes[1].text(j, i, str(v), ha="center", va="center", fontsize=9,
+                         color="white" if v == 1 else "black")
+    axes[1].set_title("get_dummies: 1436 filas x 3 columnas 0/1 (primeras 12)")
+    fig.tight_layout()
+    out.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(out, dpi=100)
+    plt.close(fig)
+    return out
+
+
+def fig_u6_ic_beta(out: Path) -> Path:
+    """IC 95% de beta: KM lejos de 0 (solido) vs Mfg_Month cruzando 0 (dudoso)."""
+    _need_deps()
+    import warnings
+    import matplotlib.pyplot as plt
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        m, X, y = _ols_reference()
+    ci = m.conf_int()
+    assert abs(ci.loc["KM", 0] - (-0.0485)) < 1e-4, ci.loc["KM"].tolist()
+    assert abs(ci.loc["Mfg_Month", 1] - 3.6572) < 1e-3, ci.loc["Mfg_Month"].tolist()
+
+    fig, axes = plt.subplots(1, 2, figsize=(12, 4.8))
+    casos = [
+        ("KM", "#16a34a", "No cruza 0 -> p aprox 0"),
+        ("Mfg_Month", "#f59e0b", "Cruza 0 -> p = 0,087"),
+    ]
+    for ax, (var, color, veredicto) in zip(axes, casos):
+        est = m.params[var]
+        lo, hi = ci.loc[var, 0], ci.loc[var, 1]
+        ax.errorbar([est], [0], xerr=[[est - lo], [hi - est]], fmt="o",
+                    color=color, ecolor=color, elinewidth=3, capsize=8,
+                    markersize=9)
+        ax.axvline(0, color="red", linestyle="--", label="beta = 0 (H0)")
+        ax.set_yticks([])
+        ax.set_xlabel("beta (efecto sobre el precio, euros)")
+        ax.set_title(f"{var}: estimado {est:.4f}, IC95 [{lo:.2f}, {hi:.2f}]")
+        ax.text(0.02, 0.92, veredicto, transform=ax.transAxes, fontsize=10,
+                va="top", bbox=dict(boxstyle="round", facecolor="white",
+                                    edgecolor=color))
+        ax.legend(fontsize=9)
+    fig.tight_layout()
+    out.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(out, dpi=100)
+    plt.close(fig)
+    return out
+
+
+def fig_u6_errores_tipo(out: Path) -> Path:
+    """Errores tipo I/II: colas alfa=5% bajo H0 + tabla 2x2 del juicio."""
+    _need_deps()
+    import numpy as np
+    import matplotlib.pyplot as plt
+    from scipy import stats as st
+
+    fig, axes = plt.subplots(1, 2, figsize=(12, 4.8))
+    t = np.linspace(-5, 5, 400)
+    d = st.t(df=1426).pdf(t)  # 1436 autos - 10 parametros del OLS 9 vars
+    axes[0].plot(t, d, color="black")
+    axes[0].fill_between(t, d, where=(np.abs(t) > 1.96), color="#fca5a5",
+                         label="Rechazo H0 (alfa = 5 % en total)")
+    axes[0].axvline(-1.96, color="red", linestyle="--")
+    axes[0].axvline(1.96, color="red", linestyle="--")
+    axes[0].annotate("Si H0 es cierta pero\ncaes aca -> Tipo I", xy=(2.6, 0.02),
+                     fontsize=9, arrowprops=dict(arrowstyle="->"),
+                     xytext=(0.3, 0.14))
+    axes[0].set_xlabel("t-value bajo H0: beta = 0")
+    axes[0].set_ylabel("Densidad")
+    axes[0].set_title("alfa = 5 %: condenar a un inocente")
+    axes[0].legend(fontsize=9)
+
+    axes[1].axis("off")
+    tbl = axes[1].table(
+        cellText=[["OK (1 - alfa)", "Tipo I (alfa = 5 %)"],
+                  ["Tipo II (beta)", "OK (potencia)"]],
+        rowLabels=["H0 cierta", "H0 falsa"],
+        colLabels=["No rechazo H0", "Rechazo H0"],
+        loc="center", cellLoc="center")
+    tbl.auto_set_font_size(False)
+    tbl.set_fontsize(10)
+    tbl.scale(1, 2.4)
+    for (r, c), cell in tbl.get_celld().items():
+        if r == 0 or c < 0:
+            cell.set_facecolor("#e5e7eb")
+        elif (r, c) in [(1, 0), (2, 1)]:
+            cell.set_facecolor("#bbf7d0")
+        else:
+            cell.set_facecolor("#fecaca")
+    axes[1].set_title("Los 4 finales del juicio (Mfg_Month: fila de arriba)")
     fig.tight_layout()
     out.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out, dpi=100)
@@ -2861,6 +3605,8 @@ GENERATORS = {
     "fig_u7_kmeans": fig_u7_kmeans,
     "fig_u7_jer": fig_u7_jer,
     "fig_u7_val": fig_u7_val,
+    "fig_u7_kmedoids": fig_u7_kmedoids,
+    "fig_u7_estabilidad": fig_u7_estabilidad,
     "fig_u7_pca": fig_u7_pca,
     "fig_u8_knn": fig_u8_knn,
     "fig_u8_log": fig_u8_log,
@@ -2871,11 +3617,21 @@ GENERATORS = {
     "fig_u9_sop": fig_u9_sop,
     "fig_u9_reglas": fig_u9_reglas,
     "fig_u9_apriori": fig_u9_apriori,
+    "fig_u9_alternativas": fig_u9_alternativas,
     "fig_u6_inf": fig_u6_inf,
     "fig_u6_met": fig_u6_met,
+    "fig_u6_cvboot": fig_u6_cvboot,
+    "fig_u6_tercera": fig_u6_tercera,
+    "fig_u6_tercera_mse": fig_u6_tercera_mse,
     "fig_u6_anova": fig_u6_anova,
     "fig_u3_viol": fig_u3_viol,
     "fig_u2_trans": fig_u2_trans,
+    "fig_u0_stack_check": fig_u0_stack_check,
+    "fig_u10_neurona_loss": fig_u10_neurona_loss,
+    "fig_u10_capacidad": fig_u10_capacidad,
+    "fig_u2_onehot_fuel": fig_u2_onehot_fuel,
+    "fig_u6_ic_beta": fig_u6_ic_beta,
+    "fig_u6_errores_tipo": fig_u6_errores_tipo,
 }
 
 

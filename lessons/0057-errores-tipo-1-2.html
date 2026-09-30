@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>0057 · Errores tipo I y II — Bloque D</title>
+  <link rel="stylesheet" href="../assets/styles.css">
+</head>
+<body>
+<main>
+  <header class="course">
+    <p class="kicker">Bloque D · Regresión lineal, selección y regularización · Lección 0057 · mié 2 sep</p>
+    <h1>Errores tipo I y II: condenar inocentes o soltar culpables</h1>
+    <p><strong>Win de hoy:</strong> la tabla 2×2 del juicio — α = 5 % es la chance de error tipo I
+    (falsa alarma, verificada por simulación: 0,050) y no rechazar a
+    <code>Mfg_Month</code> (p = 0,087) arriesga un error tipo II (culpable que se escapa).</p>
+    <p class="meta"><a href="../index.html">← Índice</a> ·
+    <a href="../reference/toyota-data-dictionary.html">Diccionario Toyota</a> ·
+    <a href="../ToyotaCorolla.csv">CSV</a></p>
+  </header>
+
+  <h2>1 · Los 4 finales del juicio</h2>
+  <p>El juicio de la <a href="0042-inferencia-pvalor-t.html">lección 0042</a> (H0 «β = 0» vs H1 «β ≠ 0»)
+  tiene 4 finales, porque la realidad y tu decisión se cruzan. Dos salen bien y dos son errores
+  con nombre propio:</p>
+  <table>
+    <tr><th></th><th>No rechazo H0</th><th>Rechazo H0</th></tr>
+    <tr><td><strong>H0 cierta</strong> (β = 0)</td><td>OK (prob. 1 − α)</td>
+    <td><strong>Tipo I</strong>: falsa alarma (prob. α)</td></tr>
+    <tr><td><strong>H0 falsa</strong> (β ≠ 0)</td><td><strong>Tipo II</strong>: se escapa (prob. β)</td>
+    <td>OK: detección (prob. <strong><abbr title="Potencia: probabilidad de detectar un efecto real; vale 1 menos beta">potencia</abbr></strong> = 1 − β)</td></tr>
+  </table>
+  <figure>
+    <img src="../assets/img/toyota/0057-errores-tipo-1-2-fig1.png" alt="Colas alfa de la t bajo H0 y tabla 2x2 de errores tipo I y II">
+    <figcaption>Fig. 1 — Izquierda: si H0 es cierta, el 5 % de las veces t cae igual en las colas rojas
+    (|t| &gt; 1,96) y condenás a un inocente (tipo I). Derecha: los 4 finales — Mfg_Month vive en la fila de arriba.</figcaption>
+  </figure>
+  <p>En criollo: <strong><abbr title="Error tipo I: rechazar H0 siendo cierta; falsa alarma, condenar a un inocente">tipo I</abbr></strong>
+  = condenar a un inocente (decir «mueve el precio» cuando no mueve nada);
+  <strong><abbr title="Error tipo II: no rechazar H0 siendo falsa; se te escapa un efecto real">tipo II</abbr></strong>
+  = soltar a un culpable (declarar «sin pruebas» un efecto que sí existe).</p>
+  <p>Regenerar la figura (mismo resultado versionado en <code>assets/img/toyota/</code>):</p>
+  <pre><code>python scripts/make_figures.py --only errores-tipo-1-2</code></pre>
+
+  <h2>2 · α = 5 % lo elegís vos (y se verifica)</h2>
+  <p><strong><abbr title="Alfa: nivel de significancia; probabilidad de error tipo I que aceptás, por convención 5 %">α</abbr></strong>
+  es la falsa alarma que aceptás: la convención del pizarrón (0042) es 5 %. No es ley física:
+  si condenar a un inocente sale carísimo, usá 1 %; si soltar culpables es peor, 10 %.
+  Pero hay tradeoff: bajar α achica las colas rojas y <em>sube</em> β — es el mismo dilema del
+  <a href="0034-regresion-logistica-roc.html">umbral de la 0034</a> (umbral 0,3/0,5/0,7 → FN 53/107/167).
+  Y el 5 % no es verso: simulando 100.000 t bajo H0, el 5,0 % cae en rechazo:</p>
+  <pre><code>import numpy as np
+from scipy import stats as st
+t = st.t.rvs(1426, size=100000, random_state=42)  # mundo donde H0 es cierta
+print(((abs(t) > 1.96).mean()))  # 0.05 → 5 de cada 100 juicios fallan igual</code></pre>
+
+  <h2>3 · Toyota: KM tranquilo, Mfg_Month en riesgo</h2>
+  <p>KM (t = −30,9, p ≈ 0): rechazamos H0 holgados. El riesgo tipo I existe en teoría (5 %),
+  pero con 30 desvíos de evidencia dormimos tranquilos. Mfg_Month (t = −1,71, p = 0,087):
+  <strong>no</strong> rechazamos — y acá vive el riesgo tipo II: por eso 0042 insiste en que
+  «no significativo» ≠ «efecto cero». Tal vez el mes sí mueve −25 €/mes de verdad
+  (su estimado) y 1436 autos no alcanzan para probarlo. Moraleja de negocio: antes de borrarla
+  (ver <a href="0019-por-que-seleccionar.html">0019</a>), preguntate cuál error te sale más caro.</p>
+
+  <h2>4 · Quiz (auto-chequeo inmediato)</h2>
+  <p class="meta">Elegí una opción por pregunta: el feedback es inmediato.</p>
+
+  <div class="quiz" id="q1">
+    <strong>P1 · Error tipo I es…</strong>
+    <label><input type="radio" name="q1" value="0"> Condenar a un inocente</label>
+    <label><input type="radio" name="q1" value="1"> Absolver a un culpable</label>
+    <label><input type="radio" name="q1" value="2"> Medir mal la media</label>
+    <label><input type="radio" name="q1" value="3"> Romper todo el modelo</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <div class="quiz" id="q2">
+    <strong>P2 · Con α = 5 %, tipo I pasa…</strong>
+    <label><input type="radio" name="q2" value="0"> Cinco de cien inocentes</label>
+    <label><input type="radio" name="q2" value="1"> Cero veces con datos</label>
+    <label><input type="radio" name="q2" value="2"> Siempre con pocos datos</label>
+    <label><input type="radio" name="q2" value="3"> Nunca en OLS lineal</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <div class="quiz" id="q3">
+    <strong>P3 · Mfg_Month (p = 0,087, no rechazo) arriesga…</strong>
+    <label><input type="radio" name="q3" value="0"> Tipo II, se escapa</label>
+    <label><input type="radio" name="q3" value="1"> Tipo I, falsa alarma</label>
+    <label><input type="radio" name="q3" value="2"> Un sesgo de selección</label>
+    <label><input type="radio" name="q3" value="3"> Overfitting en el modelo</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <h2>5 · Fuente primaria y cierre</h2>
+  <p><strong>Para profundizar (1 fuente):</strong>
+  Diez, Barr &amp; Çetinkaya-Rundel, <em>OpenIntro Statistics</em> — cap. 4–5 (tests de hipótesis, errores tipo I y II).
+  Más contexto en <a href="../RESOURCES.md">RESOURCES</a>.</p>
+  <p>¿Algo no quedó claro? <strong>Preguntame al agente</strong>: cuándo conviene α = 1 % en vez de 5 %,
+  cómo subir la potencia sin juntar más datos, o qué error preferís en una alarma de fraude.</p>
+  <p>Orden Bloque D: con los dos errores ya medís el riesgo de cada veredicto.
+  Siguiente en el bloque: <a href="0003-regresion-lineal-precio-km.html">0003 · Regresión lineal Price ~ KM</a>:
+  la recta simple, R², residuos y K-Fold.</p>
+
+  <nav class="lesson-nav">
+    <a href="0056-intervalos-confianza.html">← 0056 Intervalos</a>
+    <a href="../index.html">Índice ↑</a>
+  </nav>
+</main>
+<script>
+(function(){
+  var answers = {q1: 0, q2: 0, q3: 0};
+  var msgs = {
+    q1: ["Correcto: falsa alarma, α.",
+         "No: eso es tipo II."],
+    q2: ["Correcto: 5 % verificado.",
+         "No: α = 5 de 100."],
+    q3: ["Correcto: no rechazo, β.",
+         "No: tipo I es rechazar."]
+  };
+  ["q1","q2","q3"].forEach(function(id){
+    var box = document.getElementById(id);
+    var fb = box.querySelector(".feedback");
+    box.addEventListener("change", function(e){
+      var ok = parseInt(e.target.value, 10) === answers[id];
+      fb.textContent = ok ? msgs[id][0] : msgs[id][1];
+      fb.className = "feedback " + (ok ? "ok" : "no");
+    });
+  });
+})();
+</script>
+</body>
+</html>

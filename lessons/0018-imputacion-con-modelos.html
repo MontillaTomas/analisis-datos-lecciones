@@ -3,16 +3,16 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>0018 · Imputación con modelos — Unidad 4</title>
+  <title>0018 · Imputación con modelos — Bloque C</title>
   <link rel="stylesheet" href="../assets/styles.css">
 </head>
 <body>
 <main>
   <header class="course">
-    <p class="kicker">Unidad 4 · Datos faltantes e imputación · Lección 0018</p>
-    <h1>Imputación con modelos y veredicto U4</h1>
+    <p class="kicker">Bloque C · Limpieza de Datos · Lección 0018 · mar 1 sep</p>
+    <h1>Imputación con modelos y veredicto</h1>
     <p><strong>Win de hoy:</strong> imputar con regresiones encadenadas
-    (<code>IterativeImputer</code>: KM 34.766→23.978, HP 14,1→13,3) y cerrar la unidad con el ranking
+    (<code>IterativeImputer</code>: KM 34.766→23.978, HP 14,1→13,3) y cerrar el bloque con el ranking
     completo contra la verdad tapada.</p>
     <p class="meta"><a href="../index.html">← Índice</a> ·
     <a href="../reference/toyota-data-dictionary.html">Diccionario Toyota</a> ·
@@ -20,7 +20,7 @@
   </header>
 
   <h2>1 · La idea: predecir el hueco con el resto</h2>
-  <p>Si <code>KM</code> se predice bien con edad y precio (U6), ¿por qué rellenarlo con la media? La
+  <p>Si <code>KM</code> se predice bien con edad y precio (Bloque D), ¿por qué rellenarlo con la media? La
   <strong><abbr title="Imputación iterativa: rondas de regresiones encadenadas; cada columna predice sus huecos con las demás">imputación iterativa</abbr></strong>
   (<code>IterativeImputer</code>, prima de
   <abbr title="MICE: imputation by chained equations; imputación múltiple por ecuaciones encadenadas">MICE</abbr>) hace rondas: predice <code>KM</code> con el resto, luego
@@ -28,7 +28,8 @@
   un modelo, no de un número fijo.</p>
   <pre><code>from sklearn.experimental import enable_iterative_imputer
 from sklearn.impute import IterativeImputer
-imp = IterativeImputer(random_state=42).fit_transform(X)  # X: KM,HP,Edad,Peso,Price</code></pre>
+imp = IterativeImputer(random_state=42).fit_transform(
+    X)  # X: KM,HP,Edad,Peso,Price</code></pre>
 
   <h2>2 · Resultados: KM festeja, HP apenas mejora</h2>
   <ul>
@@ -37,9 +38,9 @@ imp = IterativeImputer(random_state=42).fit_transform(X)  # X: KM,HP,Edad,Peso,P
     en la matriz numérica</strong>. Cold deck (0017) ganaba con 2,8 justamente por usarlas.</li>
   </ul>
   <div class="callout"><strong>Lección:</strong> el modelo solo usa lo que le das. La mejor imputación no es el mejor
-  algoritmo: es el mejor algoritmo <em>con las mejores columnas</em>. Feature engineering (0002) también imputa.</div>
+  algoritmo: es el mejor algoritmo <em>con las mejores columnas</em>. Feature engineering (0002, Bloque A) también imputa.</div>
 
-  <h2>3 · Veredicto U4: el ranking en HP</h2>
+  <h2>3 · Veredicto: el ranking en HP</h2>
   <table>
     <tr><th>Método</th><th><abbr title="RMSE: error típico; raíz del error cuadrático medio contra la verdad">RMSE</abbr></th><th>Idea</th></tr>
     <tr><td>Cold deck (tabla motor)</td><td><strong>2,8</strong></td><td>Fuente externa casi perfecta</td></tr>
@@ -48,22 +49,26 @@ imp = IterativeImputer(random_state=42).fit_transform(X)  # X: KM,HP,Edad,Peso,P
     <tr><td>Media</td><td>14,1</td><td>Un número para todos</td></tr>
     <tr><td>Hot deck</td><td>18,9</td><td>Donante real (preserva forma)</td></tr>
   </table>
-  <p>Protocolo de cierre: conocer el mecanismo (0015), imputar según el caso (0016–0018), medir contra verdad
+  <p>Protocolo de cierre: conocer el mecanismo (0015, misma clase), imputar según el caso (0016–0018, misma clase), medir contra verdad
   conocida cuando se pueda, y <strong>reportar el método</strong>: un dataset imputado sin documentación es una trampa.
   Bonus: la <abbr title="Imputación múltiple: generar varias versiones rellenadas para medir la incertidumbre del relleno">imputación múltiple</abbr>
   genera <em>varias</em> versiones y promedia: mide cuánto duele no saber.</p>
 
   <h2>4 · Figura: real vs imputado y ranking</h2>
   <figure>
-    <img src="../assets/img/toyota/0018-imputacion-con-modelos-fig1.png" alt="HP real contra HP imputado y ranking de RMSE de la unidad">
+    <img src="../assets/img/toyota/0018-imputacion-con-modelos-fig1.png" alt="HP real contra HP imputado y ranking de RMSE del bloque">
     <figcaption>Fig. 1 — Izquierda: HP real vs imputado iterativo (cerca de la diagonal = bien). Derecha: ranking
-    U4 en HP, de cold deck (2,8) a hot deck (18,9).</figcaption>
+    en HP, de cold deck (2,8) a hot deck (18,9).</figcaption>
   </figure>
   <p>Regenerar la figura (mismo resultado versionado en <code>assets/img/toyota/</code>):</p>
   <pre><code>python scripts/make_figures.py --only imputacion-con-modelos</code></pre>
-  <div class="callout"><strong>Cierre de Unidad 4.</strong> 0015 clasificó mecanismos, 0016 rellenó simple,
-  0017 copió donantes y vecinos, hoy modeló. Lo que sigue (U5): con datos completos, elegir <em>qué columnas</em>
-  entran al modelo.</div>
+  <div class="callout"><strong>Cierre de Bloque C (mar 1 sep).</strong> Detectar la suciedad
+  (<a href="0004-limpieza-datos-toyota.html">0004</a>) → wrangling con regex
+  (<a href="0005-wrangling-regex-model.html">0005</a>) → mecanismos de faltantes
+  (<a href="0015-faltantes-mecanismos-listwise.html">0015</a>) → relleno simple
+  (<a href="0016-relleno-simple-media-razon.html">0016</a>) → donantes y vecinos
+  (<a href="0017-hot-deck-cold-deck-knn.html">0017</a>) → modelos (hoy). Lo que sigue (Bloque D):
+  con datos completos, elegir <em>qué columnas</em> entran al modelo.</div>
 
   <h2>5 · Quiz (auto-chequeo inmediato)</h2>
   <p class="meta">Elegí una opción por pregunta: el feedback es inmediato.</p>
@@ -102,6 +107,7 @@ imp = IterativeImputer(random_state=42).fit_transform(X)  # X: KM,HP,Edad,Peso,P
   <a href="../RESOURCES.md">RESOURCES.md</a> del curso).</p>
   <p>¿Algo no quedó claro? <strong>Preguntame al agente</strong>: cómo armar tu matriz de imputación, qué columnas
   sumarían para HP, o cuándo usar imputación múltiple. Esa pregunta vale más que releer.</p>
+  <p>Siguiente en el orden del Bloque C (misma clase, mar 1): <a href="0055-one-hot-encoding.html">0055 One-hot encoding</a> — etiquetas a columnas 0/1.</p>
 
   <nav class="lesson-nav">
     <a href="0017-hot-deck-cold-deck-knn.html">← 0017 Donantes y vecinos</a>

@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>0006 · EDA sistemático con Toyota — Unidad 2</title>
+  <title>0006 · EDA sistemático con Toyota — Bloque B</title>
   <link rel="stylesheet" href="../assets/styles.css">
 </head>
 <body>
 <main>
   <header class="course">
-    <p class="kicker">Unidad 2 · Exploración de datos · Lección 0006</p>
+    <p class="kicker">Bloque B · Análisis Exploratorio de Datos · Lección 0006 · mar 25 ago</p>
     <h1>EDA sistemático: describir, agrupar, correlacionar</h1>
     <p><strong>Win de hoy:</strong> aplicar la receta de 3 pasos
     (<code>describe</code> → <code>groupby</code> → <code>corr</code>) y salir con 3 hallazgos:
@@ -29,6 +29,7 @@
     <li><strong>Agrupar:</strong> <code>groupby()</code> por categorías (¿quién vale más: diésel o naftero?).</li>
     <li><strong>Correlacionar:</strong> <code>corr()</code> entre numéricas (¿qué se mueve junto al precio?).</li>
   </ol>
+  <p>Por cierto: ¿de dónde sale el próximo CSV después de Toyota? Cátedra (clase EDA, p. 4–7) distingue datos <strong>privados</strong> (de una empresa) de <strong>públicos</strong>, y dentro de estos los <strong>datos libres</strong> de repositorios como kaggle o UCI: ahí vas a buscar práctica cuando se te acabe este dataset.</p>
 
   <h2>2 · Describir: media vs mediana (el diésel miente con la media)</h2>
   <p>El <code>describe()</code> da <abbr title="Media: promedio aritmético; los valores extremos la arrastran">media</abbr>,
@@ -47,6 +48,11 @@
   </table>
   <p>Lección doble: el diésel “promedio” engaña (la mediana cuenta mejor la historia), y con 17 casos (CNG) ningún
   resumen es sólido. El EDA no solo describe: también avisa dónde no pisar.</p>
+  <figure>
+    <img src="../assets/img/catedra/eda/analisis-univariado.png" alt="Slide de cátedra: análisis univariado, medidas de tendencia central y de dispersión">
+    <figcaption>El vocabulario univariado según cátedra: tendencia central (promedio, moda, mediana) y dispersión (rango, varianza, desvío, cuartiles). Fuente: cátedra UTN-FRT (clase EDA, p. 17).</figcaption>
+  </figure>
+  <p>Fijate que es el mismo vocabulario que usa la tabla de arriba: media, mediana, moda y desvío no son capricho de pandas, son las medidas con las que cátedra define el análisis univariado. Si dominás esas cuatro, ya hablás el idioma.</p>
   <pre><code>df.groupby("Fuel_Type")["Price"].agg(["mean", "median", "count"]).round(0)</code></pre>
 
   <h2>3 · Agrupar: el gradiente de la edad (joven vale doble)</h2>
@@ -60,11 +66,11 @@ df.assign(t=tramos).groupby("t")["Price"].agg(["mean", "count"]).round(0)
 # medio31-60  11175 (n=535)
 # viejo61+     8543 (n=725)</code></pre>
   <p>Un Corolla joven promedia <strong>más del doble</strong> que uno viejo (18.394 € vs 8.543 €). Este gradiente
-  va a reaparecer en regresión (U6): la edad será de las primeras variables del modelo. El EDA ya lo anticipó gratis.</p>
+  va a reaparecer en regresión (Bloque D): la edad será de las primeras variables del modelo. El EDA ya lo anticipó gratis.</p>
 
   <h2>4 · Correlacionar: qué se mueve con el precio (y dos trampas)</h2>
   <p>La <strong><abbr title="Correlación: número entre -1 y 1 que mide si dos columnas suben y bajan juntas">correlación</abbr></strong>
-  (acá la de Pearson, fórmula en U6) dice qué columnas suben y bajan junto al precio. Top con <code>Price</code>:</p>
+  (acá la de Pearson, fórmula en Bloque D) dice qué columnas suben y bajan junto al precio. Top con <code>Price</code>:</p>
   <pre><code>df.select_dtypes("number").corr()["Price"].drop("Price").sort_values(ascending=False)
 # Mfg_Year          0.885   ← año de fabricación
 # Boardcomputer     0.601
@@ -80,8 +86,13 @@ df.assign(t=tramos).groupby("t")["Price"].agg(["mean", "count"]).round(0)
   <strong><abbr title="Correlación espuria: relación numérica sin causa real; suele venir de un orden o un tercero oculto">correlación espuria</abbr></strong>:
   el número más peligroso es el que parece decir algo. <strong>Trampa 2 — redundancia:</strong>
   <code>Mfg_Year</code> (+0,89) y <code>Age_08_04</code> (−0,88) son la misma información dos veces (año vs edad);
-  meter ambas al modelo es pagar dos veces (en U5/U6 se llama
+  meter ambas al modelo es pagar dos veces (en Bloque D se llama
   <abbr title="Multicolinealidad: dos variables que dicen casi lo mismo y confunden al modelo">multicolinealidad</abbr>).</div>
+  <figure>
+    <img src="../assets/img/catedra/eda/correlacion-direccion-fuerza.png" alt="Slide de cátedra: diagramas de dispersión con dirección, forma y fuerza de correlación">
+    <figcaption>Correlación según cátedra: dirección (positiva/negativa/nula), forma (lineal, exponencial, forma de U) y fuerza (fuerte/débil/ninguna). Fuente: cátedra UTN-FRT (clase EDA, p. 29).</figcaption>
+  </figure>
+  <p>Guardate el panel de abajo a la derecha: la <strong>forma de U</strong> tiene correlación lineal cercana a cero aunque haya un patrón clarísimo. Pearson solo caza relaciones lineales; por eso el EDA siempre mira el gráfico además del número.</p>
 
   <h2>5 · Figura: agrupar revela, correlacionar sugiere</h2>
   <figure>
@@ -131,6 +142,7 @@ df.assign(t=tramos).groupby("t")["Price"].agg(["mean", "count"]).round(0)
   noción de calidad de datos.</p>
   <p>¿Algo no quedó claro? <strong>Preguntame al agente</strong>: cuándo mirar la mediana en vez de la media,
   cómo armar tramos con sentido, o cómo olfatear una correlación espuria. Esa pregunta vale más que releer.</p>
+  <p>Siguiente en el orden del Bloque B (misma clase, mar 25): <a href="0007-outliers-estadisticos-iqr-z.html">0007 Outliers con IQR y z</a> — outliers univariados.</p>
 
   <nav class="lesson-nav">
     <a href="0005-wrangling-regex-model.html">← 0005 Wrangling y regex</a>

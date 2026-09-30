@@ -3,15 +3,15 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>0041 · El algoritmo Apriori — Unidad 9</title>
+  <title>0041 · El algoritmo Apriori — Bloque G</title>
   <link rel="stylesheet" href="../assets/styles.css">
 </head>
 <body>
 <main>
   <header class="course">
-    <p class="kicker">Unidad 9 · Ítems frecuentes · Lección 0041</p>
+    <p class="kicker">Bloque G · Frequent Itemsets · Lección 0041 · mié 18 nov</p>
     <h1>El algoritmo Apriori: generar, podar, contar — nivel por nivel</h1>
-    <p><strong>Win de hoy:</strong> 65.535 combos posibles → Apriori cuenta solo 821 candidatos (min_sop = 0,3)
+    <p><strong>Win de hoy:</strong> 65.535 combos posibles → Apriori cuenta solo 825 candidatos (min_sop = 0,3)
     y encuentra 787 frecuentes: la <strong><abbr title="Poda: descartar candidatos sin contarlos porque un subconjunto ya falló">poda</abbr></strong>
     por monotonicidad hace el 99 % del trabajo.</p>
     <p class="meta"><a href="../index.html">← Índice</a> ·
@@ -23,7 +23,7 @@
   <p><strong><abbr title="Apriori: algoritmo que encuentra itemsets frecuentes nivel por nivel, podando con monotonicidad">Apriori</abbr></strong>
   (Agrawal &amp; Srikant, 1994) sube de nivel: con los frecuentes de tamaño k arma candidatos de tamaño k+1,
   <strong>poda</strong> los que tienen un subconjunto infrecuente
-  (<a href="0039-soporte-itemsets.html">lección 0039</a>: si {CD, llantas} falla, {CD, llantas, techo} ni se cuenta)
+  (<a href="0039-soporte-itemsets.html">lección 0039 (mar 17)</a>: si {CD, llantas} falla, {CD, llantas, techo} ni se cuenta)
   y <strong>cuenta</strong> solo los sobrevivientes. Cuando un nivel da vacío, termina: ningún nivel superior puede tener nada.
   Esta garantía («todo subconjunto de un frecuente es frecuente») se conoce como propiedad de
   <strong><abbr title="Cierre a la baja (downward closure): si un itemset es frecuente, todos sus subconjuntos lo son">cierre a la baja</abbr></strong>.</p>
@@ -37,15 +37,16 @@
   </figure>
   <p>Lectura: <strong>(1)</strong> L1 arranca con 16 candidatos y deja 11; L7 termina con 1 combo de 7 extras.
   Total: 280 frecuentes en 7 niveles. <strong>(2)</strong> El umbral es la perilla del costo: min_sop = 0,3 cuenta
-  821 candidatos; un súper real con miles de ítems y umbral bajo es intratable — por eso existen FP-Growth y muestreo.</p>
+  825 candidatos; un súper real con miles de ítems y umbral bajo es intratable — por eso existen <a href="0052-fpgrowth-eclat-sin-candidatos.html">FP-Growth (0052, mié 18)</a> y muestreo.</p>
   <p>Regenerar la figura (mismo resultado versionado en <code>assets/img/toyota/</code>):</p>
-  <pre><code>python scripts/make_figures.py --only algoritmo-apriori</code></pre>
+  <pre><code>python3 scripts/make_figures.py --only algoritmo-apriori</code></pre>
 
   <h2>3 · Mini-Apriori en 20 líneas (puro pandas, sin librerías raras)</h2>
   <pre><code>import pandas as pd, itertools
-E = ["ABS","Airbag_1","Airbag_2","Airco","Backseat_Divider","BOVAG_Guarantee",
-     "Boardcomputer","CD_Player","Central_Lock","Met_Color","Mfr_Guarantee",
-     "Mistlamps","Power_Steering","Powered_Windows","Sport_Model","Tow_Bar"]
+E = ["ABS","Airbag_1","Airbag_2","Airco","Backseat_Divider",
+     "BOVAG_Guarantee","Boardcomputer","CD_Player","Central_Lock",
+     "Met_Color","Mfr_Guarantee","Mistlamps","Power_Steering",
+     "Powered_Windows","Sport_Model","Tow_Bar"]
 B = pd.read_csv("../ToyotaCorolla.csv")[E]
 MIN_SOP = 0.4
 cur = {frozenset([a]) for a in E if B[a].mean() >= MIN_SOP}
@@ -55,28 +56,29 @@ while cur:
     cands = {u for i, A in enumerate(sorted(cur, key=sorted))
              for A2 in sorted(cur, key=sorted)[i+1:]
              for u in [A | A2] if len(u) == k
-             and all(frozenset(s) in cur for s in itertools.combinations(u, k-1))}
+             and all(frozenset(s) in cur
+                     for s in itertools.combinations(u, k-1))}
     cur = {c for c in cands if B[list(c)].all(axis=1).mean() >= MIN_SOP}
     if cur: print(f"L{k}: {len(cands)} candidatos -> {len(cur)} frecuentes")
     k += 1
 # L2: 55 -> 47 · L3: 115 -> 88 · … · L7: 1 -> 1 (total 280)</code></pre>
   <p><strong>Tu turno:</strong> cambiá <code>MIN_SOP</code> a 0,3 y 0,6 y verificá los totales 787 y 70 de la Fig. 1.
   Luego generá reglas de un frecuente L3 con la función de la
-  <a href="0040-reglas-confianza-lift.html">lección 0040</a> y ordenalas por lift.</p>
+  <a href="0040-reglas-confianza-lift.html">lección 0040 (mar 17)</a> y ordenalas por lift.</p>
 
-  <h2>4 · Cierre del curso: el mapa completo (41 lecciones)</h2>
-  <table>
-    <tr><th>Unidad</th><th>Lecciones</th><th>El hilo Toyota</th></tr>
-    <tr><td>U1 · Datos y muestreo</td><td>0001, 0002, 0038</td><td>Tipos, TDSP, muestreo honesto</td></tr>
-    <tr><td>U2 · Exploración</td><td>0004–0008</td><td>Limpieza, <code>?</code>, KM=1, outliers</td></tr>
-    <tr><td>U3 · Visualización</td><td>0009–0014</td><td>Gráficos honestos, redes, mapas</td></tr>
-    <tr><td>U4 · Faltantes</td><td>0015–0018</td><td>Inyección seed-42, 5 imputaciones</td></tr>
-    <tr><td>U5 · Selección</td><td>0019–0022</td><td>Subset k=4, Lasso, SCAD</td></tr>
-    <tr><td>U6 · Regresión</td><td>0003, 0023–0027</td><td>OLS réplica, polinomial, GLM</td></tr>
-    <tr><td>U7 · Clustering</td><td>0028–0032</td><td>k=3 validado, PCA 68 %</td></tr>
-    <tr><td>U8 · Clasificación</td><td>0033–0037</td><td>Torneo: SVM 87,7 %</td></tr>
-    <tr><td>U9 · Ítems frecuentes</td><td>0039–0041</td><td>Lift ×2,43, Apriori 280</td></tr>
-  </table>
+  <h2>4 · Cierre Bloque G (17–18 nov)</h2>
+  <p>Recap del bloque hasta acá:</p>
+  <ul>
+    <li><a href="0039-soporte-itemsets.html">0039 (mar 17)</a>: cada auto es un changuito de 16 extras;
+    el soporte mide cuán común es cada combo y la monotonicidad (agregar ítems nunca suma soporte) permite podar.</li>
+    <li><a href="0040-reglas-confianza-lift.html">0040 (mar 17)</a>: la confianza miente cuando B es común;
+    el lift ordena los hallazgos (CD → computadora, ×2,43).</li>
+    <li>0041 (hoy, mié 18): Apriori sube nivel por nivel generando y podando — 825 candidatos contados,
+    787 frecuentes con min_sop = 0,3 (280 con min_sop = 0,4).</li>
+  </ul>
+  <p>Pero falta una pieza: Apriori genera candidatos y re-barre el dataset en cada nivel.
+  <a href="0052-fpgrowth-eclat-sin-candidatos.html">0052 (mié 18)</a> cierra el bloque con FP-Growth y ECLAT:
+  mismos frecuentes, sin candidatos y sin re-barridos.</p>
 
   <h2>5 · Quiz (auto-chequeo inmediato)</h2>
   <p class="meta">Elegí una opción por pregunta: el feedback es inmediato.</p>
@@ -112,8 +114,11 @@ while cur:
   <p><strong>Para profundizar (1 fuente):</strong>
   Agrawal &amp; Srikant (1994), <em>Fast Algorithms for Mining Association Rules</em> (VLDB).
   Más contexto en <a href="../RESOURCES.md">RESOURCES</a>.</p>
-  <p><strong>Fin del curso.</strong> Volvé al <a href="../index.html">índice</a>, rehecé los quizzes y —
-  sobre todo — corré cada bloque de código: el análisis de datos se aprende con las manos en el CSV.</p>
+  <p>Cierre Bloque G (17–18 nov): changuitos (<a href="0039-soporte-itemsets.html">0039</a>) →
+  reglas (<a href="0040-reglas-confianza-lift.html">0040</a>) → Apriori (hoy) →
+  FP-Growth/ECLAT (<a href="0052-fpgrowth-eclat-sin-candidatos.html">0052</a>).
+  Siguiente (orden Bloque G): <a href="0052-fpgrowth-eclat-sin-candidatos.html">0052 · FP-Growth y ECLAT (mié 18)</a>:
+  sin candidatos, sin re-barridos.</p>
 
   <nav class="lesson-nav">
     <a href="0040-reglas-confianza-lift.html">← 0040 Reglas</a>

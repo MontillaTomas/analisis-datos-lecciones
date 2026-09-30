@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>0030 · Jerárquico y DBSCAN — Unidad 7</title>
+  <title>0030 · Jerárquico y DBSCAN — Bloque F</title>
   <link rel="stylesheet" href="../assets/styles.css">
 </head>
 <body>
 <main>
   <header class="course">
-    <p class="kicker">Unidad 7 · Agrupamientos (clustering) · Lección 0030</p>
+    <p class="kicker">Bloque F · Clustering · Lección 0030 · mar 3 nov</p>
     <h1>Jerárquico y DBSCAN: árboles y densidades</h1>
     <p><strong>Win de hoy:</strong> agrupar por jerarquía Ward (corte en 3: 186/621/629, como K-Means) y por densidad
     DBSCAN (3 grupos + 167 ruidos), más KAMILA para datos mixtos.</p>
@@ -30,11 +30,11 @@
 Z = linkage(Xs, method="ward")
 grupos = fcluster(Z, 3, criterion="maxclust")  # 186 / 621 / 629</code></pre>
 
-  <h2>2 · DBSCAN: densidad y ruido explícito (0008 vuelve)</h2>
+  <h2>2 · DBSCAN: densidad y ruido explícito (0008, Bloque B, vuelve)</h2>
   <p><strong><abbr title="DBSCAN: agrupa lo denso (eps, min_samples) y declara ruido al resto">DBSCAN</abbr></strong> junta
   lo que tiene ≥10 vecinos a ≤0,35 y declara <strong>ruido</strong> al resto: 3 grupos + 167 negros. Diferencias con
   K-Means: no pide k, acepta formas libres y <em>muestra</em> lo inclasificable en vez de forzarlo. Costo: eps se calibra
-  a mano (0031) y con densidades mezcladas sufre.</p>
+  a mano (0031, mié 4) y con densidades mezcladas sufre.</p>
 
   <h2>3 · KAMILA: cuando hay números y etiquetas</h2>
   <p>¿Clusterizar KM + <code>Fuel_Type</code> juntos? K-Means no sabe de etiquetas.
@@ -86,6 +86,7 @@ grupos = fcluster(Z, 3, criterion="maxclust")  # 186 / 621 / 629</code></pre>
   Tan, Steinbach &amp; Kumar, <em>Introduction to Data Mining</em> — capítulo de clustering jerárquico y por densidad
   (<a href="https://www-users.cs.umn.edu/~kumar001/dmbook/">dmbook</a>, también en
   <a href="../RESOURCES.md">RESOURCES.md</a> del curso).</p>
+  <p>Orden Bloque F: seguí en la <a href="0050-kmedoids-medoides-robustos.html">lección 0050 (mar 3: K-medoids, el primo robusto)</a>.</p>
   <p>¿Algo no quedó claro? <strong>Preguntame al agente</strong>: dónde cortar tu dendrograma, cómo calibrar eps,
   o jerárquico vs K-Means para tu caso. Esa pregunta vale más que releer.</p>
 

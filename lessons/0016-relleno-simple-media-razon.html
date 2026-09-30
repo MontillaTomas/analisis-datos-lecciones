@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>0016 · Relleno simple y reponderación — Unidad 4</title>
+  <title>0016 · Relleno simple y reponderación — Bloque C</title>
   <link rel="stylesheet" href="../assets/styles.css">
 </head>
 <body>
 <main>
   <header class="course">
-    <p class="kicker">Unidad 4 · Datos faltantes e imputación · Lección 0016</p>
+    <p class="kicker">Bloque C · Limpieza de Datos · Lección 0016 · mar 1 sep</p>
     <h1>Relleno simple: media, razón y reponderación</h1>
     <p><strong>Win de hoy:</strong> rellenar con media/mediana/constante/razón sobre la inyección 0015
     (RMSE HP ≈ 14), ver el pico falso que deja la media y corregir el sesgo +205 € reponderando.</p>
@@ -46,8 +46,10 @@ imp = SimpleImputer(strategy="mean").fit_transform(df[["KM", "HP"]])</code></pre
   pesa cada auto por 1/probabilidad-de-respuesta de su tramo (viejos pesan 1/0,808 ≈ 1,24): media corregida
   <strong>10.730 €</strong> (sesgo −1). Sin inventar un solo dato.</p>
   <pre><code>resp = 1 - pd.Series(m_hp).groupby(tramos).mean()  # 0,983 / 0,882 / 0,808
-w = 1.0 / tramos.map(resp)                             # jóvenes ≈1, viejos ≈1,24
-media_pond = (df.loc[~m_hp, "Price"] * w[~m_hp]).sum() / w[~m_hp].sum()  # 10730</code></pre>
+# jóvenes ≈1, viejos ≈1,24
+w = 1.0 / tramos.map(resp)
+media_pond = ((df.loc[~m_hp, "Price"] * w[~m_hp]).sum()
+              / w[~m_hp].sum())  # 10730</code></pre>
 
   <h2>4 · Figura: el pico falso y el rescate</h2>
   <figure>
@@ -96,6 +98,7 @@ media_pond = (df.loc[~m_hp, "Price"] * w[~m_hp]).sum() / w[~m_hp].sum()  # 10730
   <a href="../RESOURCES.md">RESOURCES.md</a> del curso).</p>
   <p>¿Algo no quedó claro? <strong>Preguntame al agente</strong>: cuándo la media alcanza, cómo elegir la constante,
   o por qué ponderar rescata sin rellenar. Esa pregunta vale más que releer.</p>
+  <p>Siguiente en el orden del Bloque C (misma clase, mar 1): <a href="0017-hot-deck-cold-deck-knn.html">0017 Donantes y vecinos</a> — hot deck, cold deck y KNN.</p>
 
   <nav class="lesson-nav">
     <a href="0015-faltantes-mecanismos-listwise.html">← 0015 Faltantes</a>

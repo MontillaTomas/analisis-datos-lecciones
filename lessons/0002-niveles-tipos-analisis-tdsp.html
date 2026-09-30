@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>0002 · Niveles, tipos de análisis y metodologías — Unidad 1</title>
+  <title>0002 · Niveles, tipos de análisis y metodologías — Bloque A</title>
   <link rel="stylesheet" href="../assets/styles.css">
 </head>
 <body>
 <main>
   <header class="course">
-    <p class="kicker">Unidad 1 · ¿Qué son los datos? · Lección 0002</p>
+    <p class="kicker">Bloque A · Presentación e introducción · Lección 0002 · mié 19 ago</p>
     <h1>Niveles de decisión, tipos de análisis y cómo ordenar el trabajo</h1>
     <p><strong>Win de hoy:</strong> ubicar cualquier pregunta sobre <code>ToyotaCorolla.csv</code> en su
     nivel de decisión (operativo, táctico, estratégico, predictivo/prescriptivo), en su tipo de análisis
@@ -73,7 +73,8 @@
   <pre><code>import pandas as pd
 df = pd.read_csv("../ToyotaCorolla.csv")  # desde lessons/
 tramos = pd.qcut(df["Age_08_04"], 3, labels=["joven", "media", "vieja"])
-print(df.assign(tramo=tramos).groupby("tramo", observed=True)["Price"].mean().round(0))
+print(df.assign(tramo=tramos).groupby("tramo", observed=True)
+      ["Price"].mean().round(0))
 # joven  14312.0 / media  9658.0 / vieja  8093.0
 print(df.groupby("Mfg_Year")["Price"].mean().round(0))
 # 1998 7926 / 2000 10728 / 2004 22324 ...</code></pre>
@@ -105,12 +106,11 @@ print(df.groupby("Mfg_Year")["Price"].mean().round(0))
     81,3 %, <abbr title="Central_Lock: cierre centralizado; 1 si el auto lo tiene">Central_Lock</abbr> en el 58,0 % y
     <abbr title="Airco: aire acondicionado simple; 1 si el auto lo tiene">Airco</abbr> en el 50,8 %, mientras que
     <abbr title="Automatic_airco: climatizador automático; 1 si el auto lo tiene">Automatic_airco</abbr> solo en el 5,6 %.
-    Esa tabla de soportes es la materia prima de la Unidad 9 (reglas de asociación y algoritmo Apriori).</li>
+    Esa tabla de soportes es la materia prima del Bloque G (reglas de asociación y algoritmo Apriori).</li>
     <li><strong><abbr title="Series de tiempo: datos ordenados en el tiempo para detectar estacionalidad y tendencia">Series de tiempo</abbr>.</strong>
     Sirven para conocer la estacionalidad de un producto. Con <code>Mfg_Month</code> se ve cuántos autos se fabricaron por mes
-    (enero 207, septiembre 76, diciembre 68): hay ritmo anual. La Unidad 9 y el contexto de
-    <abbr title="Forecasting: pronóstico de series de tiempo; predecir valores futuros a partir de la historia">forecasting</abbr>
-    lo retomarán.</li>
+    (enero 207, septiembre 76, diciembre 68): hay ritmo anual. Las series de tiempo
+    (fuera del núcleo de bloques) lo retomarán.</li>
   </ul>
   <figure>
     <img src="../assets/img/toyota/0002-niveles-tipos-analisis-tdsp-fig2.png" alt="Barras de soporte de equipamiento y barras de autos por mes de fabricación">
@@ -141,15 +141,24 @@ print(df.groupby("Mfg_Year")["Price"].mean().round(0))
     <li><strong>Despliegue</strong> (<abbr title="Deployment: puesta en producción; llevar el modelo al uso real">deployment</abbr>): la fórmula llega al mostrador (planilla de tasación, regla de descuento por KM).</li>
     <li><strong>Aceptación del cliente</strong> (<abbr title="Customer acceptance: validación del cliente de que el sistema cumple la necesidad de negocio">customer acceptance</abbr>): la concesionaria valida si la tasación acierta y paga lo que predice.</li>
   </ol>
+  <figure>
+    <img src="../assets/img/catedra/introduccion/tdsp-ciclo-vida.png" alt="Diagrama de cátedra del ciclo de vida TDSP con sus 5 etapas iterando">
+    <figcaption>El ciclo de vida TDSP según cátedra: las mismas 5 etapas iterando en ciclo. Fuente: cátedra UTN-FRT (clase de introducción, p. 55).</figcaption>
+  </figure>
+  <p>El diagrama de cátedra muestra las mismas 5 etapas iterando (las mismas 5 que listamos arriba, con nombres equivalentes: donde el diagrama dice «Entendimiento» aquí usamos «Comprensión», y su «Modelo» es nuestro «Modelado»).
+  Notar que “Feature Engineering” y “Evaluación del Modelo” cuelgan del Modelado, y que la Aceptación del Cliente
+  cierra el ciclo hacia Fin.</p>
+  <p>Cátedra también evalúa TDSP (p. 66–67): ventajas — ágil, familiar para quien viene de software, nativo de datos;
+  desventajas — los sprints fijos incomodan cuando el dato manda, y la documentación de Microsoft es inconsistente.</p>
   <p>TDSP además define roles (arquitecto de solución, project manager, ingeniero de datos, científico de datos,
   desarrollador, líder de proyecto), estructura estándar de proyecto y plantillas. Para profundizar:</p>
   <ul>
     <li><a href="https://www.datascience-pm.com/tdsp/">Ficha TDSP en Data Science PM (ciclo, roles, pros/contras)</a></li>
     <li><a href="https://microsoft.github.io/azureml-ops-accelerator/1-MLOpsFoundation/2-SkillsRolesAndResponsibilities/1-AdoptingDSProcess.html">Microsoft: Adopting a Data Science Process (roles y responsabilidades)</a></li>
   </ul>
-  <div class="callout"><strong>Cómo leer el curso con TDSP.</strong> 0001–0002 = comprensión del negocio + datos.
-  U2–U4 = adquisición y preparación (wrangling, outliers, faltantes). U5–U6 = modelado (selección, regularización,
-  regresión). U7–U9 = modelado avanzado (clustering, clasificación, asociación). El despliegue y la aceptación los
+  <div class="callout"><strong>Cómo leer el curso con TDSP.</strong> 0001–0002 + 0049 = comprensión del negocio + datos.
+  Bloque B = EDA. Bloque C = limpieza. Bloque D = modelado (regresión y selección). Bloques E–G = modelado avanzado
+  (clasificación, clustering, itemsets). Bloque H = RNA. El despliegue y la aceptación los
   simulamos comunicando: cada lección cierra con qué le dirías al dueño de la concesionaria.</div>
 
   <h2>5 · Quiz (auto-chequeo inmediato)</h2>
@@ -190,6 +199,8 @@ print(df.groupby("Mfg_Year")["Price"].mean().round(0))
   <a href="../RESOURCES.md">RESOURCES.md</a> del curso). Para el ciclo concreto usamos la documentación oficial de
   <a href="https://www.datascience-pm.com/tdsp/">TDSP</a> y
   <a href="https://microsoft.github.io/azureml-ops-accelerator/1-MLOpsFoundation/2-SkillsRolesAndResponsibilities/1-AdoptingDSProcess.html">Microsoft</a>.</p>
+  <p>Orden Bloque A: la próxima clase (Bloque B, mar 25 ago) es la
+  <a href="0006-eda-sistematico-toyota.html">lección 0006: EDA sistemático</a>.</p>
   <p>¿Algo no quedó claro? <strong>Preguntame al agente</strong>: qué nivel es tu pregunta, qué tipo de análisis necesita,
   o en qué fase TDSP estás. Esa pregunta vale más que releer.</p>
 

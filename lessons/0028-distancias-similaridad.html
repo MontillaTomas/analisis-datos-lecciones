@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>0028 · Distancias y similaridad — Unidad 7</title>
+  <title>0028 · Distancias y similaridad — Bloque F</title>
   <link rel="stylesheet" href="../assets/styles.css">
 </head>
 <body>
 <main>
   <header class="course">
-    <p class="kicker">Unidad 7 · Clustering · Lección 0028</p>
+    <p class="kicker">Bloque F · Clustering · Lección 0028 · mar 27 oct</p>
     <h1>Distancias: qué tan parecido es un auto a otro</h1>
     <p><strong>Win de hoy:</strong> medir parecido entre las filas 0 y 1 con 3 distancias
     (<strong><abbr title="Euclídea: línea recta; Pitágoras en n dimensiones">euclídea</abbr></strong> 25.952,
@@ -25,7 +25,7 @@
   <p><strong><abbr title="Clustering: agrupar casos parecidos sin etiquetas previas (no supervisado)">Clustering</abbr></strong>
   agrupa sin target: nadie dice cuántos grupos hay ni quién va en cuál. La única regla del juego es la
   <strong><abbr title="Distancia: número que mide diferencia entre dos casos; parecidos = chicos">distancia</abbr></strong>:
-  definir “parecido” con un número. Todo U7 cuelga de esta definición: cambiá la distancia y cambian los grupos.</p>
+  definir “parecido” con un número. Todo el bloque cuelga de esta definición: cambiá la distancia y cambian los grupos.</p>
   <p>El ejemplo: filas 0 y 1 (misma edad, 23 meses; KM 46.986 vs 72.937; precio 13.500 vs 13.750).</p>
 
   <h2>2 · Euclídea: Pitágoras (KM aporta 100,0 %)</h2>
@@ -43,7 +43,7 @@
 
   <h2>4 · Estandarizar: un voto por variable</h2>
   <p>Un desvío vale 37.506 km = 3.627 € = 18,6 meses: comparar crudo es sumar peras con tornillos. Estandarizando,
-  la distancia 0–1 queda <strong>d = 0,70</strong> y cada variable vota en desvíos (regla 0008). Sin este paso, todo
+  la distancia 0–1 queda <strong>d = 0,70</strong> y cada variable vota en desvíos (regla 0008, Bloque B). Sin este paso, todo
   clustering Toyota sería “clustering de KM”.</p>
   <pre><code>Xs = (X - X.mean(axis=0)) / X.std(axis=0)  # siempre antes de clusterizar</code></pre>
 
@@ -91,6 +91,7 @@
   Tan, Steinbach &amp; Kumar, <em>Introduction to Data Mining</em> — capítulo de similaridad y distancias
   (<a href="https://www-users.cs.umn.edu/~kumar001/dmbook/">dmbook</a>, también en
   <a href="../RESOURCES.md">RESOURCES.md</a> del curso).</p>
+  <p>Orden Bloque F: seguí en la <a href="0029-kmeans-segmentos.html">lección 0029 (mié 28: K-Means con estas distancias)</a>.</p>
   <p>¿Algo no quedó claro? <strong>Preguntame al agente</strong>: qué distancia para tu dato, euclídea vs Manhattan,
   o cuándo el coseno gana. Esa pregunta vale más que releer.</p>
 

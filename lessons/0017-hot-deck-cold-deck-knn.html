@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>0017 · Hot deck, cold deck y KNN — Unidad 4</title>
+  <title>0017 · Hot deck, cold deck y KNN — Bloque C</title>
   <link rel="stylesheet" href="../assets/styles.css">
 </head>
 <body>
 <main>
   <header class="course">
-    <p class="kicker">Unidad 4 · Datos faltantes e imputación · Lección 0017</p>
+    <p class="kicker">Bloque C · Limpieza de Datos · Lección 0017 · mar 1 sep</p>
     <h1>Donantes y vecinos: hot deck, cold deck, KNN</h1>
     <p><strong>Win de hoy:</strong> imputar <code>HP</code> copiando donantes reales
     (<strong><abbr title="Hot deck: rellenar copiando el valor de un caso parecido del mismo dataset">hot deck</abbr></strong> 18,9),
@@ -37,7 +37,7 @@ donante = rd.choice(df.loc[completos_mismo_tramo, "HP"])</code></pre>
 
   <h2>3 · KNN: promediar a los 5 vecinos (RMSE 8,1)</h2>
   <p><code>KNNImputer(k=5)</code> busca los 5 autos más parecidos en <code>KM/HP/Edad/Peso/Price</code>
-  <strong>estandarizados</strong> (0008: sin escalar, KM domina) y promedia sus HP. RMSE 8,1: mejor que la media,
+  <strong>estandarizados</strong> (0008, Bloque B: sin escalar, KM domina) y promedia sus HP. RMSE 8,1: mejor que la media,
   con valores variados (sin pico). k chico = sensible al ruido; k grande = tiende a la media. Detalle técnico: la
   distancia ignora celdas vacías (<code>nan_euclidean</code>), por eso funciona con huecos por todos lados.</p>
   <pre><code>from sklearn.impute import KNNImputer
@@ -91,6 +91,7 @@ imp = KNNImputer(n_neighbors=5).fit_transform(Xs)</code></pre>
   <a href="../RESOURCES.md">RESOURCES.md</a> del curso).</p>
   <p>¿Algo no quedó claro? <strong>Preguntame al agente</strong>: cuándo hot vs cold deck, cómo elegir k, o por qué
   el RMSE no lo es todo. Esa pregunta vale más que releer.</p>
+  <p>Siguiente en el orden del Bloque C (misma clase, mar 1): <a href="0018-imputacion-con-modelos.html">0018 Imputación con modelos</a> — regresiones encadenadas y veredicto.</p>
 
   <nav class="lesson-nav">
     <a href="0016-relleno-simple-media-razon.html">← 0016 Relleno simple</a>

@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>0046 · Transformaciones: log y discretización — Unidad 2</title>
+  <title>0046 · Transformaciones: log y discretización — Bloque B</title>
   <link rel="stylesheet" href="../assets/styles.css">
 </head>
 <body>
 <main>
   <header class="course">
-    <p class="kicker">Unidad 2 · Exploración de datos · Lección 0046</p>
+    <p class="kicker">Bloque B · Análisis Exploratorio de Datos · Lección 0046 · mar 25 ago</p>
     <h1>Transformaciones: log para la cola larga, tramos para la edad</h1>
     <p><strong>Win de hoy:</strong> el precio tiene cola derecha (skew 1,70) y <code>log1p</code> la doma (skew 0,73);
     la edad continua se vuelve 4 tramos que valen 15.266 / 10.265 / 9.086 / 7.904 € —
@@ -21,11 +21,16 @@
 
   <h2>1 · El mapa: 5 transformaciones, 2 nuevas hoy</h2>
   <p>Transformar es reexpresar una variable para que los algoritmos la aprovechen mejor. La familia completa de clase:</p>
+  <figure>
+    <img src="../assets/img/catedra/eda/feature-transformation.png" alt="Slide de cátedra: feature transformation con escalado, discretización, agrupamiento, faltantes y log">
+    <figcaption>La lista de transformaciones según cátedra: escalado, discretización, agrupamiento, llenado de faltantes y log para la asimetría. Fuente: cátedra UTN-FRT (clase EDA, p. 13).</figcaption>
+  </figure>
+  <p>La tabla de abajo es esa misma lista, ordenada por dónde se estudia cada una en el curso. Y ojo al mapa grande: transformation es solo 1 de 3 patas del feature engineering (clase EDA, p. 11); las otras dos son selection (elegir variables: filtros y Chi² en la <a href="0022-scad-elastic-filtros.html">0022</a>, Lasso/Ridge en la <a href="0021-ridge-lasso-caminos.html">0021</a>) y extraction (crear variables nuevas: <abbr title="PCA: técnica que combina variables correlacionadas en pocas componentes no correlacionadas">PCA</abbr> en la <a href="0032-pca-biplot-pcr.html">0032</a>), las tres en Bloque D.</p>
   <table>
     <tr><th>Transformación</th><th>Idea</th><th>Dónde se estudia</th></tr>
     <tr><td>Escalado</td><td>Igualar rangos (KM no aplasta a Doors)</td><td><a href="0028-distancias-similaridad.html">0028</a>, <a href="0033-clasificacion-knn.html">0033</a></td></tr>
-    <tr><td>Llenado de faltantes</td><td>Rellenar huecos con criterio</td><td>U4 (0015–0018)</td></tr>
-    <tr><td>Agrupamiento</td><td>Crear grupos como variable (clusters)</td><td>U7 (0028–0032)</td></tr>
+    <tr><td>Llenado de faltantes</td><td>Rellenar huecos con criterio</td><td>Bloque C (0015–0018)</td></tr>
+    <tr><td>Agrupamiento</td><td>Crear grupos como variable (clusters)</td><td>Bloques D (0032) y F (0028–0031)</td></tr>
     <tr><td><strong>Log / skew</strong></td><td><strong>Domar colas largas</strong></td><td><strong>Hoy §2</strong></td></tr>
     <tr><td><strong>Discretización</strong></td><td><strong>Número → tramo con sentido</strong></td><td><strong>Hoy §3</strong></td></tr>
   </table>
@@ -98,13 +103,17 @@ print(df.groupby("Tramo", observed=True)["Price"].mean().round(0).to_string())
   <p><strong>Para profundizar (1 fuente):</strong>
   Kuhn &amp; Johnson, <em>Feature Engineering and Selection</em> — cap. 3 (transformaciones, skew).
   Más contexto en <a href="../RESOURCES.md">RESOURCES</a>.</p>
-  <p>Cierre del bloque de apuntes: inferencia (0042) → métricas (0043) → ANOVA (0044) → violín/KDE (0045) → transformaciones (0046).
-  Volvé al <a href="../index.html">índice</a> y seguí por donde ibas.</p>
+  <p><strong>Cierre mar 25 (EDA numérico):</strong> describir/agrupar/correlacionar (0006) → outliers (0007–0008) →
+  transformaciones (hoy). Mañana, mié 26, toca contar todo esto con gráficos.</p>
+  <p>Siguiente en el orden del Bloque B (mié 26): <a href="0009-que-grafico-para-que-dato.html">0009 Qué gráfico para qué dato</a> — apertura de visualización.</p>
 
   <nav class="lesson-nav">
     <a href="0045-violin-densidad-torta.html">← 0045 Violín</a>
-    <a href="../index.html">Índice ↑</a>
+    <a href="0047-remuestreo-bootstrap-cv.html">Siguiente: 0047 Remuestreo →</a>
   </nav>
+  <p class="meta">Ver también: <a href="../index.html">índice del curso</a> ·
+  <a href="../reference/toyota-data-dictionary.html">diccionario Toyota</a> ·
+  <a href="../reference/analisis-ejemplo-ols.html">análisis OLS de ejemplo</a></p>
 </main>
 <script>
 (function(){

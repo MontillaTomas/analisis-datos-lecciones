@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>0004 · Limpieza de datos con Toyota — Unidad 2</title>
+  <title>0004 · Limpieza de datos con Toyota — Bloque C</title>
   <link rel="stylesheet" href="../assets/styles.css">
 </head>
 <body>
 <main>
   <header class="course">
-    <p class="kicker">Unidad 2 · Exploración de datos · Lección 0004</p>
+    <p class="kicker">Bloque C · Limpieza de Datos · Lección 0004 · mar 1 sep</p>
     <h1>Limpieza de datos con Toyota: detectar la suciedad</h1>
     <p><strong>Win de hoy:</strong> auditar <code>ToyotaCorolla.csv</code> (1436 × 37) y documentar
     sus 5 defectos conocidos: <code>Model</code> con <code>?</code>, <code>KM</code> sospechosos y rarezas
@@ -42,13 +42,24 @@
   Cada defecto se cuenta, se muestra con evidencia y se decide por escrito qué hacer (corregir, marcar con un
   <abbr title="Flag: columna nueva de 0/1 que marca las filas con un defecto, sin borrarlas">flag</abbr>, o dejarlo).
   El dataset limpio se guarda como archivo <em>nuevo</em>; el original no se toca.</div>
+  <figure>
+    <img src="../assets/img/catedra/limpieza/paso1-encontrar.png" alt="Slide de cátedra: Paso 1, encontrar la suciedad; qué buscar en los datos">
+    <figcaption>Paso 1 según cátedra: antes de refregar, determinar qué está mal — vacíos, constantes, distribuciones, imposibles, consistencia. Fuente: cátedra UTN-FRT (clase Limpieza de Datos, p. 7).</figcaption>
+  </figure>
+  <p>Este checklist es el programa de la clase de hoy: vacíos (§2), constantes (nuestras casi-constantes de §5),
+  distribuciones e imposibles (§4–§5) y consistencia (§3). Y el mapa completo del Paso 2 de cátedra tiene 9 subpasos:
+  “(1) Eliminar columnas innecesarias. (2) Datos faltantes. (3) Outliers. (4) Datos contaminados.
+  (5) Datos inconsistentes. (6) Datos inválidos. (7) Datos duplicados. (8) Problemas en el tipo de datos.
+  (9) Errores estructurales” (clase Limpieza de Datos, p. 10). Para los atípicos, cátedra da 3 enfoques — eliminarlos
+  del análisis, segmentarlos en un grupo separado o conservarlos (p. 14–15) — que se operan en las
+  <a href="0007-outliers-estadisticos-iqr-z.html">0007</a> y <a href="0008-outliers-multivariados-lof-dbscan.html">0008</a> (Bloque B).</p>
   <p><strong>Paso −1: ¿de dónde vienen?</strong> Los
   <strong><abbr title="Datos privados: provistos por organizaciones; conllevan cuidados de seguridad y privacidad">datos privados</abbr></strong>
   (los de una concesionaria real: clientes, patentes) exigen cuidados de seguridad y privacidad antes de abrirlos;
   los <strong><abbr title="Datos públicos: publicados por organismos para todos (ej. Our World in Data)">datos públicos</abbr></strong>
   (organismos, portales abiertos, <em>Our World in Data</em>) vienen con documentación y licencia.
   Este CSV es público y docente: ideal para aprender, pero igual hereda sesgos de cómo se juntó (ver
-  <a href="0038-muestreo-sesgo.html">lección 0038</a>).</p>
+  <a href="0038-muestreo-sesgo.html">lección 0038</a> (Anexo)).</p>
 
   <h2>2 · Paso 0: ¿hay celdas vacías? (<code>info</code>, <code>describe</code>, <code>isna</code>)</h2>
   <p>Antes de cazar defectos sutiles, la pregunta más básica: ¿falta algo? Tres comandos responden:</p>
@@ -57,10 +68,29 @@ df = pd.read_csv("../ToyotaCorolla.csv")  # desde lessons/
 print(df.shape)              # (1436, 37)
 print(df.isna().sum().sum()) # 0 → ni una celda vacía
 print(df.info())             # 35 numéricas + 2 de texto (Model, Fuel_Type)</code></pre>
+  <figure>
+    <img src="../assets/img/catedra/limpieza/faltantes-disfraces.png" alt="Slide de cátedra: datos faltantes y los disfraces que usan (0, NA, NaN, NULL, Inf)">
+    <figcaption>Antes de decidir qué hacer con los faltantes, cátedra pide detectar sus disfraces: 0, “0”, cadenas vacías, “NA”, NaN, NULL o Inf — e ignorarlos “podría llegar a ser muy perjudicial en el análisis”. Fuente: cátedra UTN-FRT (clase Limpieza de Datos, p. 12).</figcaption>
+  </figure>
   <p>Resultado: <strong>0 valores nulos</strong> en todo el archivo. ¿Terminamos? No: como advierte el
   <a href="../reference/toyota-data-dictionary.html">diccionario Toyota</a>, acá la suciedad viene
   <em>codificada dentro de celdas llenas</em>. El <code>isna()</code> no la detecta; hay que mirar columna por columna.
-  Por eso esta unidad existe: <code>describe()</code> muestra el resumen numérico, pero el juicio lo pone el analista.</p>
+  Por eso esta lección existe: <code>describe()</code> muestra el resumen numérico, pero el juicio lo pone el analista.
+  El <code>?</code> de §3 y el <code>KM = 1</code> de §4 son exactamente esos disfraces: suciedad codificada que
+  <code>isna()</code> no ve.</p>
+  <p><strong>Duplicados: el chequeo que igual se documenta.</strong> Nulos y duplicados van juntos en la auditoría:
+  cátedra define los duplicados como “los mismos valores que se repiten para un punto de observación” y lista 3 fuentes:
+  combinar fuentes distintas, doble envío del usuario y código de carga que inserta de más
+  (clase Limpieza de Datos, p. 19). El chequeo en vivo:</p>
+  <pre><code>print(df.duplicated().sum())  # 0 → ni una fila repetida</code></pre>
+  <figure>
+    <img src="../assets/img/catedra/limpieza/duplicados-fuentes.png" alt="Slide de cátedra: datos duplicados, definición y sus tres fuentes">
+    <figcaption>Duplicados según cátedra: definición y 3 fuentes (combinar fuentes, doble envío, código de carga). Acá el conteo da 0, pero el chequeo queda documentado. Fuente: cátedra UTN-FRT (clase Limpieza de Datos, p. 19).</figcaption>
+  </figure>
+  <p>Si hubiera dado distinto de cero, cátedra ofrece 3 formas de eliminarlos: “(1) Busque los registros similares y
+  elimine a todos menos uno. (2) Registros de coincidencias por pares, compárelos y tome el más relevante
+  (por ejemplo, el más reciente). (3) Combine los registros en entidades a través de la agrupación” (p. 20).
+  Acá no hizo falta: 0 filas, decisión anotada.</p>
 
   <h2>3 · Caso 1: <code>Model</code> con <code>?</code> inicial (147 filas)</h2>
   <p>La columna <code>Model</code> describe la versión del auto en texto. Pero 147 filas empiezan con un signo
@@ -77,6 +107,9 @@ print(df.loc[raro, "Model"].iloc[0])
   </ul>
   <pre><code>df["Model_tiene_pregunta"] = raro.astype(int)
 df["Model_limpio"] = df["Model"].str.lstrip("?")</code></pre>
+  <p>Es el caso “manzanas vs MANZANAS” de cátedra: “¿vendimos 'manzanas', 'manzanas' o 'MANZANAS' este mes? […] Las
+  diferentes representaciones de ‘manzana’ es fácilmente entendible por las personas, para las computadoras son cosas
+  diferentes” (clase Limpieza de Datos, p. 17).</p>
   <p class="meta">En la próxima lección exprimiremos <code>Model</code> con
   <abbr title="Regex: expresiones regulares; patrones para buscar y extraer partes de un texto">regex</abbr>;
   hoy alcanza con dejar el defecto contado y marcado.</p>
@@ -104,7 +137,8 @@ print(df["KM_sospechoso"].sum())  # 9</code></pre>
     <li><strong><code>cc = 16000</code> (1 fila).</strong> Toda la columna está entre 1300 y 2000… salvo una fila
     con 16.000, exactamente 10× lo típico. Casi seguro alguien sumó un cero. Decisión: corregir a 1600
     (el valor más común) y anotarlo, o marcarla; lo imperdonable es dejarla pasar en silencio porque distorsiona
-    cualquier promedio.</li>
+    cualquier promedio. Dato inválido de libro, como la “persona cuya edad es 170” del slide de cátedra
+    (clase Limpieza de Datos, p. 18).</li>
     <li><strong><code>Doors = 2</code> (2 filas).</strong> El resto: 622 con 3, 138 con 4, 674 con 5. ¿Existe un
     Corolla de 2 puertas? Raro pero no imposible; se marca con flag y se sigue. Ejemplo perfecto de
     “atípico ≠ error”.</li>
@@ -113,8 +147,10 @@ print(df["KM_sospechoso"].sum())  # 9</code></pre>
   </ul>
   <p>Y un hallazgo de regalo: hay columnas <strong><abbr title="Casi constante: columna que vale lo mismo en casi todas las filas; aporta poca información">casi constantes</abbr></strong>
   (<code>Cylinders</code> vale 4 en las 1436 filas, <code>Guarantee_Period</code> vale 3 en 1274).
-  Si una columna no varía, no puede explicar nada: el análisis de ejemplo las deja afuera, y en la
-  Unidad 5 veremos cómo la selección de variables las descarta sola.</p>
+  Si una columna no varía, no puede explicar nada: el análisis de ejemplo las deja afuera, y en el
+  Bloque D veremos cómo la selección de variables las descarta sola. Cátedra lo dice antes de modelar: “Se debe analizar
+  si para los objetivos del análisis son importantes o significativos” (clase Limpieza de Datos, p. 11) — eliminar
+  columnas innecesarias según el objetivo.</p>
 
   <h2>6 · Figuras: el mapa de la suciedad</h2>
   <p>Primero, el conteo de filas afectadas por cada defecto (de 1436):</p>
@@ -134,11 +170,16 @@ print(df["KM_sospechoso"].sum())  # 9</code></pre>
   <p>Snippet generador de la Fig. 1 (conteo honesto, sin hardcodear):</p>
   <pre><code>import pandas as pd
 df = pd.read_csv("../ToyotaCorolla.csv")
-print("Model con ?:", int(df["Model"].str.startswith("?", na=False).sum()))  # 147
-print("Gears != 5:", int((df["Gears"] != 5).sum()))                          # 46
-print("KM <= 100:", int((df["KM"] &lt;= 100).sum()))                          # 9
-print("Doors == 2:", int((df["Doors"] == 2).sum()))                          # 2
-print("cc > 5000:", int((df["cc"] > 5000).sum()))                            # 1</code></pre>
+print("Model con ?:",
+      int(df["Model"].str.startswith("?", na=False).sum()))  # 147
+print("Gears != 5:",
+      int((df["Gears"] != 5).sum()))  # 46
+print("KM <= 100:",
+      int((df["KM"] &lt;= 100).sum()))  # 9
+print("Doors == 2:",
+      int((df["Doors"] == 2).sum()))  # 2
+print("cc > 5000:",
+      int((df["cc"] > 5000).sum()))  # 1</code></pre>
   <p>Regenerar ambas figuras (mismo resultado versionado en <code>assets/img/toyota/</code>):</p>
   <pre><code>python scripts/make_figures.py --only limpieza-datos-toyota</code></pre>
 
@@ -178,9 +219,13 @@ print("cc > 5000:", int((df["cc"] > 5000).sum()))                            # 1
   <code><abbr title="value_counts: método de pandas que cuenta cuántos casos hay por categoría">value_counts</abbr></code>
   (<a href="https://wesmckinney.com/book/">wesmckinney.com/book</a>, también en
   <a href="../RESOURCES.md">RESOURCES.md</a> del curso).
-  Es la referencia para todo lo que hoy contaste con <code>isna</code> y comparaciones booleanas.</p>
+  Es la referencia para todo lo que hoy contaste con <code>isna</code> y comparaciones booleanas.
+  Y el ritual de cierre lo pone cátedra, Paso 3: “Una vez realizada la limpieza, repita los pasos 1 y 2” — porque
+  “es posible que te hayas perdido algo”, “es probable descubrir nuevos problemas” y “aprendes más sobre tus datos”
+  (clase Limpieza de Datos, p. 26). Enjuague y repita.</p>
   <p>¿Algo no quedó claro? <strong>Preguntame al agente</strong>: qué defecto te cuesta detectar, cuándo un atípico
   es error y cuándo es real, o cómo decidir entre corregir, marcar o excluir. Esa pregunta vale más que releer.</p>
+  <p>Siguiente en el orden del Bloque C (misma clase, mar 1): <a href="0005-wrangling-regex-model.html">0005 Wrangling y regex</a> — exprimir Model con regex.</p>
 
   <nav class="lesson-nav">
     <a href="0003-regresion-lineal-precio-km.html">← 0003 Regresión lineal</a>

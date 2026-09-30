@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>0022 · SCAD, elastic net y filtros — Unidad 5</title>
+  <title>0022 · SCAD, elastic net y filtros — Bloque D</title>
   <link rel="stylesheet" href="../assets/styles.css">
 </head>
 <body>
 <main>
   <header class="course">
-    <p class="kicker">Unidad 5 · Selección de variables y regularización · Lección 0022</p>
+    <p class="kicker">Bloque D · Regresión lineal, selección y regularización · Lección 0022 · mié 23 sep</p>
     <h1>SCAD, elastic net y filtros: el resto del arsenal</h1>
     <p><strong>Win de hoy:</strong> entender <strong><abbr title="SCAD: penalización que mata chicos como Lasso pero perdona a los grandes (menos sesgo)">SCAD</abbr></strong>
     (perdona fuertes), probar <strong><abbr title="Elastic net: mezcla Lasso+Ridge; elige y estabiliza a la vez">elastic net</abbr></strong>
@@ -50,9 +50,10 @@ ElasticNetCV(l1_ratio=0.5, cv=5).fit(X_estandarizada, y)</code></pre>
     SCAD (verde) se aplana con β grande mientras Lasso y Ridge siguen castigando.</figcaption>
   </figure>
   <p>Regenerar la figura (mismo resultado versionado en <code>assets/img/toyota/</code>):</p>
-  <pre><code>python scripts/make_figures.py --only scad-elastic-filtros</code></pre>
-  <div class="callout"><strong>Cierre de Unidad 5.</strong> 0019 mostró el daño, 0020 buscó equipos, 0021 multó con
-  Ridge/Lasso, hoy sumó SCAD, elastic net y filtros. Lo que sigue: U6 cierra regresión (múltiple, polinomial, GLM).</div>
+  <pre><code>python3 scripts/make_figures.py --only scad-elastic-filtros</code></pre>
+  <div class="callout"><strong>Cierre de contracción (mié 23 sep).</strong> 0019 mostró el daño de no elegir, 0020 buscó
+  equipos, 0021 multó con Ridge/Lasso y hoy sumó SCAD, elastic net y filtros. Lo que sigue en el Bloque D:
+  <a href="0032-pca-biplot-pcr.html">0032</a> (mar 29: PCA, biplot y PCR, la tercera familia).</div>
 
   <h2>5 · Quiz (auto-chequeo inmediato)</h2>
   <p class="meta">Elegí una opción por pregunta: el feedback es inmediato.</p>
@@ -92,6 +93,9 @@ ElasticNetCV(l1_ratio=0.5, cv=5).fit(X_estandarizada, y)</code></pre>
   <a href="../RESOURCES.md">RESOURCES.md</a> del curso).</p>
   <p>¿Algo no quedó claro? <strong>Preguntame al agente</strong>: cuándo SCAD le gana a Lasso, cómo calibrar elastic
   net, o filtros vs selección real. Esa pregunta vale más que releer.</p>
+  <p>Orden Bloque D: siguiente en el bloque,
+  <a href="0032-pca-biplot-pcr.html">0032 · PCA y biplot: comprimir variables que repiten la historia</a>:
+  mar 29, reducción de dimensionalidad (PCA, biplot y PCR).</p>
 
   <nav class="lesson-nav">
     <a href="0021-ridge-lasso-caminos.html">← 0021 Ridge y Lasso</a>

@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>0038 · Muestreo y sesgo — Unidad 1</title>
+  <title>0038 · Muestreo y sesgo — Anexo</title>
   <link rel="stylesheet" href="../assets/styles.css">
 </head>
 <body>
 <main>
   <header class="course">
-    <p class="kicker">Unidad 1 · Introducción · Lección 0038</p>
+    <p class="kicker">Anexo · Contenido extra · Lección 0038</p>
     <h1>Muestreo y sesgo: por qué 30 autos al azar valen más que 725 elegidos mal</h1>
     <p><strong>Win de hoy:</strong> con 2.000 muestras simuladas: n=30 da medias entre 9.553 y 12.106 (mucho ruido),
     n=500 entre 10.477 y 10.989 (puntería)… y 725 autos «solo viejos» dan 8.543: precisos, pero <em>precisamente mal</em>.</p>
@@ -49,7 +49,7 @@
   </table>
   <p>El tercero es el más tramposo: ni siquiera la «población» del CSV es la población real de Toyotas.
   Todo análisis hereda los sesgos de cómo se juntaron los datos — documentarlos es parte del trabajo
-  (como hicimos con KM=1 y los <code>?</code> en U2).</p>
+  (como hicimos con KM=1 y los <code>?</code> en Bloque C).</p>
 
   <h2>4 · Simulación en 10 líneas (reproducí la Fig. 1)</h2>
   <pre><code>import pandas as pd, numpy as np
@@ -61,7 +61,8 @@ for n in [30, 100, 500]:
     ms = [rng.choice(p, n, replace=False).mean() for _ in range(2000)]
     lo, hi = np.percentile(ms, [2.5, 97.5])
     print(f"n={n}: sd={np.std(ms):.0f} intervalo=({lo:.0f}, {hi:.0f})")
-print("solo viejos:", round(df.loc[df["Age_08_04"]>60, "Price"].mean(), 1))  # 8542.9</code></pre>
+viejos = df.loc[df["Age_08_04"]>60, "Price"]
+print("solo viejos:", round(viejos.mean(), 1))  # 8542.9</code></pre>
   <p><strong>Tu turno:</strong> cambiá la semilla (<code>default_rng(7)</code>) y verificá que los intervalos apenas se mueven:
   el ruido muestral es estable; el sesgo, testarudo.</p>
 
@@ -99,8 +100,8 @@ print("solo viejos:", round(df.loc[df["Age_08_04"]>60, "Price"].mean(), 1))  # 8
   <p><strong>Para profundizar (1 fuente):</strong>
   Diez, Barr &amp; Çetinkaya-Rundel, <em>OpenIntro Statistics</em> — cap. 1 (muestreo y sesgos).
   Más contexto en <a href="../RESOURCES.md">RESOURCES</a>.</p>
-  <p>Cierre U1: con muestreo honesto, todo lo anterior (EDA, modelos, torneo) generaliza; sin él, es aritmética sobre arena.
-  Siguiente unidad: <a href="0039-soporte-itemsets.html">0039 · Soporte e itemsets (Unidad 9)</a>.</p>
+  <p>Cierre: con muestreo honesto, todo lo anterior (EDA, modelos, torneo) generaliza; sin él, es aritmética sobre arena.
+  Siguiente: <a href="0039-soporte-itemsets.html">0039 · Soporte e itemsets (Bloque G)</a>.</p>
 
   <nav class="lesson-nav">
     <a href="0037-svm-comparacion.html">← 0037 SVM</a>

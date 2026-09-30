@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>0032 · PCA y biplot — Unidad 7</title>
+  <title>0032 · PCA y biplot — Bloque D</title>
   <link rel="stylesheet" href="../assets/styles.css">
 </head>
 <body>
 <main>
   <header class="course">
-    <p class="kicker">Unidad 7 · Agrupamientos (clustering) · Lección 0032</p>
+    <p class="kicker">Bloque D · Regresión lineal, selección y regularización · Lección 0032 · mar 29 sep</p>
     <h1>PCA y biplot: comprimir variables que repiten la historia</h1>
     <p><strong>Win de hoy:</strong> reemplazar 8 variables correlacionadas por 2
     <strong><abbr title="Componente principal: combinación ponderada de las variables que resume la mayor variabilidad posible">componentes</abbr></strong>
@@ -28,6 +28,10 @@
   responde: <em>¿podemos reemplazar 8 variables correlacionadas por 2 componentes que expliquen casi la misma variabilidad?</em></p>
   <p>Condición fundamental: <strong>estandarizar primero</strong> (<code>StandardScaler</code>), porque
   <code>KM</code> (miles) aplastaría a <code>Doors</code> (4 o 5) si comparamos escalas crudas.</p>
+  <p>En el mapa del Bloque D, esto es la <strong>tercera familia de selección</strong> (ISL 6.3): después de buscar
+  equipos (<a href="0020-best-subset-stepwise.html">0020</a>) y multar coeficientes
+  (<a href="0021-ridge-lasso-caminos.html">0021</a>–<a href="0022-scad-elastic-filtros.html">0022</a>), la tercera vía es
+  no elegir columnas sino <em>fabricar pocas nuevas</em> que resuman a todas.</p>
 
   <h2>2 · Scree plot: ¿cuántas componentes guardar?</h2>
   <p>Cada componente explica un % de la
@@ -46,7 +50,7 @@
   (<code>KM</code> y <code>Age</code> apuntan juntas, como vimos en la <a href="0023-correlacion-vs-regresion.html">lección 0023</a>);
   <strong>puntos cercanos</strong> = autos parecidos. Y confirma visualmente los 3 clusters de k-means (colores bien separados).</p>
   <p>Regenerar la figura (mismo resultado versionado en <code>assets/img/toyota/</code>):</p>
-  <pre><code>python scripts/make_figures.py --only pca-biplot-pcr</code></pre>
+  <pre><code>python3 scripts/make_figures.py --only pca-biplot-pcr</code></pre>
 
   <h2>3 · Qué significan PC1 y PC2 (las cargas)</h2>
   <p>Cada componente es una <strong>combinación ponderada</strong>: <code>PC1 = 0,45·Age + 0,42·KM + …</code>.
@@ -128,8 +132,10 @@ Z = p.transform(Xs)  # los autos ahora viven en 2D: graficables</code></pre>
   <p><strong>Para profundizar (1 fuente):</strong>
   James et al., <em>An Introduction to Statistical Learning</em> — cap. 12 (PCA) y 6.3 (PCR).
   Más contexto en <a href="../RESOURCES.md">RESOURCES</a>.</p>
-  <p>Cierre U7: distancias (0028) → k-means (0029) → jerárquico/DBSCAN (0030) → validación (0031) → PCA (0032).
-  Siguiente: <a href="0033-clasificacion-knn.html">Unidad 8, clasificación con k-NN</a>.</p>
+  <p>Orden Bloque D: esta lección cierra el bloque selección/regularización (22–29 sep):
+  <a href="0020-best-subset-stepwise.html">stepwise</a> →
+  <a href="0021-ridge-lasso-caminos.html">contracción</a> → PCA/PCR (hoy).
+  Siguiente en cadena numérica: <a href="0033-clasificacion-knn.html">0033 k-NN (Bloque E)</a>.</p>
 
   <nav class="lesson-nav">
     <a href="0031-validar-grupos-codo-silueta.html">← 0031 Validar grupos</a>

@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>0048 · Tercera parte de la salida: Omnibus, skew, kurtosis, JB + MSE — Bloque D</title>
+  <link rel="stylesheet" href="../assets/styles.css">
+</head>
+<body>
+<main>
+  <header class="course">
+    <p class="kicker">Bloque D · Regresión lineal, selección y regularización · Lección 0048 · mar 15 sep</p>
+    <h1>Tercera parte de la salida: Omnibus, skew, kurtosis, JB + MSE</h1>
+    <p><strong>Win de hoy:</strong> leer el pie del <code>summary()</code> del OLS de 9 variables
+    (<a href="0024-regresion-multiple-ols.html">lección 0024</a>): <strong>Omnibus 84,3</strong> (p ≈ 0),
+    <strong>skew −0,12</strong>, <strong>kurtosis 5,28</strong>, <strong>JB 315,4</strong> (p ≈ 0),
+    <strong><abbr title="Durbin-Watson: test de autocorrelación de residuos; 2 = independencia, regla sana 1,5-2,5">DW</abbr> 1,08</strong> (apenas bajo lo sano; ver 0025) — y cerrar con la tarea de cátedra: análisis de valores residuales +
+    <abbr title="MSE: Mean Squared Error; promedio de errores al cuadrado; la función de costo de OLS">MSE</abbr> en test
+    (<strong>≈ 2,00 M€²</strong> la múltiple vs <strong>≈ 8,93 M€²</strong> la simple).</p>
+    <p class="meta"><a href="../index.html">← Índice</a> ·
+    <a href="../reference/toyota-data-dictionary.html">Diccionario Toyota</a> ·
+    <a href="../ToyotaCorolla.csv">CSV</a></p>
+  </header>
+
+  <h2>1 · La tercera parte del summary: ¿los residuos son normales?</h2>
+  <p>El <code>summary()</code> tiene tres pisos: arriba el encabezado (R², F, AIC — la 0024),
+  en el medio la tabla de coeficientes con t y p (la <a href="0042-inferencia-pvalor-t.html">0042</a>),
+  y abajo el pie: los tests de normalidad de residuos. En nuestro OLS de 9 variables sale así:</p>
+  <pre><code>Omnibus:      84,259   Durbin-Watson:   1,079
+Prob(Omnibus): 0,000   Jarque-Bera (JB): 315,422
+Skew:           -0,122   Prob(JB):        3,2e-69
+Kurtosis:        5,283   Cond. No.        2,31e+06</code></pre>
+  <p>Lectura piso por piso. <strong><abbr title="Omnibus: test de normalidad de residuos que combina asimetría y kurtosis">Omnibus</abbr></strong>
+  prueba normalidad combinando asimetría y kurtosis: cerca de 0 con
+  <strong><abbr title="Prob(Omnibus): p-valor del test Omnibus; cerca de 1 = residuos normales">Prob(Omnibus)</abbr> cerca de 1</strong>
+  = campana sana. Acá Omnibus 84,3 con p ≈ 0: los tests <em>rechazan</em> normalidad.
+  ¿Pánico? No: con n = 1436 cualquier micro-desvío “rechaza” (la 0025 ya avisó: el gráfico manda, el test obedece).
+  El histograma de la Fig. 1 muestra una campana decente con colas algo pesadas: eso es todo lo que pasa.
+  (Referencia: en clase, con el modelo del profesor, salía Omnibus 163,6, skew 2,07, kurtosis 12,5, JB 1362 y DW 1,98:
+  su modelo estaba mucho más lejos de la campana que el nuestro.)</p>
+  <figure>
+    <img src="../assets/img/toyota/0048-salida-tercera-parte-residuales-mse-fig1.png" alt="Histograma de residuos OLS con tests de normalidad y skew antes y después del log">
+    <figcaption>Fig. 1 — Izquierda: residuos del OLS múltiple vs la campana normal: forma sana, colas pesadas
+    (kurtosis 5,28). Derecha: el log1p baja el skew de Price de 1,70 a 0,73 — de “muy sesgado” a “moderado”.</figcaption>
+  </figure>
+  <p>Regenerar la figura (mismo resultado versionado en <code>assets/img/toyota/</code>):</p>
+  <pre><code>python scripts/make_figures.py --only salida-tercera-parte-residuales-mse</code></pre>
+
+  <h2>2 · Skew: la simetría (y qué hacer si falta)</h2>
+  <p>El <strong><abbr title="Skew: asimetría; mide si la cola de la distribución pesa más a un lado; ideal ≈ 0">skew (asimetría)</abbr></strong>
+  mide si la distribución se inclina: 0 = simétrica como la campana, positivo = cola a la derecha
+  (unos pocos autos carísimos estiran), negativo = cola a la izquierda. Nuestros residuos dan −0,12:
+  casi simétricos. La regla de cátedra para juzgarlo:</p>
+  <ul>
+    <li><strong>−0,5 … +0,5:</strong> simétrico, no tocar nada (nuestro −0,12 vive acá).</li>
+    <li><strong>0,5 … 1</strong> (en valor absoluto): sesgo moderado, evaluar tratamiento.</li>
+    <li><strong>Más de 1:</strong> muy sesgado, tratar sí o sí (Price crudo: 1,70).</li>
+  </ul>
+  <figure>
+    <img src="../assets/img/catedra/regresion/skew-tipos-asimetria.png" alt="Distribuciones con skew positivo, simétrica y negativo">
+    <figcaption>Fig. 2 — Skew positivo, simétrico y negativo. Fuente: cátedra UTN-FRT, clase de regresión lineal.</figcaption>
+  </figure>
+  <p>¿Por qué importa? El skew degrada la regresión: los valores extremos tiran de la recta y las predicciones
+  empeoran justo donde más duele. (Los <a href="0035-naive-bayes-arboles.html">árboles</a>, en cambio, son inmunes:
+  cortan por umbrales, no les importa la forma de la distribución.) Tratamientos de clase, uno por línea:</p>
+  <ul>
+    <li><strong>Log:</strong> el clásico; achica la cola derecha (Fig. 1, der.). Ver <a href="0046-transformaciones-log-discretizar.html">0046</a>.</li>
+    <li><strong>Quitar outliers:</strong> solo si son errores de carga documentados (protocolo 0004), jamás en silencio.</li>
+    <li><strong>Min-max:</strong> reescala a 0–1; ordena pero no corrige forma (útil para comparar, no para simetrizar).</li>
+    <li><strong>Raíz cuadrada / cúbica:</strong> suavizan colas más suave que el log (la cúbica admite negativos).</li>
+    <li><strong>Square (cuadrado):</strong> para skew negativo: estira la cola izquierda hacia la simetría.</li>
+    <li><strong>Recíprocos (1/x):</strong> agresivos con colas derechas extremas; cambian la interpretación.</li>
+    <li><strong>Box-Cox:</strong> busca la potencia óptima automáticamente (solo valores positivos).</li>
+  </ul>
+  <figure>
+    <img src="../assets/img/catedra/regresion/skew-tratamiento-log-antes-despues.png" alt="Distribución sesgada antes y después de aplicar log">
+    <figcaption>Fig. 3 — Antes y después del log: la cola derecha se domestica. Fuente: cátedra UTN-FRT, clase de regresión lineal.</figcaption>
+  </figure>
+
+  <h2>3 · Kurtosis y Jarque-Bera: colas pesadas bajo la lupa</h2>
+  <p>La <strong><abbr title="Kurtosis: apuntamiento; mide concentración central y peso de las colas; la normal vale 3">kurtosis</abbr></strong>
+  mide apuntamiento y concentración central: la normal vale <strong>3</strong>
+  (Fisher la recentra: K = g2 − 3, normal = 0). Más de 3 = pico alto y colas pesadas
+  (<strong><abbr title="Leptocúrtica: distribución más apuntada que la normal, con colas pesadas">leptocúrtica</abbr></strong>);
+  3 = normal (<strong><abbr title="Mesocúrtica: distribución con kurtosis igual a la normal">mesocúrtica</abbr></strong>);
+  menos de 3 = chata (<strong><abbr title="Platicúrtica: distribución más chata que la normal, con colas livianas">platicúrtica</abbr></strong>).
+  Nuestro 5,28 es leptocúrtico: el pico central más los KM=1 y pesos raros engordan las colas. Eso —no el skew,
+  que es sano— es lo que voltea los tests.</p>
+  <figure>
+    <img src="../assets/img/catedra/regresion/kurtosis-tipos.png" alt="Curvas lepto, meso y platicúrtica comparadas">
+    <figcaption>Fig. 4 — Leptocúrtica (picuda), mesocúrtica (normal) y platicúrtica (chata).
+    Fuente: cátedra UTN-FRT, clase de regresión lineal.</figcaption>
+  </figure>
+  <p>El <strong><abbr title="Jarque-Bera: test de normalidad basado en skew y kurtosis; en sintonía con Omnibus">test de Jarque-Bera (JB)</abbr></strong>
+  va en sintonía con Omnibus: combina skew y kurtosis en un solo número, y JB grande con p chico = no-normal.
+  JB 315,4 con p ≈ 0 confirma lo que Omnibus ya dijo: con 1436 autos, las colas pesadas alcanzan para rechazar.
+  Misma moraleja que en la 0025: mirá el histograma y el QQ antes de creerle al p-valor.</p>
+
+  <h2>4 · Función de costo: MSE, RSS y MAE con fórmulas</h2>
+  <p>Los residuos no solo se miran: se <em>resumen</em> en un número a minimizar, la
+  <strong><abbr title="Función de costo: número que el algoritmo minimiza; en OLS es la RSS (o MSE)">función de costo</abbr></strong>.
+  Tres formas de sumar errores eᵢ = real − predicho:</p>
+  <ul>
+    <li><strong>MSE = (1/n)·Σ eᵢ²</strong> (promedio de errores al cuadrado). Es varianza + sesgo²: castiga ×cuadrado,
+    así que un error de 4.000 € pesa ×4 que uno de 2.000 €. Unidades: €² (raras, por eso se reporta su raíz).</li>
+    <li><strong>RSS = Σ eᵢ²</strong> (suma sin promediar). Es exactamente lo que OLS minimiza para elegir la recta;
+    MSE = RSS/n. En la simple en muestra: RSS ≈ 12,7 mil millones de €² (la 0003).</li>
+    <li><strong>MAE = (1/n)·Σ |eᵢ|</strong> (promedio de errores absolutos). Democrático: cada euro pesa lo mismo;
+    siempre ≤ RMSE.</li>
+  </ul>
+  <figure>
+    <img src="../assets/img/catedra/regresion/mse-formula.png" alt="Fórmula del error cuadrático medio MSE">
+    <figcaption>Fig. 5 — MSE = (1/n)·Σ(yᵢ − ŷᵢ)². Fuente: cátedra UTN-FRT, clase de regresión lineal.</figcaption>
+  </figure>
+  <figure>
+    <img src="../assets/img/catedra/regresion/rss-formulas.png" alt="Fórmulas de residuos y RSS">
+    <figcaption>Fig. 6 — Residuos êᵢ y RSS: lo que OLS minimiza. Fuente: cátedra UTN-FRT, clase de regresión lineal.</figcaption>
+  </figure>
+  <p>En test honesto 20 % (mismos números de la <a href="0043-metricas-split-80-20.html">0043</a>):
+  la simple erra MSE ≈ 8,93 M€² (RMSE 2.988 €, MAE 2.147 €) y la múltiple MSE ≈ 2,00 M€²
+  (RMSE 1.413 €, MAE 999 €): ×4,5 menos error cuadrático.</p>
+  <figure>
+    <img src="../assets/img/toyota/0048-salida-tercera-parte-residuales-mse-fig2.png" alt="MSE, RMSE y MAE en test: simple vs múltiple">
+    <figcaption>Fig. 7 — Test 20 %: MSE 8,93 → 2,00 M€²; RMSE 2.988 → 1.413 €; MAE 2.147 → 999 €.
+    Las tres métricas, mismo veredicto que la 0043.</figcaption>
+  </figure>
+
+  <h2>5 · Tarea de cátedra: análisis de residuales + MSE (checklist)</h2>
+  <p>La consigna de clase, reproducible paso a paso sobre el OLS de 5 variables:</p>
+  <ol>
+    <li>Ajustar OLS y guardar residuos (real − predicho, auto por auto).</li>
+    <li>Histograma + skew/kurtosis con scipy: ¿simétrico? ¿colas pesadas?</li>
+    <li>Jarque-Bera: ¿confirma o desmiente al gráfico? (Con n grande, manda el gráfico.)</li>
+    <li>Split 80/20 y MSE en test: el número honesto del error.</li>
+  </ol>
+  <pre><code>import pandas as pd, statsmodels.api as sm
+from scipy import stats
+from statsmodels.stats.stattools import jarque_bera
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_squared_error
+df = pd.read_csv("../ToyotaCorolla.csv")  # desde lessons/
+cols = ["Age_08_04", "KM", "HP", "cc", "Weight"]
+d = df.dropna(subset=cols + ["Price"])
+m = sm.OLS(d["Price"], sm.add_constant(d[cols])).fit()
+print("skew %.2f | kurt %.2f | JB %.1f" % (stats.skew(m.resid),
+      stats.kurtosis(m.resid, fisher=False), jarque_bera(m.resid)[0]))
+# skew -0.40 | kurt 8.08 | JB 1581.0
+Xtr, Xte, ytr, yte = train_test_split(d[cols], d["Price"], test_size=0.2, random_state=42)
+yp = sm.OLS(ytr, sm.add_constant(Xtr)).fit().predict(sm.add_constant(Xte))
+print("MSE test %.0f" % mean_squared_error(yte, yp))  # MSE test 1995965</code></pre>
+  <p><strong>Tu turno:</strong> corré el checklist sobre la simple (<code>["KM"]</code>) y compará:
+  el skew de sus residuos (≈ 1,39, cola derecha, visto en la 0003) contra el −0,40 de la múltiple.
+  ¿Qué modelo deja residuos más sanos?</p>
+
+  <h2>6 · Quiz (auto-chequeo inmediato)</h2>
+  <p class="meta">Elegí una opción por pregunta: el feedback es inmediato.</p>
+
+  <div class="quiz" id="q1">
+    <strong>P1 · Omnibus ≈ 0 con Prob ≈ 1 indica…</strong>
+    <label><input type="radio" name="q1" value="0"> Residuos compatibles con normalidad</label>
+    <label><input type="radio" name="q1" value="1"> Autocorrelación grave entre residuos</label>
+    <label><input type="radio" name="q1" value="2"> Multicolinealidad entre las variables</label>
+    <label><input type="radio" name="q1" value="3"> Heterocedasticidad fuerte en nube</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <div class="quiz" id="q2">
+    <strong>P2 · Skew 0,8 en los residuos pide…</strong>
+    <label><input type="radio" name="q2" value="0"> Simetría total, no tocar nada</label>
+    <label><input type="radio" name="q2" value="1"> Sesgo moderado, probar con log</label>
+    <label><input type="radio" name="q2" value="2"> Sesgo extremo, borrar todo ya</label>
+    <label><input type="radio" name="q2" value="3"> Normalidad plena, seguir todo igual</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <div class="quiz" id="q3">
+    <strong>P3 · Ante un outlier gigante…</strong>
+    <label><input type="radio" name="q3" value="0"> Las dos métricas ignoran los outliers</label>
+    <label><input type="radio" name="q3" value="1"> MAE crece mucho más que MSE</label>
+    <label><input type="radio" name="q3" value="2"> MSE crece mucho más que MAE</label>
+    <label><input type="radio" name="q3" value="3"> RMSE y MAE siempre valen cero</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <h2>7 · Fuente primaria y cierre</h2>
+  <p><strong>Para profundizar (1 fuente):</strong>
+  Documentación de statsmodels — OLS, <code>summary()</code> y tests de diagnóstico (Omnibus, Jarque-Bera)
+  (<a href="https://www.statsmodels.org/stable/index.html">statsmodels.org</a>, también en
+  <a href="../RESOURCES.md">RESOURCES.md</a> del curso). Contexto teórico en ISL cap. 3 (regresión lineal).</p>
+  <p>Orden Bloque D: con el pie del summary ya leés la salida entera (0024 → 0042 → 0048).
+  Para elegir entre modelos con validación honesta, seguí en
+  <a href="0047-remuestreo-bootstrap-cv.html">0047 · Remuestreo: validación cruzada y bootstrap</a>.</p>
+
+  <nav class="lesson-nav">
+    <a href="0047-remuestreo-bootstrap-cv.html">← 0047 Remuestreo</a>
+    <a href="../index.html">Índice ↑</a>
+    <a href="0049-tecnologias-stack-clase.html">0049 Stack →</a>
+  </nav>
+</main>
+<script>
+(function(){
+  var answers = {q1: 0, q2: 1, q3: 2};
+  var msgs = {
+    q1: ["Correcto: Omnibus 0 + Prob 1 = campana sana.",
+         "No: Omnibus≈0/Prob≈1 es normalidad, no correlación."],
+    q2: ["Correcto: 0,8 es moderado; el log achica cola.",
+         "No: 0,5–1 es moderado y pide tratamiento."],
+    q3: ["Correcto: el cuadrado castiga ×cuadrado al extremo.",
+         "No: MSE eleva al cuadrado; MAE pesa parejo."]
+  };
+  ["q1","q2","q3"].forEach(function(id){
+    var box = document.getElementById(id);
+    var fb = box.querySelector(".feedback");
+    box.addEventListener("change", function(e){
+      var ok = parseInt(e.target.value, 10) === answers[id];
+      fb.textContent = ok ? msgs[id][0] : msgs[id][1];
+      fb.className = "feedback " + (ok ? "ok" : "no");
+    });
+  });
+})();
+</script>
+</body>
+</html>

@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>0023 · Correlación vs regresión — Unidad 6</title>
+  <title>0023 · Correlación vs regresión — Bloque D</title>
   <link rel="stylesheet" href="../assets/styles.css">
 </head>
 <body>
 <main>
   <header class="course">
-    <p class="kicker">Unidad 6 · Regresión lineal simple y múltiple · Lección 0023</p>
+    <p class="kicker">Bloque D · Regresión lineal, selección y regularización · Lección 0023 · mié 2 sep</p>
     <h1>Correlación vs regresión: de Galton a r</h1>
     <p><strong>Win de hoy:</strong> medir asociación con <strong><abbr title="Covarianza: promedio de productos de desvíos; signo útil, magnitud en unidades locas">covarianza</abbr></strong>
     (−77M €·km), normalizarla a <strong><abbr title="r de Pearson: covarianza estandarizada entre −1 y 1">r = −0,57</abbr></strong>
@@ -23,7 +23,7 @@
   <p>Francis Galton cruzó alturas de padres e hijos: hijos de padres altísimos eran altos… pero <em>menos</em> extremos
   que sus padres. Lo llamó <strong><abbr title="Regresión a la media: los extremos tienden a acercarse al centro en la siguiente medición">regresión a la media</abbr></strong>,
   y de ahí viene la palabra “regresión”. Pearson la formalizó con <code>r</code>; Legendre y Gauss ya ajustaban rectas
-  por mínimos cuadrados. Todo U6 desciende de esa tabla de alturas.</p>
+  por mínimos cuadrados. Todo Bloque D desciende de esa tabla de alturas.</p>
 
   <h2>2 · Covarianza: el signo sirve, el número no</h2>
   <p>La covarianza promedia <code>(x − x̄)·(y − ȳ)</code>: cada auto vota + (cuadrantes I/III) o − (II/IV). KM–Price da
@@ -44,7 +44,8 @@
     <li><strong>Regresión:</strong> una fórmula asimétrica (<code>Price = 14.508 − 0,055·KM</code>): “cuánto vale dado KM”.</li>
   </ul>
   <p>El puente: en regresión <strong>simple</strong>, r² = R². Acá (−0,57)² = <strong>0,3249</strong> = el 0,325 de la 0003.
-  La recta explica exactamente lo que la correlación promete. (En múltiple, 0024, el puente se ensancha.)</p>
+  La recta explica exactamente lo que la correlación promete. (En múltiple,
+  <a href="0024-regresion-multiple-ols.html">lección 0024</a>, el puente se ensancha.)</p>
   <p><strong>Receta bivariada (4 pasos de clase):</strong> 1) mirar la naturaleza (¿directa o inversa?);
   2) identificar niveles de medición (nominal, ordinal, ratio); 3) exigir significancia (¿se repite en otra muestra?);
   4) cuantificar con rigor (Pearson, o Spearman si hay outliers).</p>

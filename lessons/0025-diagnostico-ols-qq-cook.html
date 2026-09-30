@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>0025 · Diagnóstico OLS — Unidad 6</title>
+  <title>0025 · Diagnóstico OLS — Bloque D</title>
   <link rel="stylesheet" href="../assets/styles.css">
 </head>
 <body>
 <main>
   <header class="course">
-    <p class="kicker">Unidad 6 · Regresión lineal simple y múltiple · Lección 0025</p>
+    <p class="kicker">Bloque D · Regresión lineal, selección y regularización · Lección 0025 · mié 9 / mar 15 sep</p>
     <h1>Diagnóstico OLS: residuos, QQ, Cook y parcial</h1>
     <p><strong>Win de hoy:</strong> replicar la Parte 3 del análisis de ejemplo sobre el OLS múltiple:
     QQ casi recto, fila 221 con Cook 0,82 (peso 1615) y efecto KM genuino (−0,0456 aislado).</p>
@@ -19,13 +19,47 @@
     <a href="../ToyotaCorolla.csv">CSV</a></p>
   </header>
 
-  <h2>1 · Residuos: el QQ y la nube (casi) bien</h2>
-  <p>Los <strong><abbr title="Residuos: real menos predicho, auto por auto; lo que la fórmula no explica">residuos</abbr></strong>
-  deben parecer ruido: centrados en 0, sin patrón. El
-  <strong><abbr title="QQ plot: compara los errores con una normal; recta = normalidad">QQ plot</abbr></strong> sigue
-  la diagonal (colas apenas pesadas) y la nube residuos-vs-predichos flota en 0 sin embudo claro: mejor que la simple
-  (0003), que abanicaba. Detalle: Jarque-Bera rechaza normalidad (p ≈ 0)… con n = 1436 cualquier micro-desvío
-  “rechaza”: el gráfico manda, el test obedece.</p>
+  <h2>1 · Análisis de valores residuales: las 4 condiciones</h2>
+  <p>Un <strong><abbr title="Residuo: real menos predicho, auto por auto; lo que la fórmula no explica">residuo</abbr></strong>
+  es lo que la fórmula no explica, auto por auto: precio real menos precio predicho. Para confiar en el OLS,
+  los residuos deben cumplir 4 condiciones: <strong>media 0</strong> (no sesgo sistemático),
+  <strong>normalidad</strong> (campana), <strong>independencia</strong> (un error no arrastra al siguiente) y
+  <strong><abbr title="Homocedasticidad: varianza del error constante en todo el rango predicho; lo contrario es heterocedasticidad">homocedasticidad</abbr></strong>
+  (misma dispersión en todo el rango). El primer vistazo es el histograma: pico en 0 y forma de campana.</p>
+  <figure>
+    <img src="../assets/img/catedra/regresion/histograma-residuales.png" alt="Histograma de residuales con forma de campana">
+    <figcaption>Fig. 1 — Histograma de residuales: pico en 0, forma de campana.
+    Fuente: cátedra UTN-FRT, clase de regresión lineal.</figcaption>
+  </figure>
+  <p>El <strong><abbr title="QQ plot: compara los errores con una normal; recta = normalidad">QQ plot</abbr></strong>
+  (Fig. 7, abajo) afina la normalidad: sigue la diagonal con colas apenas pesadas, y la nube residuos-vs-predichos
+  flota en 0 sin embudo claro — mejor que la simple (0003), que abanicaba. Detalle: Jarque-Bera rechaza normalidad
+  (p ≈ 0)… con n = 1436 cualquier micro-desvío “rechaza”: el gráfico manda, el test obedece
+  (el pie completo del summary se lee en la <a href="0048-salida-tercera-parte-residuales-mse.html">0048</a>).</p>
+  <p>Sesgo y homocedasticidad se juzgan a ojo con patrones de referencia. El ideal es el panel a):
+  sin sesgo (nube centrada, sin curva) y homocedástico (mismo ancho en todo el rango). Cualquier curva,
+  embudo o deriva delata qué condición falla:</p>
+  <figure>
+    <img src="../assets/img/catedra/regresion/patrones-sesgo-homocedasticidad.png" alt="Panel de patrones de sesgo y homocedasticidad">
+    <figcaption>Fig. 2 — Patrones de sesgo × homocedasticidad; el ideal es a): sin sesgo y homocedástico.
+    Fuente: cátedra UTN-FRT, clase de regresión lineal.</figcaption>
+  </figure>
+  <figure>
+    <img src="../assets/img/catedra/regresion/patrones-tendencia-curvilinea.png" alt="Patrones de tendencia y curvas en residuos">
+    <figcaption>Fig. 3 — Tendencias y curvas: si los residuos dibujan forma, falta una variable o sobra linealidad.
+    Fuente: cátedra UTN-FRT, clase de regresión lineal.</figcaption>
+  </figure>
+  <p>La independencia se mide con <strong><abbr title="Durbin-Watson: test de autocorrelación de residuos; 2 = independencia, regla sana 1,5–2,5">Durbin-Watson (DW)</abbr></strong>:
+  compara cada residuo con el anterior; <strong>2 = independencia total</strong> y la regla sana es
+  <strong>1,5–2,5</strong> (cerca de 0 = autocorrelación positiva, cerca de 4 = negativa).</p>
+  <figure>
+    <img src="../assets/img/catedra/regresion/durbin-watson-formula.png" alt="Fórmula del estadístico Durbin-Watson">
+    <figcaption>Fig. 4 — Fórmula de Durbin-Watson: cociente de diferencias sucesivas sobre dispersión total.
+    Fuente: cátedra UTN-FRT, clase de regresión lineal.</figcaption>
+  </figure>
+  <p>En Toyota, el OLS con todas las variables da DW ≈ 1,70 (sano, según clase); nuestro OLS de 9 variables
+  da DW ≈ 1,08: apenas bajo el 1,5, autocorrelación positiva leve —otro aviso de que faltan variables,
+  consistente con el R² 0,741 (no perfecto).</p>
 
   <h2>2 · Leverage y Cook: las 3 filas que tiran</h2>
   <p><strong><abbr title="Leverage: cuánto tira cada auto de la fórmula; los raros tiran más">Leverage</abbr></strong>
@@ -39,6 +73,28 @@
   </ul>
   <p>Protocolo 0004: influyente ≠ culpable. Se mira, se documenta, se prueba sin ellas; no se borra en silencio.</p>
 
+  <h3>2.1 · Scale-Location: homocedasticidad de un vistazo</h3>
+  <p>El <strong><abbr title="Scale-Location: gráfico de raíz de residuos estandarizados vs predichos; línea horizontal = homocedasticidad">Scale-Location plot</abbr></strong>
+  grafica la raíz de los residuos estandarizados contra los predichos: si la línea de tendencia sale
+  <strong>horizontal</strong>, la dispersión es pareja (homocedasticidad); si sube o baja, hay embudo.
+  Es el “¿el ancho cambia?” en un solo gráfico.</p>
+  <figure>
+    <img src="../assets/img/catedra/regresion/scale-location-ejemplo.png" alt="Ejemplo de Scale-Location plot">
+    <figcaption>Fig. 5 — Scale-Location: línea horizontal = dispersión pareja.
+    Fuente: cátedra UTN-FRT, clase de regresión lineal.</figcaption>
+  </figure>
+
+  <h3>2.2 · Residuals vs Leverage: quién es influyente</h3>
+  <p>El <strong><abbr title="Residuals vs Leverage: residuos estandarizados contra leverage; fuera de la discontinua = influyente">Residuals vs Leverage plot</abbr></strong>
+  cruza error × tiro en un plano: cada auto es un punto, y los que caen <strong>fuera de la línea
+  discontinua</strong> (contornos de Cook) son influyentes de verdad. Es la versión gráfica del top-3 de arriba:
+  221, 960 y 601 serían los puntos que se escapan del rebaño.</p>
+  <figure>
+    <img src="../assets/img/catedra/regresion/residuals-vs-leverage-ejemplo.png" alt="Ejemplo de Residuals vs Leverage plot">
+    <figcaption>Fig. 6 — Residuals vs Leverage: fuera de la discontinua = influyente.
+    Fuente: cátedra UTN-FRT, clase de regresión lineal.</figcaption>
+  </figure>
+
   <h2>3 · Parcial KM: el efecto es genuino</h2>
   <p>La <strong><abbr title="Regresión parcial: efecto de una variable con todas las demás fijas">regresión parcial</abbr></strong>
   de KM pregunta: si todos pesaran/potenciaran igual, ¿KM seguiría bajando el precio? Sí: pendiente
@@ -49,11 +105,11 @@
   <h2>4 · Figuras: los 4 chequeos</h2>
   <figure>
     <img src="../assets/img/toyota/0025-diagnostico-ols-qq-cook-fig1.png" alt="QQ plot de residuos y residuos contra predichos">
-    <figcaption>Fig. 1 — QQ casi recto y nube en 0: los errores parecen ruido sano.</figcaption>
+    <figcaption>Fig. 7 — QQ casi recto y nube en 0: los errores parecen ruido sano.</figcaption>
   </figure>
   <figure>
     <img src="../assets/img/toyota/0025-diagnostico-ols-qq-cook-fig2.png" alt="Leverage contra residuos con burbujas de Cook y regresión parcial de KM">
-    <figcaption>Fig. 2 — Izquierda: 3 burbujas mandan (221, 960, 601). Derecha: KM aislado sigue bajando.</figcaption>
+    <figcaption>Fig. 8 — Izquierda: 3 burbujas mandan (221, 960, 601). Derecha: KM aislado sigue bajando.</figcaption>
   </figure>
   <p>Regenerar las figuras (mismo resultado versionado en <code>assets/img/toyota/</code>):</p>
   <pre><code>python scripts/make_figures.py --only diagnostico-ols-qq-cook</code></pre>
@@ -95,6 +151,9 @@
   <a href="../RESOURCES.md">RESOURCES.md</a> del curso).</p>
   <p>¿Algo no quedó claro? <strong>Preguntame al agente</strong>: leer tu QQ, decidir con un Cook alto, o contarle el
   parcial al negocio. Esa pregunta vale más que releer.</p>
+  <p>Orden Bloque D: siguiente en el bloque,
+  <a href="0048-salida-tercera-parte-residuales-mse.html">0048 · Tercera parte de la salida: Omnibus, skew, kurtosis, JB + MSE</a>:
+  el pie del summary con números y la tarea de cátedra.</p>
 
   <nav class="lesson-nav">
     <a href="0024-regresion-multiple-ols.html">← 0024 Múltiple</a>

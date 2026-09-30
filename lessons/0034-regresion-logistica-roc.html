@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>0034 · Regresión logística y ROC — Unidad 8</title>
+  <title>0034 · Regresión logística y ROC — Bloque E</title>
   <link rel="stylesheet" href="../assets/styles.css">
 </head>
 <body>
 <main>
   <header class="course">
-    <p class="kicker">Unidad 8 · Clasificación · Lección 0034</p>
+    <p class="kicker">Bloque E · Clasificación · Lección 0034 · mié 7 oct</p>
     <h1>Regresión logística y ROC: probabilidades en vez de votos</h1>
     <p><strong>Win de hoy:</strong> k-NN vota; la
     <strong><abbr title="Regresión logística: modelo lineal que devuelve la probabilidad de pertenecer a una clase">regresión logística</abbr></strong>
@@ -20,7 +20,7 @@
   </header>
 
   <h2>1 · De «caro» a «72 % caro»</h2>
-  <p>k-NN (<a href="0033-clasificacion-knn.html">lección 0033</a>) dice «caro» o «barato» a secas.
+  <p>k-NN (<a href="0033-clasificacion-knn.html">lección 0033</a> (mar 6 + mié 7)) dice «caro» o «barato» a secas.
   La logística dice «72 % de chances de caro»: una probabilidad que después convertimos en etiqueta con un
   <strong><abbr title="Umbral: probabilidad mínima para declarar la clase positiva; 0,5 es solo la convención">umbral</abbr></strong>
   (0,5 por convención). ¿Cómo? Una recta ponderada (<code>β·Age + β·KM + …</code>) pasa por la función
@@ -106,7 +106,7 @@ print(round(roc_auc_score(y, proba), 4))  # 0.9473</code></pre>
   <p><strong>Para profundizar (1 fuente):</strong>
   James et al., <em>An Introduction to Statistical Learning</em> — cap. 4.3 y 5 (logística, ROC).
   Más contexto en <a href="../RESOURCES.md">RESOURCES</a>.</p>
-  <p>Siguiente: <a href="0035-naive-bayes-arboles.html">0035 · Naive Bayes y árboles</a>:
+  <p>Siguiente en el orden del Bloque E: <a href="0035-naive-bayes-arboles.html">0035 · Naive Bayes y árboles</a> (mar 13):
   el clasificador ingenuo que funciona y las reglas sí/no que se dibujan.</p>
 
   <nav class="lesson-nav">

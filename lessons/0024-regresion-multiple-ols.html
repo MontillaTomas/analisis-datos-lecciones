@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>0024 · Regresión múltiple OLS — Unidad 6</title>
+  <title>0024 · Regresión múltiple OLS — Bloque D</title>
   <link rel="stylesheet" href="../assets/styles.css">
 </head>
 <body>
 <main>
   <header class="course">
-    <p class="kicker">Unidad 6 · Regresión lineal simple y múltiple · Lección 0024</p>
+    <p class="kicker">Bloque D · Regresión lineal, selección y regularización · Lección 0024 · mar 8 / mié 9 sep</p>
     <h1>Regresión múltiple: la fórmula de 9 variables</h1>
     <p><strong>Win de hoy:</strong> replicar la Parte 2 del análisis de ejemplo:
     OLS con 9 variables (R² 0,741, AIC 25.692, condición 2,3e+06), leyendo cada coeficiente
@@ -28,7 +28,7 @@
   (“todo lo demás igual”): β_KM = −0,0456 dice que 10.000 km extra restan ~456 € <em>a igual peso, potencia y
   equipamiento</em>. En la simple (0003) era −0,055: la múltiple reparte el mérito.</p>
 
-  <h2>2 · La selección del reference (lista basura)</h2>
+  <h2>2 · Primera parte de la salida OLS: el encabezado (y la selección previa)</h2>
   <p>Antes de ajustar, el reference filtra: solo numéricas, fuera <code>Id</code>, constantes
   (<code>Cylinders</code>), rarezas (<code>cc</code>, <code>Doors</code>) y —ojo— <strong>tanto
   <code>Age_08_04</code> como <code>Mfg_Year</code></strong> (la duplicada y su gemela: el modelo final no usa ni edad
@@ -39,7 +39,21 @@
 modelo = sm.OLS(y, sm.add_constant(X)).fit()
 print(modelo.summary())  # R² 0,741 · AIC 25692 · BIC 25745 · cond 2,31e+06</code></pre>
 
-  <h2>3 · Leer el summary (el boletín)</h2>
+  <h2>3 · Primera parte de la salida OLS: fila por fila del encabezado</h2>
+  <p>“¿Y aquí qué vemos?” (pregunta de clase). El encabezado del <code>summary()</code> del reference, fila por fila:</p>
+  <table>
+    <tr><th>Fila</th><th>Valor</th><th>Lectura en una línea</th></tr>
+    <tr><td>R²</td><td>0,741</td><td>74 % del precio explicado vs 32,5 % de la simple</td></tr>
+    <tr><td>Adj. R²</td><td>0,740</td><td>Casi igual: las 9 variables se ganan su lugar</td></tr>
+    <tr><td>F</td><td>454,0</td><td>El modelo entero explica muchísimo más que la media</td></tr>
+    <tr><td>Prob(F)</td><td>0,00</td><td>Significancia global total: el conjunto sirve</td></tr>
+    <tr><td>Log-Likelihood</td><td>−12.836</td><td>Ajuste crudo (solo sirve para comparar modelos)</td></tr>
+    <tr><td>AIC</td><td>25.692</td><td>Menor es mejor: equilibra ajuste y complejidad</td></tr>
+    <tr><td>BIC</td><td>25.745</td><td>Como AIC pero castiga más cada variable extra</td></tr>
+    <tr><td>No. Observations</td><td>1.436</td><td>Los 1436 autos, sin bajas</td></tr>
+    <tr><td>Df Residuals / Model</td><td>1426 / 9</td><td>Grados de libertad: datos menos parámetros</td></tr>
+    <tr><td>Cov. Type nonrobust</td><td>—</td><td>Errores estándar clásicos (suponen homocedasticidad)</td></tr>
+  </table>
   <ul>
     <li><strong><abbr title="R²: proporción de la variación del precio explicada, de 0 a 1">R²</abbr> 0,741</strong> (ajustado 0,740): 74 % explicado vs 32,5 % de la simple. El 26 % restante: estado,
     color de moda, apuro del vendedor.</li>
@@ -48,10 +62,14 @@ print(modelo.summary())  # R² 0,741 · AIC 25692 · BIC 25745 · cond 2,31e+06<
     <li><strong><abbr title="P>|t|: probabilidad de ver tal efecto por azar; ~0 es sólido">P&gt;|t|</abbr>:</strong> ≈ 0 en KM/peso/aire (efectos sólidos); <code>Mfg_Month</code> 0,087 = dudoso
     (¿el mes fabrica precio? probablemente ruido estacional, 0002).</li>
     <li><strong>Condición 2,3e+06:</strong> <abbr title="Multicolinealidad: variables redundantes que confunden al modelo">multicolinealidad</abbr> residual (0019): aun podando, quedan redundancias
-    (peso↔potencia↔impuesto). Por eso existe U5. En el extremo, la redundancia perfecta vuelve
+    (peso↔potencia↔impuesto). Por eso existe la selección (0019–0022, Bloque D). En el extremo, la redundancia perfecta vuelve
     <strong><abbr title="Matriz singular: matriz con determinante cero, no invertible; OLS no puede resolver coeficientes únicos">singular</abbr></strong>
     a la matriz (determinante cero, no invertible): OLS no encuentra coeficientes únicos y todo se loteriza (0019).</li>
   </ul>
+  <p>Mapa de la salida completa: esta fue la <strong>primera parte</strong> (encabezado).
+  La <strong>segunda parte</strong> (t, p, juicio por coeficiente) se juzga en
+  <a href="0042-inferencia-pvalor-t.html">0042 · Hipótesis, p-valor y t</a>; el
+  <strong>diagnóstico de residuos</strong>, en <a href="0025-diagnostico-ols-qq-cook.html">0025 · Diagnóstico OLS</a>.</p>
 
   <h2>4 · Figura: pesos y ajuste</h2>
   <figure>
@@ -98,7 +116,7 @@ print(modelo.summary())  # R² 0,741 · AIC 25692 · BIC 25745 · cond 2,31e+06<
   (<a href="https://www.statsmodels.org/stable/index.html">statsmodels.org</a>, también en
   <a href="../RESOURCES.md">RESOURCES.md</a> del curso).</p>
   <p>¿Algo no quedó claro? <strong>Preguntame al agente</strong>: leer tu propio summary, qué es ceteris paribus en
-  tu variable, o por qué condición enorme pide U5. Esa pregunta vale más que releer.</p>
+  tu variable, o por qué condición enorme pide selección (Bloque D). Esa pregunta vale más que releer.</p>
 
   <nav class="lesson-nav">
     <a href="0023-correlacion-vs-regresion.html">← 0023 Correlación</a>

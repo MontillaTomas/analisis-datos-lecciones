@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>0015 · Faltantes: mecanismos y listwise — Unidad 4</title>
+  <title>0015 · Faltantes: mecanismos y listwise — Bloque C</title>
   <link rel="stylesheet" href="../assets/styles.css">
 </head>
 <body>
 <main>
   <header class="course">
-    <p class="kicker">Unidad 4 · Datos faltantes e imputación · Lección 0015</p>
+    <p class="kicker">Bloque C · Limpieza de Datos · Lección 0015 · mar 1 sep</p>
     <h1>Faltantes: por qué faltan y qué se pierde</h1>
     <p><strong>Win de hoy:</strong> distinguir <abbr title="MCAR: missing completely at random; falta al azar, sin patrón">MCAR</abbr> /
     <abbr title="MAR: missing at random; falta según otra columna observada (ej. edad)">MAR</abbr> /
@@ -30,19 +30,22 @@
     <li><strong>MNAR</strong> (falta según el propio valor): vendedores que ocultan KM altos. Acá el hueco esconde
     justo lo que querés saber: es el peor caso y ningún truco mecánico lo arregla del todo.</li>
   </ul>
+  <p>Contexto Toyota: el <code>isna()</code> de 0004 (misma clase) dio 0 — por eso en §2 fabricamos los faltantes en
+  vez de encontrarlos.</p>
 
   <h2>2 · La inyección documentada (el CSV no trae vacíos)</h2>
-  <p>ToyotaCorolla.csv tiene 0 celdas vacías (0004), así que para practicar <strong>fabricamos</strong> los faltantes
-  con semilla fija y lo documentamos. Esta inyección vale para toda la Unidad 4:</p>
+  <p>ToyotaCorolla.csv tiene 0 celdas vacías (0004, misma clase), así que para practicar <strong>fabricamos</strong> los faltantes
+  con semilla fija y lo documentamos. Esta inyección vale para 0015–0018:</p>
   <pre><code>import numpy as np
 rng = np.random.default_rng(42)          # semilla: reproducible
 m_km = rng.random(len(df)) &lt; 0.10       # MCAR: 139 KM (~10 %)
-tramos = pd.cut(df["Age_08_04"], [0, 30, 60, 81], labels=["joven", "medio", "viejo"])
+tramos = pd.cut(df["Age_08_04"], [0, 30, 60, 81],
+                labels=["joven", "medio", "viejo"])
 p = tramos.map({"joven": 0.05, "medio": 0.12, "viejo": 0.20})
 m_hp = rng.random(len(df)) &lt; p.to_numpy(dtype=float)  # MAR: 205 HP
 df.loc[m_km, "KM"] = np.nan
 df.loc[m_hp, "HP"] = np.nan</code></pre>
-  <div class="callout"><strong>Regla U4:</strong> como conocemos los valores reales que tapamos, podemos medir qué
+  <div class="callout"><strong>Regla 0015–0018:</strong> como conocemos los valores reales que tapamos, podemos medir qué
   método de relleno se acerca más (0018). Sin verdad conocida, comparar imputaciones es opinar.</div>
 
   <h2>3 · Listwise vs pairwise: tirar filas vs aprovechar columnas</h2>
@@ -54,8 +57,15 @@ df.loc[m_hp, "HP"] = np.nan</code></pre>
     cada cálculo usa lo disponible: media de KM con 1297, media de HP con 1231, correlación KM–HP con 1109.
     Aprovecha más, pero cada número sale de una muestra distinta (pandas lo hace por defecto en <code>corr()</code>).</li>
   </ul>
-  <p>Ninguno rellena: ambos <em>conviven</em> con huecos. Rellenarlos (<abbr title="Imputación: rellenar faltantes con valores estimados (media, vecinos, modelos)">imputación</abbr>)
-  empieza en la 0016.</p>
+  <figure>
+    <img src="../assets/img/catedra/limpieza/faltantes-tres-enfoques.png" alt="Slide de cátedra: 3 enfoques para datos faltantes (eliminar, recodificar, imputar)">
+    <figcaption>Los 3 enfoques de cátedra para faltantes: eliminar, recodificar, imputar. El mapa de las próximas tres lecciones. Fuente: cátedra UTN-FRT (clase Limpieza de Datos, p. 13).</figcaption>
+  </figure>
+  <p>Ninguno rellena: ambos <em>conviven</em> con huecos. Cátedra ordena igual: “(1) Eliminar filas y/o columnas con
+  datos faltantes. (2) Recodificar los datos que faltan en un formato diferente. (3) Imputación de datos faltantes”
+  (p. 13) — el 1 es el listwise de hoy, el 2 la bandera de 0016, el 3 las 0016–0018. Rellenarlos
+  (<abbr title="Imputación: rellenar faltantes con valores estimados (media, vecinos, modelos)">imputación</abbr>)
+  empieza en la 0016 (misma clase).</p>
 
   <h2>4 · Figura: el MAR a la vista y el costo listwise</h2>
   <figure>
@@ -103,6 +113,7 @@ df.loc[m_hp, "HP"] = np.nan</code></pre>
   <a href="../RESOURCES.md">RESOURCES.md</a> del curso).</p>
   <p>¿Algo no quedó claro? <strong>Preguntame al agente</strong>: qué mecanismo tiene tu hueco, cuándo listwise
   alcanza, o por qué la semilla fija importa. Esa pregunta vale más que releer.</p>
+  <p>Siguiente en el orden del Bloque C (misma clase, mar 1): <a href="0016-relleno-simple-media-razon.html">0016 Relleno simple y reponderación</a> — media, razón y rescate sin rellenar.</p>
 
   <nav class="lesson-nav">
     <a href="0014-mapas-texto-dos-visualizaciones.html">← 0014 Mapas y texto</a>

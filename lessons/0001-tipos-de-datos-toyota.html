@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>0001 · Tipos de datos con Toyota Corolla — Unidad 1</title>
+  <title>0001 · Tipos de datos con Toyota Corolla — Bloque A</title>
   <link rel="stylesheet" href="../assets/styles.css">
 </head>
 <body>
 <main>
   <header class="course">
-    <p class="kicker">Unidad 1 · ¿Qué son los datos? · Lección 0001</p>
+    <p class="kicker">Bloque A · Presentación e introducción · Lección 0001 · mar 18 ago</p>
     <h1>Tipos de datos con Toyota Corolla</h1>
     <p><strong>Win de hoy:</strong> clasificar cada columna de <code>ToyotaCorolla.csv</code> en su tipo
     de dato (continua, discreta, categórica, binaria) con ejemplos reales y un snippet que lo verifica.</p>
@@ -39,6 +39,12 @@
     Es un proceso extrapolativo, no determinista y no probabilístico; se desarrolla con reflexión y práctica
     consciente. Ejemplo: decidir qué ofertas aceptar, con criterio ético y de negocio, no solo con el modelo.</li>
   </ul>
+  <figure>
+    <img src="../assets/img/catedra/introduccion/dikw-overview.png" alt="Slide de cátedra con el overview Datos, Información, Conocimiento, Insight, Wisdom">
+    <figcaption>Así presenta cátedra la escalera dato → sabiduría (de puntos sueltos a red conectada con el camino resaltado). Fuente: cátedra UTN-FRT (clase de introducción, p. 4).</figcaption>
+  </figure>
+  <p>Las definiciones de arriba siguen los slides de cátedra (p. 5–9), uno por concepto. La jerarquía original
+  viene de Ackoff 1989 (“From Data to Wisdom”), citado en la bibliografía de cátedra (p. 71).</p>
   <div class="callout">Idea guía del curso: cada lección sube un escalón. Hoy nos quedamos en los dos primeros:
   distinguir <strong>qué tipo de dato</strong> es cada columna, porque de eso depende todo lo demás
   (qué gráfico usar, qué modelo ajustar, qué error esperar).</div>
@@ -70,18 +76,19 @@ print(df.shape)  # (1436, 37)</code></pre>
     <tr><td><strong><abbr title="Categórica: etiquetas sin aritmética válida; no se pueden sumar ni promediar">Categórica</abbr></strong></td>
       <td><code>Fuel_Type</code> (Diesel; Petrol 1264 / Diesel 155 / CNG 17),
       <code>Model</code> (“TOYOTA Corolla 2.0 D4D…”, 147 filas con <code>?</code> inicial)</td>
-      <td>Etiquetas sin aritmética válida. <code>Fuel_Type</code> es <abbr title="Nominal: etiquetas sin orden ni aritmética válida (nafta, diésel, gas)">nominal</abbr> y está <abbr title="Desbalanceada: una categoría concentra la gran mayoría (Petrol: 1264 de 1436)">desbalanceada</abbr> (U8).</td></tr>
+      <td>Etiquetas sin aritmética válida. <code>Fuel_Type</code> es <abbr title="Nominal: etiquetas sin orden ni aritmética válida (nafta, diésel, gas)">nominal</abbr> y está <abbr title="Desbalanceada: una categoría concentra la gran mayoría (Petrol: 1264 de 1436)">desbalanceada</abbr> (Bloque E).</td></tr>
     <tr><td><strong><abbr title="Binaria: solo dos estados posibles; 1 = presencia y 0 = ausencia">Binaria 0/1</abbr></strong></td>
       <td><code>Airco</code> (1: hay 730, 0: hay 706),
       <code>ABS</code> (1: hay 1168, 0: hay 268)</td>
-      <td>Solo dos estados: presencia/ausencia de equipamiento. Base de reglas de asociación (U9).</td></tr>
+      <td>Solo dos estados: presencia/ausencia de equipamiento. Base de reglas de asociación (Bloque G).</td></tr>
   </table>
   <p>Snippet que lo verifica (tipos + conteo de la categórica desbalanceada):</p>
   <pre><code>import pandas as pd
 df = pd.read_csv("../ToyotaCorolla.csv")  # desde lessons/
 print(df.shape)  # (1436, 37)
 print(df.select_dtypes(include="number").shape[1])  # 35 columnas numéricas
-print(df.select_dtypes(include="object").shape[1])  # 2 de texto: Model, Fuel_Type
+print(df.select_dtypes(include="object").shape[1])
+# 2 de texto: Model, Fuel_Type
 print(df["Fuel_Type"].value_counts())
 # Petrol    1264
 # Diesel     155
@@ -111,7 +118,8 @@ axes[0].set_title("Boxplot de KM")
 sns.boxplot(y=df["Price"], ax=axes[1], color="lightgreen")
 axes[1].set_title("Boxplot de Price")
 fig.tight_layout()
-fig.savefig("../assets/img/toyota/0001-tipos-de-datos-toyota-fig1.png", dpi=100)</code></pre>
+fig.savefig("../assets/img/toyota/0001-tipos-de-datos-toyota-fig1.png",
+            dpi=100)</code></pre>
   <p>Regenerar cuando quieras (mismo resultado versionado en <code>assets/img/toyota/</code>):</p>
   <pre><code>python scripts/make_figures.py --only tipos-de-datos-toyota</code></pre>
 
@@ -151,7 +159,7 @@ fig.savefig("../assets/img/toyota/0001-tipos-de-datos-toyota-fig1.png", dpi=100)
   la <strong>diana</strong>: sesgo = qué tan lejos del centro pegás en promedio; varianza = qué tan dispersos
   están tus tiros. Querés tiros juntos <em>y</em> en el centro.</p>
   <div class="callout"><strong>Regla de trabajo:</strong> si el error de entrenamiento es bueno pero el de test es malo,
-  sospechá overfit (bajá complejidad o regularizá: U5/U6). Si hasta el entrenamiento es malo, sospechá underfit
+  sospechá overfit (ver Bloque D). Si hasta el entrenamiento es malo, sospechá underfit
   (subí complejidad o agregá features). El ruido irreducible no se negocia.</div>
 
   <h2>6 · Quiz (auto-chequeo inmediato)</h2>
@@ -190,6 +198,9 @@ fig.savefig("../assets/img/toyota/0001-tipos-de-datos-toyota-fig1.png", dpi=100)
   (<a href="https://wesmckinney.com/book/">wesmckinney.com/book</a>, también en <a href="../RESOURCES.md">RESOURCES.md</a> del curso).
   Es la referencia del curso para todo lo que hoy verificaste con <code><abbr title="select_dtypes: método de pandas que filtra las columnas por tipo (numéricas, texto, …)">select_dtypes</abbr></code> y
   <code><abbr title="value_counts: método de pandas que cuenta cuántos casos hay por categoría">value_counts</abbr></code>.</p>
+  <p>Orden Bloque A: misma clase (mar 18), seguí con la
+  <a href="0049-tecnologias-stack-clase.html">lección 0049: el stack de herramientas</a>;
+  después, <a href="0002-niveles-tipos-analisis-tdsp.html">mié 19: niveles y TDSP</a>.</p>
   <p>¿Algo no quedó claro? <strong>Preguntame al agente</strong>: qué parte de la escalera dato → sabiduría,
   qué columna te cuesta clasificar, o cómo leer la U del tradeoff en tu propio modelo. Esa pregunta vale más que releer.</p>
 

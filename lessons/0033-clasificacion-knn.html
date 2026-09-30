@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>0033 · Clasificación con k-NN — Unidad 8</title>
+  <title>0033 · Clasificación con k-NN — Bloque E</title>
   <link rel="stylesheet" href="../assets/styles.css">
 </head>
 <body>
 <main>
   <header class="course">
-    <p class="kicker">Unidad 8 · Clasificación · Lección 0033</p>
+    <p class="kicker">Bloque E · Clasificación · Lección 0033 · mar 6 + mié 7 oct</p>
     <h1>Clasificación con k-NN: caro o barato según sus vecinos</h1>
     <p><strong>Win de hoy:</strong> predecir si un auto es caro (Price &gt; 9.900, la mediana) con
     <strong><abbr title="k-NN: clasifica cada caso según la mayoría de sus k vecinos más parecidos">k-NN</abbr></strong>:
@@ -20,13 +20,13 @@
   </header>
 
   <h2>1 · Clasificar ≠ agrupar: ahora hay respuesta correcta</h2>
-  <p>En clustering (U7) no había etiquetas: inventábamos grupos. En
+  <p>En clustering (Bloque F) no había etiquetas: inventábamos grupos. En
   <strong><abbr title="Clasificación: predecir una etiqueta discreta (caro/barato) a partir de las variables">clasificación</abbr></strong>
   cada auto trae su etiqueta y el modelo aprende a predecirla en autos nuevos. Nuestro target:
   <code>caro = Price &gt; 9900</code> (mediana → 49 % caros, casi 50/50, el azar acierta 50 %).
   Predictores: <code>Age_08_04, KM, HP, cc, Weight</code>.</p>
   <p>k-NN es el clasificador más honesto: para un auto nuevo, busca sus <code>k</code> vecinos más parecidos
-  (distancia euclídea, como en la <a href="0028-distancias-similaridad.html">lección 0028</a>) y vota la mayoría.
+  (distancia euclídea, como en la <a href="0028-distancias-similaridad.html">lección 0028</a> (Bloque F)) y vota la mayoría.
   Sin fórmulas, sin entrenamiento real: el «modelo» <em>es</em> la base de datos.</p>
 
   <h2>2 · Eligiendo k: ni nervioso ni dormido</h2>
@@ -56,6 +56,13 @@
   </table>
   <p>El modelo «pierde» más caros (114) de los baratos que infla (73): es conservador para decir «caro».
   Si tu negocio castiga más un error que otro, esta tabla —no el accuracy— decide.</p>
+  <p>Tres métricas canónicas salen directo de esta tabla (TP=593, FP=73, FN=114):<br>
+  <strong><abbr title="Precisión: de lo que el modelo declara positivo, cuánto acierta">precisión</abbr></strong>
+  593/666 = 89,0 % (de lo que declara caro, cuánto acierta);<br>
+  <strong><abbr title="Recall: de los positivos reales, cuántos caza el modelo">recall</abbr></strong>
+  593/707 = 83,9 % (de los caros reales, cuántos caza);<br>
+  <strong><abbr title="F1: media armónica de precisión y recall">F1</abbr></strong>
+  = 86,4 % (media armónica de las dos).</p>
 
   <h2>4 · k-NN en 10 líneas (reproducí el 87,0 %)</h2>
   <pre><code>import pandas as pd
@@ -107,7 +114,7 @@ print(cross_val_score(KNeighborsClassifier(25), X, y, cv=cv).mean().round(4))  #
   <p><strong>Para profundizar (1 fuente):</strong>
   James et al., <em>An Introduction to Statistical Learning</em> — cap. 2.2.3 y 3.5 (k-NN).
   Más contexto en <a href="../RESOURCES.md">RESOURCES</a>.</p>
-  <p>Siguiente: <a href="0034-regresion-logistica-roc.html">0034 · Regresión logística y ROC</a>:
+  <p>Siguiente en el orden del Bloque E: <a href="0034-regresion-logistica-roc.html">0034 · Regresión logística y ROC</a> (mié 7):
   probabilidades en vez de votos, y cómo elegir el umbral.</p>
 
   <nav class="lesson-nav">

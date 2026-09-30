@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>0019 · Por qué seleccionar variables — Unidad 5</title>
+  <title>0019 · Por qué seleccionar variables — Bloque D</title>
   <link rel="stylesheet" href="../assets/styles.css">
 </head>
 <body>
 <main>
   <header class="course">
-    <p class="kicker">Unidad 5 · Selección de variables y regularización · Lección 0019</p>
+    <p class="kicker">Bloque D · Regresión lineal, selección y regularización · Lección 0019 · mar 22 sep</p>
     <h1>Por qué seleccionar: basura, duplicadas y constantes</h1>
     <p><strong>Win de hoy:</strong> ver con números por qué sobran columnas: 15 ruidos bajan el CV de 0,823 a 0,751,
     una casi-duplicada multiplica ×900 la lotería del coeficiente, y <code>Cylinders</code> aporta cero.</p>
@@ -36,7 +36,9 @@
   <p>Con pocos autos (80) y 4 útiles + 15 ruidos, la regresión memoriza: R² de train <strong>sube</strong> 0,906 →
   0,926 pero el CV-5 <strong>baja</strong> 0,823 → 0,751. Siete puntos perdidos por columnas que no dicen nada: el
   <abbr title="Sobreajuste: el modelo memoriza el entrenamiento y falla con datos nuevos">sobreajuste</abbr> de la 0001,
-  ahora con culpable identificado. (Con 1436 autos el daño se diluye; con 80 se ve.)</p>
+  ahora con culpable identificado. (Con 1436 autos el daño se diluye; con 80 se ve.) La cátedra lo nombra igual en su
+  clase de regresión (p. 17): hay <em>overfitting</em> «dado que el modelo se ajusta a las peculiaridades aleatorias
+  de la muestra».</p>
 
   <h2>3 · Demo duplicada: el coeficiente lotería (×900)</h2>
   <p>Agrego <code>Edad2 = Edad + ruido tiny</code> (correlación 0,9999): el coeficiente de Edad salta entre folds con
@@ -44,15 +46,24 @@
   se lo resta a Edad2. El
   <strong><abbr title="VIF: variance inflation factor; cuánto infla la redundancia la varianza del coeficiente (acá ≈145 mil)">VIF ≈ 145.000</abbr></strong>
   lo confirma (sano: &lt; 5–10). Moraleja: duplicadas no rompen la predicción; rompen la <em>explicación</em>.</p>
+  <figure>
+    <img src="../assets/img/catedra/regresion/vif-tol-colinealidad.png" alt="Slide de cátedra: rangos VIF y tolerancia TOL para cuantificar colinealidad">
+    <figcaption>Fig. 1 — La cátedra cuantifica la colinealidad con VIF (1 = sana, 1–5 = aviso, 5–10 = alarma) y
+    tolerancia TOL = 1/VIF (sana entre 0,1 y 1). Fuente: cátedra UTN-FRT, clase de regresión lineal.</figcaption>
+  </figure>
+  <p>Compará escalas: la cátedra enciende la alarma en VIF = 10; nuestra casi-duplicada dio
+  <strong>VIF ≈ 145.000</strong>, cuatro órdenes de magnitud fuera de escala (su
+  <strong><abbr title="TOL: tolerancia; 1/VIF. Sana entre 0,1 y 1; acá ≈ 0,000007">TOL ≈ 0,000007</abbr></strong>,
+  muy por debajo del mínimo 0,1). No es «un poco de colinealidad»: es la misma columna dos veces.</p>
 
   <h2>4 · Figura: el costo de no elegir</h2>
   <figure>
     <img src="../assets/img/toyota/0019-por-que-seleccionar-fig1.png" alt="Barras train-CV con y sin ruido e inestabilidad del coeficiente con duplicada">
-    <figcaption>Fig. 1 — Izquierda: 15 ruidos suben train y hunden CV. Derecha: la casi-duplicada multiplica ×900
+    <figcaption>Fig. 2 — Izquierda: 15 ruidos suben train y hunden CV. Derecha: la casi-duplicada multiplica ×900
     el desvío del coeficiente entre folds (escala log).</figcaption>
   </figure>
   <p>Regenerar la figura (mismo resultado versionado en <code>assets/img/toyota/</code>):</p>
-  <pre><code>python scripts/make_figures.py --only por-que-seleccionar</code></pre>
+  <pre><code>python3 scripts/make_figures.py --only por-que-seleccionar</code></pre>
 
   <h2>5 · Quiz (auto-chequeo inmediato)</h2>
   <p class="meta">Elegí una opción por pregunta: el feedback es inmediato.</p>
@@ -88,9 +99,12 @@
   <p><strong>Para profundizar (1 fuente):</strong>
   James et al., <em>An Introduction to Statistical Learning</em> — capítulo de selección de variables
   (<a href="https://www.statlearning.com/">statlearning.com</a>, PDF libre; también en
-  <a href="../RESOURCES.md">RESOURCES.md</a> del curso). La referencia teórica de toda la Unidad 5.</p>
+  <a href="../RESOURCES.md">RESOURCES.md</a> del curso). La referencia teórica de la selección en el Bloque D.</p>
   <p>¿Algo no quedó claro? <strong>Preguntame al agente</strong>: qué basura tiene tu dataset, cómo leer un VIF,
   o cuándo 4 columnas le ganan a 37. Esa pregunta vale más que releer.</p>
+  <p>Orden Bloque D: siguiente en el bloque,
+  <a href="0020-best-subset-stepwise.html">0020 · Best subset y stepwise: buscar el mejor equipo</a>:
+  mañana mismo, cómo buscar el equipo (best subset, AIC/BIC, forward + backward).</p>
 
   <nav class="lesson-nav">
     <a href="0018-imputacion-con-modelos.html">← 0018 Con modelos</a>

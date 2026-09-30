@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>0052 · FP-Growth y ECLAT: sin candidatos — Bloque G</title>
+  <link rel="stylesheet" href="../assets/styles.css">
+</head>
+<body>
+<main>
+  <header class="course">
+    <p class="kicker">Bloque G · Frequent Itemsets · Lección 0052 · mié 18 nov</p>
+    <h1>FP-Growth y ECLAT: los mismos frecuentes, sin candidatos ni re-barridos</h1>
+    <p><strong>Win de hoy:</strong> Apriori genera candidatos y re-barre el CSV en cada nivel (7 pasadas con
+    min_sop = 0,4). <strong>FP-Growth</strong> comprime todo en un árbol con 2 pasadas y <strong>ECLAT</strong>
+    cruza listas de filas en memoria con 1: mismo resultado, distinto costo.</p>
+    <p class="meta"><a href="../index.html">← Índice</a> ·
+    <a href="../reference/toyota-data-dictionary.html">Diccionario Toyota</a> ·
+    <a href="../ToyotaCorolla.csv">CSV</a></p>
+  </header>
+
+  <h2>1 · Por qué Apriori no alcanza</h2>
+  <p>Recap de la <a href="0041-algoritmo-apriori.html">lección 0041 (mié 18)</a>: con min_sop = 0,3 Apriori cuenta
+  825 candidatos barriendo las 1436 filas nivel por nivel (9 niveles, 9 pasadas), y con min_sop = 0,4 todavía hace
+  7 pasadas para 280 frecuentes. La poda ayuda, pero el esquema tiene dos costos estructurales:
+  <strong>(1)</strong> genera candidatos que después descarta y <strong>(2)</strong> re-barre todo el dataset
+  una vez por nivel. Con 16 extras se aguanta; con los miles de productos de un súper real, es intratable.</p>
+  <p>Dos ideas distintas atacan esos dos costos: FP-Growth elimina los candidatos (§2) y ECLAT elimina los
+  re-barridos (§3). Los tres algoritmos devuelven exactamente los mismos frecuentes: solo cambia el camino.</p>
+
+  <h2>2 · FP-Growth: comprimir y minar (concepto + ejemplo a mano)</h2>
+  <p><strong>FP-Growth</strong> (Han et al., 2000) hace solo <strong>2 pasadas</strong>: en la 1ª cuenta los soportes
+  individuales y poda los infrecuentes; en la 2ª comprime todas las transacciones en un
+  <strong><abbr title="Árbol-FP: árbol de prefijos que comprime las transacciones ordenadas por frecuencia">árbol-FP</abbr></strong>:
+  cada ticket entra ordenado de ítem más a menos frecuente, y los tickets que comparten prefijo comparten rama
+  (los contadores se acumulan en los nodos). Después mina el árbol recursivamente por sufijo, sin generar ni un
+  candidato: para cada ítem junta su
+  <strong><abbr title="Base de patrones: prefijos que acompañan a un sufijo en el árbol-FP, con sus conteos">base de patrones</abbr></strong>
+  y repite.</p>
+  <p>Ejemplo a mano, 5 tickets (min_sop = 0,4, o sea al menos 2 de 5). Verificá cada conteo a ojo:</p>
+  <table>
+    <tr><th>Ticket</th><th>Ítems</th><th>Ordenado por frecuencia</th></tr>
+    <tr><td>T1</td><td>leche, pan, queso</td><td>leche, pan, queso</td></tr>
+    <tr><td>T2</td><td>leche, pan</td><td>leche, pan</td></tr>
+    <tr><td>T3</td><td>leche, pan, vino</td><td>leche, pan</td></tr>
+    <tr><td>T4</td><td>leche, queso</td><td>leche, queso</td></tr>
+    <tr><td>T5</td><td>pan, queso</td><td>pan, queso</td></tr>
+  </table>
+  <p>1ª pasada: leche 4, pan 4, queso 3, vino 1 → el vino se poda (1 &lt; 2). 2ª pasada: el árbol queda con una rama
+  raíz → leche(4) → pan(3) → queso(1), más leche → queso(1) de T4 y raíz → pan(1) → queso(1) de T5.
+  Minando por sufijo: queso trae base {leche, pan}:1, {leche}:1, {pan}:1 → leche:2 y pan:2, o sea {queso},
+  {leche, queso} y {pan, queso}; pan trae base {leche}:3 → {pan} y {leche, pan}; leche trae {leche}.
+  Total: 6 frecuentes, los mismos que Apriori (que acá haría 3 pasadas y 8 conteos: 4 + 3 + 1).</p>
+  <p>Cierre honesto: implementar el árbol-FP completo (nodos, enlaces, minería recursiva) excede esta lección corta;
+  la librería <code>mlxtend</code> lo trae listo, pero está fuera del stack del curso (solo pandas/numpy/matplotlib
+  y afines). Lo que importa es la idea: <strong>comprimir en 2 pasadas y minar sin candidatos</strong>.</p>
+
+  <h2>3 · ECLAT en 10 líneas: listas de filas e intersecciones</h2>
+  <p><strong>ECLAT</strong> da vuelta el dataset: en vez del formato horizontal (cada fila, sus ítems), usa el
+  <strong><abbr title="Formato vertical: cada ítem guarda la lista de filas donde aparece, en vez de cada fila guardar sus ítems">formato vertical</abbr></strong>:
+  cada ítem guarda su
+  <strong><abbr title="TID-list: lista de identificadores de transacción (filas) donde aparece un ítem">TID-list</abbr></strong>,
+  la lista de filas donde aparece. El soporte de {CD, computadora} es entonces |intersección de sus dos listas| / n:
+  se cruzan conjuntos en memoria, <strong>sin re-barrer el CSV jamás</strong> (1 sola pasada inicial).</p>
+  <pre><code>import pandas as pd
+B = pd.read_csv("../ToyotaCorolla.csv")
+n = len(B)  # 1436
+def tid(col):  # formato vertical: filas con el ítem
+    return set(B.index[B[col] == 1])
+cd, board = tid("CD_Player"), tid("Boardcomputer")
+print(len(cd), len(board))  # 314 423
+ambos = cd &amp; board  # intersección, sin re-barrer
+print(len(ambos), round(len(ambos) / n, 4))  # 225 0.1567
+trio = ambos &amp; tid("Central_Lock")
+print(len(trio), round(len(trio) / n, 4))  # 181 0.126</code></pre>
+  <p>Lectura: CD la traen 314 autos y computadora 423; ambos a la vez, 225 (soporte 0,1567 — el mismo 0,157 de la
+  tabla de la <a href="0040-reglas-confianza-lift.html">lección 0040 (mar 17)</a>, calculado sin re-barrer).
+  Agregar cierre centralizado achica a 181 (0,126): cada intersección solo achica, nunca agranda —
+  la monotonicidad de la <a href="0039-soporte-itemsets.html">lección 0039 (mar 17)</a>, en versión vertical.</p>
+  <p><strong>Tu turno:</strong> cruzá <code>Central_Lock</code> con <code>Powered_Windows</code> y verificá que da
+  0,540 (el pack eléctrico de 0039/0040). Luego probá el trío {cierre, vidrios, dirección}.</p>
+
+  <h2>4 · Figura: mismo resultado, distinto costo</h2>
+  <figure>
+    <img src="../assets/img/toyota/0052-fpgrowth-eclat-sin-candidatos-fig1.png" alt="Pasadas y candidatos por algoritmo">
+    <figcaption>Fig. 1 — Izquierda: pasadas completas sobre el dataset (min_sop = 0,4, 280 frecuentes para los tres):
+    Apriori 7 (una por nivel) vs FP-Growth 2 vs ECLAT 1. Derecha: candidatos contados — Apriori 322 vs 0 y 0
+    (minería directa del árbol e intersecciones en memoria).</figcaption>
+  </figure>
+  <p>Regenerar la figura (mismo resultado versionado en <code>assets/img/toyota/</code>):</p>
+  <pre><code>python3 scripts/make_figures.py --only fpgrowth-eclat-sin-candidatos</code></pre>
+
+  <h2>5 · Quiz (auto-chequeo inmediato)</h2>
+  <p class="meta">Elegí una opción por pregunta: el feedback es inmediato.</p>
+
+  <div class="quiz" id="q1">
+    <strong>P1 · Apriori sufre con miles de ítems porque…</strong>
+    <label><input type="radio" name="q1" value="0"> Genera y cuenta demasiados candidatos</label>
+    <label><input type="radio" name="q1" value="1"> El lift siempre vale uno</label>
+    <label><input type="radio" name="q1" value="2"> Solo acepta reglas muy largas</label>
+    <label><input type="radio" name="q1" value="3"> Prohíbe usar soporte mínimo siempre</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <div class="quiz" id="q2">
+    <strong>P2 · FP-Growth evita los candidatos con…</strong>
+    <label><input type="radio" name="q2" value="0"> Dos pasadas y árbol compacto</label>
+    <label><input type="radio" name="q2" value="1"> Siete pasadas y poda total</label>
+    <label><input type="radio" name="q2" value="2"> Una pasada sin ordenar nada</label>
+    <label><input type="radio" name="q2" value="3"> Cero pasadas y puro azar</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <div class="quiz" id="q3">
+    <strong>P3 · Una TID-list es…</strong>
+    <label><input type="radio" name="q3" value="0"> Filas de cada ítem guardadas</label>
+    <label><input type="radio" name="q3" value="1"> Reglas con lift alto siempre</label>
+    <label><input type="radio" name="q3" value="2"> Candidatos podados sin contar jamás</label>
+    <label><input type="radio" name="q3" value="3"> Soportes calculados solo de pares</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <h2>6 · Fuente primaria y cierre del Bloque G</h2>
+  <p><strong>Para profundizar (1 fuente):</strong>
+  Tan, Steinbach &amp; Kumar, <em>Introduction to Data Mining</em> — cap. 6 (FP-Growth y ECLAT).
+  Más contexto en <a href="../RESOURCES.md">RESOURCES</a>.</p>
+  <p>Cierre Bloque G (17–18 nov): changuitos (<a href="0039-soporte-itemsets.html">0039</a>) →
+  reglas (<a href="0040-reglas-confianza-lift.html">0040</a>) → Apriori
+  (<a href="0041-algoritmo-apriori.html">0041</a>) → FP-Growth/ECLAT (hoy).
+  Siguiente: <a href="0053-neurona-mlp-precio.html">0053 (Bloque H, mié 25 nov: qué es una RNA)</a>.</p>
+
+  <nav class="lesson-nav">
+    <a href="0051-calidad-ventajas-cierre.html">← 0051 Calidad</a>
+    <a href="../index.html">Índice ↑</a>
+    <a href="0053-neurona-mlp-precio.html">0053 Neurona →</a>
+  </nav>
+</main>
+<script>
+(function(){
+  var answers = {q1: 0, q2: 0, q3: 0};
+  var msgs = {
+    q1: ["Correcto: candidatos y re-barridos explotan.",
+         "No: el costo es generar y contar."],
+    q2: ["Correcto: 2 pasadas, 0 candidatos.",
+         "No: FP-Growth = 2 pasadas."],
+    q3: ["Correcto: filas por ítem, se intersectan.",
+         "No: TID-list = lista de filas."]
+  };
+  ["q1","q2","q3"].forEach(function(id){
+    var box = document.getElementById(id);
+    var fb = box.querySelector(".feedback");
+    box.addEventListener("change", function(e){
+      var ok = parseInt(e.target.value, 10) === answers[id];
+      fb.textContent = ok ? msgs[id][0] : msgs[id][1];
+      fb.className = "feedback " + (ok ? "ok" : "no");
+    });
+  });
+})();
+</script>
+</body>
+</html>

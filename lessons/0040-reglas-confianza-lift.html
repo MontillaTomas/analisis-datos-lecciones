@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>0040 · Reglas: confianza y lift — Unidad 9</title>
+  <title>0040 · Reglas: confianza y lift — Bloque G</title>
   <link rel="stylesheet" href="../assets/styles.css">
 </head>
 <body>
 <main>
   <header class="course">
-    <p class="kicker">Unidad 9 · Ítems frecuentes · Lección 0040</p>
+    <p class="kicker">Bloque G · Frequent Itemsets · Lección 0040 · mar 17 nov</p>
     <h1>Reglas: confianza y lift (la confianza miente, el lift ordena)</h1>
     <p><strong>Win de hoy:</strong> «garantía fábrica → BOVAG» tiene confianza 98 %… y lift 1,10 (obviedad:
     BOVAG la tienen casi todos). «CD → computadora» tiene confianza 72 % pero lift ×2,43: ese sí es un hallazgo.</p>
@@ -19,7 +19,7 @@
   </header>
 
   <h2>1 · De combos a flechas: A → B</h2>
-  <p>Un itemset frecuente (<a href="0039-soporte-itemsets.html">lección 0039</a>) se parte en regla:
+  <p>Un itemset frecuente (<a href="0039-soporte-itemsets.html">lección 0039 (mar 17)</a>) se parte en regla:
   «si el auto trae A, trae B». Tres números la describen: el
   <strong><abbr title="Soporte de regla: fracción de autos con A y B a la vez">soporte</abbr></strong>
   (¿cuántos la cumplen?), la
@@ -57,14 +57,16 @@
 
   <h2>4 · Reglas en 10 líneas (reproducí la tabla)</h2>
   <pre><code>import pandas as pd
-E = ["ABS","Airbag_1","Airbag_2","Airco","Backseat_Divider","BOVAG_Guarantee",
-     "Boardcomputer","CD_Player","Central_Lock","Met_Color","Mfr_Guarantee",
-     "Mistlamps","Power_Steering","Powered_Windows","Sport_Model","Tow_Bar"]
+E = ["ABS","Airbag_1","Airbag_2","Airco","Backseat_Divider",
+     "BOVAG_Guarantee","Boardcomputer","CD_Player","Central_Lock",
+     "Met_Color","Mfr_Guarantee","Mistlamps","Power_Steering",
+     "Powered_Windows","Sport_Model","Tow_Bar"]
 B = pd.read_csv("../ToyotaCorolla.csv")[E]
 def regla(a, b):
     sop = (B[a] & B[b]).mean()
     conf = sop / B[a].mean()
-    print(f"{a} -> {b}: sop={sop:.3f} conf={conf:.3f} lift={conf/B[b].mean():.2f}")
+    lift = conf / B[b].mean()
+    print(f"{a} -> {b}: sop={sop:.3f} conf={conf:.3f} lift={lift:.2f}")
 regla("CD_Player", "Boardcomputer")      # lift 2.43: hallazgo
 regla("Mfr_Guarantee", "BOVAG_Guarantee")  # conf 0.98, lift 1.10: humo</code></pre>
   <p><strong>Tu turno:</strong> inventá dos reglas propias (ej. <code>Airco → CD_Player</code>) y decidí por lift
@@ -76,9 +78,9 @@ regla("Mfr_Guarantee", "BOVAG_Guarantee")  # conf 0.98, lift 1.10: humo</code></
   <div class="quiz" id="q1">
     <strong>P1 · Confianza 0,98 de Mfr → BOVAG…</strong>
     <label><input type="radio" name="q1" value="0"> Esconde lift 1,10, casi azar</label>
-    <label><input type="radio" name="q1" value="1"> Prueba causalidad total directa</label>
-    <label><input type="radio" name="q1" value="2"> Vale más que lift</label>
-    <label><input type="radio" name="q1" value="3"> Exige subir min_sop ya</label>
+    <label><input type="radio" name="q1" value="1"> Prueba causalidad total y directa</label>
+    <label><input type="radio" name="q1" value="2"> Vale mucho más que lift</label>
+    <label><input type="radio" name="q1" value="3"> Exige subir min_sop ya mismo</label>
     <div class="feedback" aria-live="polite"></div>
   </div>
 
@@ -104,7 +106,7 @@ regla("Mfr_Guarantee", "BOVAG_Guarantee")  # conf 0.98, lift 1.10: humo</code></
   <p><strong>Para profundizar (1 fuente):</strong>
   Tan, Steinbach &amp; Kumar, <em>Introduction to Data Mining</em> — cap. 6 (reglas de asociación).
   Más contexto en <a href="../RESOURCES.md">RESOURCES</a>.</p>
-  <p>Siguiente: <a href="0041-algoritmo-apriori.html">0041 · El algoritmo Apriori</a>:
+  <p>Siguiente (mié 18, orden Bloque G): <a href="0041-algoritmo-apriori.html">0041 · El algoritmo Apriori (mié 18)</a>:
   generar candidatos, podar con monotonicidad y contar — nivel por nivel.</p>
 
   <nav class="lesson-nav">

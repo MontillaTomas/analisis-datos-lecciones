@@ -23,7 +23,7 @@ Fuentes de confianza para este curso. El conocimiento de las lecciones sale de a
 - [Book: *Forecasting: Principles and Practice* (Hyndman & Athanasopoulos)](https://otexts.com/fpp3/)
   Use for: contexto de series si alguna lección lo roza. No es foco.
 - [Book: *Fundamentals of Data Visualization* (Wilke)](https://clauswilke.com/dataviz/)
-  Use for: principios, color, foco/contexto (Unidad 3).
+  Use for: principios, color, foco/contexto (Bloque B).
 - [Book: *The Truthful Art* (Cairo)](https://www.thefunctionalart.com/p/the-truthful-art-book.html)
   Use for: storytelling y honestidad visual.
 - [Docs: pandas](https://pandas.pydata.org/docs/)
@@ -42,6 +42,8 @@ Fuentes de confianza para este curso. El conocimiento de las lecciones sale de a
   Libro abierto. Use for: transformaciones (log, skew), discretización, escalado.
 - [Data: Our World in Data](https://ourworldindata.org/)
   Datasets públicos documentados. Use for: ejemplo de origen público de datos con licencia.
+- [Cátedra: PDFs `utn_frt_ieyd_*` + apuntes Clase 1–7 (material interno, no URL pública)](./PLANIFICACION.md)
+  Slides del profesor (introducción, EDA, limpieza, regresión lineal) + apuntes de clase hasta 23 sep. Use for: definiciones de cátedra (AIC/BIC, VIF/TOL, normalidad de residuos, skew y tratamientos, MSE), imágenes vía `pdftoppm` a `assets/img/catedra/`. Bloques E–H sin material de cátedra.
 
 ## Wisdom (Communities)
 
@@ -52,5 +54,5 @@ Fuentes de confianza para este curso. El conocimiento de las lecciones sale de a
 
 ## Gaps
 
-- Falta recurso en español de nivel cátedra que cubra exactamente las 9 unidades con `ToyotaCorolla.csv`. Lo cubren las propias lecciones + `reference/toyota-data-dictionary.html`.
+- Falta recurso en español de nivel cátedra que cubra exactamente cada clase de la planificación con `ToyotaCorolla.csv`. Lo cubren las propias lecciones + `reference/toyota-data-dictionary.html`.
 - Falta glosario ES consolidado: se construye en `GLOSSARY.md` a medida que cada término se domina.

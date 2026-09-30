@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>0039 · Soporte e itemsets — Unidad 9</title>
+  <title>0039 · Soporte e itemsets — Bloque G</title>
   <link rel="stylesheet" href="../assets/styles.css">
 </head>
 <body>
 <main>
   <header class="course">
-    <p class="kicker">Unidad 9 · Ítems frecuentes · Lección 0039</p>
+    <p class="kicker">Bloque G · Frequent Itemsets · Lección 0039 · mar 17 nov</p>
     <h1>Soporte e itemsets: qué extras suelen venir juntos</h1>
     <p><strong>Win de hoy:</strong> cada auto es un «changuito» de 16 extras (ABS, airbag, cierre…):
     el <strong><abbr title="Soporte: fracción de autos que tienen un conjunto de ítems">soporte</abbr></strong>
@@ -45,20 +45,21 @@
   <p>Con 16 extras hay 2^16 − 1 = 65.535 combos posibles: contarlos todos es viable acá, imposible en un súper real
   (miles de productos). Monotonicidad al rescate: <strong>si {CD, llantas} ya es infrecuente, ningún super-combo suyo
   ({CD, llantas, techo}, …) puede ser frecuente</strong>. Se poda la rama entera sin contarla.
-  Ese es todo el secreto de Apriori (<a href="0041-algoritmo-apriori.html">lección 0041</a>).</p>
+  Ese es todo el secreto de Apriori (<a href="0041-algoritmo-apriori.html">lección 0041 (mié 18)</a>).</p>
 
   <h2>4 · Soportes en 8 líneas (reproducí la Fig. 1)</h2>
   <pre><code>import pandas as pd
-E = ["ABS","Airbag_1","Airbag_2","Airco","Backseat_Divider","BOVAG_Guarantee",
-     "Boardcomputer","CD_Player","Central_Lock","Met_Color","Mfr_Guarantee",
-     "Mistlamps","Power_Steering","Powered_Windows","Sport_Model","Tow_Bar"]
+E = ["ABS","Airbag_1","Airbag_2","Airco","Backseat_Divider",
+     "BOVAG_Guarantee","Boardcomputer","CD_Player","Central_Lock",
+     "Met_Color","Mfr_Guarantee","Mistlamps","Power_Steering",
+     "Powered_Windows","Sport_Model","Tow_Bar"]
 B = pd.read_csv("../ToyotaCorolla.csv")[E]
 print(B.mean().round(3).sort_values().to_string())  # soportes 1-ítem
 cad = ["Airbag_1","Power_Steering","BOVAG_Guarantee","ABS"]
 for k in range(1, 5):
     print(k, round(B[cad[:k]].all(axis=1).mean(), 4))  # 0.9708 … 0.7409</code></pre>
   <p><strong>Tu turno:</strong> calculá el soporte de <code>{Central_Lock, Powered_Windows}</code>
-  (pista: 0,540 — el 54 % que ya vimos en la <a href="0013-redes-arboles-equipamiento.html">lección 0013</a>)
+  (pista: 0,540 — el 54 % que ya vimos en la <a href="0013-redes-arboles-equipamiento.html">lección 0013 (Anexo)</a>)
   y verificá que es ≤ cada soporte individual.</p>
 
   <h2>5 · Quiz (auto-chequeo inmediato)</h2>
@@ -95,7 +96,7 @@ for k in range(1, 5):
   <p><strong>Para profundizar (1 fuente):</strong>
   Tan, Steinbach &amp; Kumar, <em>Introduction to Data Mining</em> — cap. 6 (ítems frecuentes).
   Más contexto en <a href="../RESOURCES.md">RESOURCES</a>.</p>
-  <p>Siguiente: <a href="0040-reglas-confianza-lift.html">0040 · Reglas: confianza y lift</a>:
+  <p>Siguiente (mar 17, orden Bloque G): <a href="0040-reglas-confianza-lift.html">0040 · Reglas: confianza y lift (mar 17)</a>:
   del «suelen ir juntos» al «si lleva esto, lleva aquello (×2,4)».</p>
 
   <nav class="lesson-nav">

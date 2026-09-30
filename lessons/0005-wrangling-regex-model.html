@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>0005 · Wrangling y regex sobre Model — Unidad 2</title>
+  <title>0005 · Wrangling y regex sobre Model — Bloque C</title>
   <link rel="stylesheet" href="../assets/styles.css">
 </head>
 <body>
 <main>
   <header class="course">
-    <p class="kicker">Unidad 2 · Exploración de datos · Lección 0005</p>
+    <p class="kicker">Bloque C · Limpieza de Datos · Lección 0005 · mar 1 sep</p>
     <h1>Wrangling y regex: exprimir la columna Model</h1>
     <p><strong>Win de hoy:</strong> extraer motor y puertas del texto de <code>Model</code> con
     <abbr title="Regex: expresiones regulares; patrones para buscar y extraer partes de un texto">regex</abbr>,
@@ -26,6 +26,14 @@
   puertas… pero todo mezclado en una frase. Hoy la desenredamos con el accesorio
   <code><abbr title="str: accesorio de pandas (.str) que aplica operaciones de texto a toda una columna de una vez">.str</abbr></code>
   de <abbr title="pandas: biblioteca de Python para trabajar con tablas de datos">pandas</abbr> y un patrón regex.</p>
+  <figure>
+    <img src="../assets/img/catedra/limpieza/limpieza-cadenas.png" alt="Slide de cátedra: limpieza de cadenas, la parte más complicada, y sus técnicas">
+    <figcaption>Limpieza de cadenas según cátedra: estandarizar, quitar espacios, typos, codificaciones — porque las generan humanos y son propensas a errores. Fuente: cátedra UTN-FRT (clase Limpieza de Datos, p. 22).</figcaption>
+  </figure>
+  <p>Cátedra pone la limpieza de strings como “la parte más complicada de la limpieza de datos porque a menudo son
+  generadas por humanos y, por lo tanto, son propensas a errores” (p. 22): <code>Model</code> es exactamente ese caso.
+  El mapa del Paso 2.8 es strings (hoy) vs fecha y hora (p. 21/23) — y el CSV no trae fechas, así que esa mitad no
+  aplica.</p>
   <p>Anatomía de un <code>Model</code> típico (hay 319 textos distintos; este es el más común, 109 autos):</p>
   <pre><code>TOYOTA Corolla 1.6 16V HATCHB LINEA TERRA 2/3-Doors
                ^^^                         ^^^^^^^^^
@@ -41,7 +49,7 @@
   </ul>
   <pre><code>import pandas as pd
 df = pd.read_csv("../ToyotaCorolla.csv")
-m = df["Model"].str.lstrip("?")          # sin el ? de la 0004
+m = df["Model"].str.lstrip("?")          # sin el ? de la 0004 (misma clase)
 df["motor_txt"] = m.str.extract(r"(\d\.\d)")[0]
 print(df["motor_txt"].value_counts())
 # 1.6    852
@@ -72,10 +80,12 @@ print(df["puertas_txt"].notna().sum())  # 1344 de 1436 (93,6 %)</code></pre>
   <h2>4 · Validar: el texto contra la columna numérica</h2>
   <p>¿Cómo sabemos que extrajimos bien? El dataset trae la respuesta por otro camino: <code>cc</code> y
   <code>Doors</code>. Si motor × 1000 coincide con <code>cc</code>, la extracción es buena:</p>
-  <pre><code>acuerdo_cc = (((df["motor_txt"].astype(float) * 1000).round(0) == df["cc"])).mean() * 100
+  <pre><code>acuerdo_cc = (((df["motor_txt"].astype(float) * 1000).round(0)
+              == df["cc"])).mean() * 100
 print(f"Motor vs cc: {acuerdo_cc:.1f}%")        # 98.8% (1411 de 1428)
 val = df["puertas_txt"].notna()
-print(f"Puertas vs Doors: {(df.loc[val, 'puertas_txt'] == df.loc[val, 'Doors']).mean()*100:.1f}%")
+igual_ptas = df.loc[val, 'puertas_txt'] == df.loc[val, 'Doors']
+print(f"Puertas vs Doors: {igual_ptas.mean()*100:.1f}%")
 # 89.7% (1206 de 1344; el resto son los SEDAN ambiguos)</code></pre>
   <p>98,8 % y 89,7 %: dos columnas nuevas, validadas, nacidas de una frase. Y el premio: el motor extraído
   <em>explica precio</em> (un 1.8 promedia 17.742 €, un 1.3 apenas 8.491 €). Eso es wrangling que paga.</p>
@@ -124,10 +134,13 @@ print(f"Puertas vs Doors: {(df.loc[val, 'puertas_txt'] == df.loc[val, 'Doors']).
   McKinney, <em>Python for Data Analysis</em> — capítulos de limpieza y métodos de texto vectorizados
   (<code>.str.extract</code>, <code>.str.contains</code>)
   (<a href="https://wesmckinney.com/book/">wesmckinney.com/book</a>, también en
-  <a href="../RESOURCES.md">RESOURCES.md</a> del curso).</p>
+  <a href="../RESOURCES.md">RESOURCES.md</a> del curso). Y cátedra cierra el círculo: automatizar es “utilizar scripts
+  y que a su vez estos sean reutilizables (corrección de mayúsculas, eliminar espacios en blanco, partición de
+  cadenas, etc)” (clase Limpieza de Datos, p. 28) — eso son exactamente los §2–§3 de hoy.</p>
   <p>¿Algo no quedó claro? <strong>Preguntame al agente</strong>: cómo leer un patrón regex pieza por pieza,
   cuándo conviene <code>extract</code> vs <code>contains</code>, o cómo validar tu propia extracción.
   Esa pregunta vale más que releer.</p>
+  <p>Siguiente en el orden del Bloque C (misma clase, mar 1): <a href="0015-faltantes-mecanismos-listwise.html">0015 Faltantes: mecanismos y listwise</a> — por qué faltan y qué se pierde.</p>
 
   <nav class="lesson-nav">
     <a href="0004-limpieza-datos-toyota.html">← 0004 Limpieza de datos</a>

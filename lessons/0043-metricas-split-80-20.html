@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>0043 · Métricas y split 80/20 — Unidad 6</title>
+  <title>0043 · Métricas y split 80/20 — Bloque D</title>
   <link rel="stylesheet" href="../assets/styles.css">
 </head>
 <body>
 <main>
   <header class="course">
-    <p class="kicker">Unidad 6 · Regresión lineal simple y múltiple · Lección 0043</p>
+    <p class="kicker">Bloque D · Regresión lineal, selección y regularización · Lección 0043 · mar 15 sep</p>
     <h1>Métricas y split 80/20: el flujo de la pizarra, con números</h1>
     <p><strong>Win de hoy:</strong> entrenar en el 80 %, medir en el 20 % escondido:
     la simple erra 2.988 € (MAPE 20,5 %) y la múltiple 1.413 € (MAPE 10,0 %) —
@@ -26,6 +26,8 @@
   <strong>fit</strong> en train → <strong>medir</strong> solo en test. La regla de oro: el test no se mira hasta el final;
   si elegís el modelo mirando el test, el test deja de ser honesto (para elegir, usá CV como en
   <a href="0003-regresion-lineal-precio-km.html">0003</a>).</p>
+  <p>Nota de mapa: MSE, RSS y MAE como <em>función de costo</em> (con fórmulas y derivación) se desarrollan en la
+  <a href="0048-salida-tercera-parte-residuales-mse.html">0048 §4</a>; acá se usan como métricas de test, sin repetir teoría.</p>
 
   <h2>2 · Tres métricas, tres personalidades</h2>
   <ul>
@@ -105,8 +107,9 @@ print("MAPE %.2f%%" % (np.mean(np.abs(yte - yp) / yte) * 100))  # 10.02%</code><
   <p><strong>Para profundizar (1 fuente):</strong>
   James et al., <em>An Introduction to Statistical Learning</em> — cap. 3.2–3.3 y 5.1 (métricas, train/test).
   Más contexto en <a href="../RESOURCES.md">RESOURCES</a>.</p>
-  <p>Siguiente: <a href="0044-anova-comparar-medias.html">0044 · ANOVA</a>:
-  ¿los tres combustibles valen distinto de verdad, o es ruido? (F = 3,12, p = 0,045… justito).</p>
+  <p>Orden Bloque D: siguiente en el bloque,
+  <a href="0047-remuestreo-bootstrap-cv.html">0047 · Remuestreo: validación cruzada y bootstrap</a>:
+  k tests honestos que rotan + incertidumbre de β₁ con 1000 réplicas.</p>
 
   <nav class="lesson-nav">
     <a href="0042-inferencia-pvalor-t.html">← 0042 Inferencia</a>

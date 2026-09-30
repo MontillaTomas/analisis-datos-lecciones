@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>0049 · El stack de herramientas del curso — Bloque A</title>
+  <link rel="stylesheet" href="../assets/styles.css">
+</head>
+<body>
+<main>
+  <header class="course">
+    <p class="kicker">Bloque A · Presentación e introducción · Lección 0049 · mar 18 ago</p>
+    <h1>El stack de herramientas del curso</h1>
+    <p><strong>Win de hoy:</strong> dejar tu entorno corriendo y verificado: importar las 6 librerías
+    del curso, imprimir sus versiones y leer <code>ToyotaCorolla.csv</code> con un snippet que lo comprueba.</p>
+    <p class="meta"><a href="../index.html">← Índice</a> ·
+    <a href="0001-tipos-de-datos-toyota.html">← 0001 Tipos de datos</a> ·
+    <a href="../reference/toyota-data-dictionary.html">Diccionario Toyota</a> ·
+    <a href="../ToyotaCorolla.csv">CSV</a></p>
+  </header>
+
+  <h2>1 · El stack de cátedra, pieza por pieza</h2>
+  <p>Esta es la foto oficial de las herramientas que usa la materia, tal como la presentó cátedra en clase:</p>
+  <figure>
+    <img src="../assets/img/catedra/introduccion/tecnologias-clase.png" alt="Slide de cátedra con el stack de tecnologías: Debian, Anaconda, Python, Jupyter, git y GitHub, Docker, Dagster, dbt, mlflow y las librerías pandas, numpy, matplotlib, statsmodels, seaborn y scikit-learn">
+    <figcaption>El slide “Tecnologías a Utilizar en Clases” de cátedra. Fuente: cátedra UTN-FRT (clase de introducción, p. 34).</figcaption>
+  </figure>
+  <p>Cada casillero del slide, en una línea:</p>
+  <table>
+    <tr><th>Pieza del slide</th><th>Qué es</th></tr>
+    <tr><td><strong><abbr title="SO: sistema operativo; el programa que gestiona el hardware y los demás programas">SO</abbr> Debian</strong></td>
+      <td>El sistema operativo de las máquinas de cátedra. Vos podés usar el tuyo (Mac, Windows, Linux): Python corre igual en todos.</td></tr>
+    <tr><td><strong><abbr title="Suite: paquete que instala de una vez varios programas que trabajan juntos">Suite</abbr> Anaconda</strong></td>
+      <td>El paquete que instala Python más las librerías científicas de una sola vez, sin pelear con dependencias.</td></tr>
+    <tr><td><strong>Lenguaje Python</strong></td>
+      <td>El único lenguaje del curso: todo snippet, figura y modelo de estas lecciones está escrito en Python.</td></tr>
+    <tr><td><strong><abbr title="IDE: entorno de desarrollo integrado; el programa donde escribís y corrés código">IDE</abbr> Jupyter</strong></td>
+      <td>El cuaderno interactivo donde se mezclan código, gráficos y texto. Acá corrés los snippets celda por celda.</td></tr>
+    <tr><td><strong><abbr title="Control de versiones: sistema que registra cada cambio del código para poder volver atrás y colaborar">Control de versiones</abbr> (git + GitHub)</strong></td>
+      <td>git registra cada cambio de tus archivos; GitHub los guarda en la nube y permite colaborar. Este curso vive en un repositorio así.</td></tr>
+    <tr><td><strong><abbr title="Contenedor (Docker): cajita aislada que empaqueta programa + dependencias para que corra igual en cualquier máquina">Contenedor</abbr> Docker</strong></td>
+      <td>Empaqueta programa y dependencias para que corra idéntico en cualquier máquina. Lo nombramos para que lo reconozcas; no lo usamos.</td></tr>
+    <tr><td><strong>Dagster / dbt</strong></td>
+      <td>Herramientas de orquestación y transformación de datos en producción. Alcance: reconocer el nombre, nada más.</td></tr>
+    <tr><td><strong><abbr title="Tracking (mlflow): registro de experimentos; guarda parámetros, métricas y modelos de cada corrida">Tracking</abbr> mlflow</strong></td>
+      <td>Registra experimentos (qué parámetros, qué métrica dio cada corrida). Acá alcanza con saber que existe.</td></tr>
+    <tr><td><strong><abbr title="Librería: paquete de código reutilizable que extiende Python con funciones listas para usar">Librerías</abbr> (las 6 del curso)</strong></td>
+      <td>pandas (tablas), numpy (números), matplotlib y seaborn (gráficos), statsmodels (modelos estadísticos), scikit-learn (machine learning).</td></tr>
+  </table>
+  <div class="callout">Alcance real: este curso vive en <strong>Python + las 6 librerías</strong> de la última fila.
+  El resto del slide (Docker, Dagster, dbt, mlflow) se nombra para que lo reconozcas cuando aparezca, no se usa.</div>
+
+  <h2>2 · Verificá tu entorno (el win, paso a paso)</h2>
+  <p>La prueba mínima de que tu stack funciona tiene dos partes: que las 6 librerías importen y
+  que el <abbr title="CSV: archivo de texto con valores separados por comas; cada fila es un auto">CSV</abbr> se lea.
+  Corré este snippet desde la carpeta <code>lessons/</code> (o en un cuaderno Jupyter parado ahí):</p>
+  <pre><code>import pandas as pd
+import numpy as np
+import matplotlib
+import seaborn as sns
+import statsmodels
+import sklearn
+
+print("pandas", pd.__version__)
+print("numpy", np.__version__)
+print("matplotlib", matplotlib.__version__)
+print("seaborn", sns.__version__)
+print("statsmodels", statsmodels.__version__)
+print("scikit-learn", sklearn.__version__)
+print(pd.read_csv("../ToyotaCorolla.csv").shape)  # (1436, 37)</code></pre>
+  <p>Salida esperada (tus versiones pueden ser más nuevas; lo importante es que importe sin errores y el CSV dé <code>(1436, 37)</code>):</p>
+  <pre><code>pandas 2.3.3
+numpy 2.0.2
+matplotlib 3.9.4
+seaborn 0.13.2
+statsmodels 0.14.6
+scikit-learn 1.6.1
+(1436, 37)</code></pre>
+  <p class="meta">Nota: en Mac el comando es <code>python3</code>, no <code>python</code> (que no existe).
+  Todos los comandos del curso usan <code>python3</code>.</p>
+
+  <h2>3 · Cómo se trabaja en este curso (3 hábitos)</h2>
+  <ul>
+    <li><strong>Rutas relativas desde <code>lessons/</code>.</strong> Los snippets leen el dataset como
+    <code>../ToyotaCorolla.csv</code> porque el <abbr title="CSV: archivo de texto con valores separados por comas; cada fila es un auto">CSV</abbr> vive en la raíz del repo, un nivel arriba de cada lección
+    (lo viste en la <a href="0001-tipos-de-datos-toyota.html">lección 0001, §2</a>).</li>
+    <li><strong>Las figuras se regeneran, no se dibujan a mano.</strong> Cada PNG de
+    <code>assets/img/toyota/</code> sale de <code>python3 scripts/make_figures.py --only &lt;slug&gt;</code>
+    (reemplazá <code>&lt;slug&gt;</code> por el de la lección, por ejemplo <code>tipos-de-datos-toyota</code>).</li>
+    <li><strong>El sitio se mira con un servidor local.</strong> Parado en la raíz del repo:
+    <code>python3 -m http.server</code> y abrir <code>http://localhost:8000</code> en el navegador.</li>
+  </ul>
+  <p>Ejemplo del hábito 2: los boxplots de la <a href="0001-tipos-de-datos-toyota.html">lección 0001, §4</a> se regeneran con
+  <code>python3 scripts/make_figures.py --only tipos-de-datos-toyota</code> y dan el mismo PNG versionado.</p>
+
+  <h2>4 · Figura: tu entorno en una imagen</h2>
+  <p>La figura de esta lección es tu “certificado de entorno”: a la izquierda las versiones instaladas
+  (leídas en tiempo de ejecución), a la derecha el histograma de <code>Price</code> como prueba de que tu stack lee el CSV:</p>
+  <figure>
+    <img src="../assets/img/toyota/0049-tecnologias-stack-clase-fig1.png" alt="Panel izquierdo con versiones instaladas de Python y librerías; panel derecho con histograma de Price de 1436 autos">
+    <figcaption>Fig. 1 — Izq.: versiones instaladas en tu entorno (Python + las 6 librerías).
+    Der.: histograma de <code>Price</code> (n = 1436): si tu corrida lo reproduce, tu stack lee bien el CSV.</figcaption>
+  </figure>
+  <p><strong>Tu turno:</strong> corré <code>python3 scripts/make_figures.py --only tecnologias-stack-clase</code>
+  y compará tu PNG con el de arriba. El histograma debe ser idéntico; el panel de versiones refleja tus números, no los míos.</p>
+
+  <h2>5 · Quiz (auto-chequeo inmediato)</h2>
+  <p class="meta">Elegí una opción por pregunta: el feedback es inmediato.</p>
+
+  <div class="quiz" id="q1">
+    <strong>P1 · En el stack de cátedra, Jupyter es el…</strong>
+    <label><input type="radio" name="q1" value="0"> SO que gestiona el hardware</label>
+    <label><input type="radio" name="q1" value="1"> IDE donde corrés Python interactivo</label>
+    <label><input type="radio" name="q1" value="2"> Suite que instala el entorno</label>
+    <label><input type="radio" name="q1" value="3"> Librería que ajusta modelos OLS</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <div class="quiz" id="q2">
+    <strong>P2 · ¿Qué comando regenera las figuras de una lección?</strong>
+    <label><input type="radio" name="q2" value="0"> make_figures.py --only con el slug</label>
+    <label><input type="radio" name="q2" value="1"> http.server sirviendo el puerto 8000</label>
+    <label><input type="radio" name="q2" value="2"> pip install del requirements.txt</label>
+    <label><input type="radio" name="q2" value="3"> read_csv del CSV desde lessons</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <div class="quiz" id="q3">
+    <strong>P3 · El summary() de OLS con AIC/BIC sale de…</strong>
+    <label><input type="radio" name="q3" value="0"> La librería seaborn de gráficos lindos</label>
+    <label><input type="radio" name="q3" value="1"> La librería pandas de tablas rápidas</label>
+    <label><input type="radio" name="q3" value="2"> La librería statsmodels de Python clásico</label>
+    <label><input type="radio" name="q3" value="3"> El IDE Jupyter de cátedra oficial</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <h2>6 · Fuente primaria y cierre</h2>
+  <p><strong>Para profundizar (1 fuente):</strong> McKinney, <em>Python for Data Analysis</em> — capítulo 1
+  (el entorno y las herramientas de Python para datos)
+  (<a href="https://wesmckinney.com/book/">wesmckinney.com/book</a>, también en <a href="../RESOURCES.md">RESOURCES.md</a> del curso).
+  Como segunda referencia, la <a href="https://pandas.pydata.org/docs/">documentación oficial de pandas</a> para
+  <code>read_csv</code>. El stack completo viene del slide de cátedra UTN-FRT (clase de introducción, p. 34).</p>
+  <p>Orden Bloque A: seguí en la <a href="0002-niveles-tipos-analisis-tdsp.html">lección 0002 (mié 19: niveles y TDSP)</a>.</p>
+  <p>¿Algo no quedó claro? <strong>Preguntame al agente</strong>: qué pieza del stack te falla al instalar,
+  qué versión te dio distinta, o qué hábito de trabajo te cuesta. Esa pregunta vale más que releer.</p>
+
+  <nav class="lesson-nav">
+    <a href="0048-salida-tercera-parte-residuales-mse.html">← 0048 Tercera parte</a>
+    <a href="../index.html">Índice ↑</a>
+    <a href="0050-kmedoids-medoides-robustos.html">0050 K-medoids →</a>
+  </nav>
+  <p class="meta">Ver también: <a href="../index.html">índice del curso</a> ·
+  <a href="../reference/toyota-data-dictionary.html">diccionario Toyota</a> ·
+  <a href="../reference/analisis-ejemplo-ols.html">análisis OLS de ejemplo</a></p>
+</main>
+<script>
+(function(){
+  var answers = {q1: 1, q2: 0, q3: 2};
+  var msgs = {
+    q1: ["Correcto: en el slide de cátedra Jupyter ocupa el casillero IDE.",
+         "No: en el slide de cátedra Jupyter es el IDE; el SO es Debian y la suite es Anaconda."],
+    q2: ["Correcto: make_figures.py --only <slug> regenera los PNG de esa lección.",
+         "No: las figuras salen de make_figures.py --only <slug>; http.server solo sirve el sitio."],
+    q3: ["Correcto: el summary() con AIC/BIC es de statsmodels, la librería de modelos.",
+         "No: el summary() con AIC/BIC es de statsmodels, no de seaborn, pandas ni Jupyter."]
+  };
+  ["q1","q2","q3"].forEach(function(id){
+    var box = document.getElementById(id);
+    var fb = box.querySelector(".feedback");
+    box.addEventListener("change", function(e){
+      var ok = parseInt(e.target.value, 10) === answers[id];
+      fb.textContent = ok ? msgs[id][0] : msgs[id][1];
+      fb.className = "feedback " + (ok ? "ok" : "no");
+    });
+  });
+})();
+</script>
+</body>
+</html>

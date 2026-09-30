@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>0045 · Violín, densidad y torta — Unidad 3</title>
+  <title>0045 · Violín, densidad y torta — Bloque B</title>
   <link rel="stylesheet" href="../assets/styles.css">
 </head>
 <body>
 <main>
   <header class="course">
-    <p class="kicker">Unidad 3 · Visualización de datos · Lección 0045</p>
+    <p class="kicker">Bloque B · Análisis Exploratorio de Datos · Lección 0045 · mié 26 ago</p>
     <h1>Violín, densidad y torta: dos upgrades y un gráfico prohibido</h1>
     <p><strong>Win de hoy:</strong> el <strong><abbr title="Violín: boxplot + forma de la distribución; lo ancho muestra dónde se juntan los datos">violín</abbr></strong>
     muestra lo que el boxplot esconde (la forma), la <strong><abbr title="KDE: estimación de densidad por kernel; curva suave de la distribución sin elegir bins">KDE</abbr></strong>
@@ -23,12 +23,18 @@
   <p>El boxplot (<a href="0001-tipos-de-datos-toyota.html">lección 0001</a>) resume en 5 números pero esconde la forma:
   dos distribuciones distintas (una joroba vs dos) pueden dar la misma caja. El violín suma el contorno de densidad a los costados:
   lo <strong>ancho</strong> = muchos autos ahí; lo <strong>angosto</strong> = pocos. Adentro lleva la misma caja (mediana, cuartiles).</p>
+  <figure>
+    <img src="../assets/img/catedra/eda/violin.png" alt="Slide de cátedra: diagrama de violín con anatomía anotada (mediana, IQR, intervalo de confianza)">
+    <figcaption>El violín según cátedra: combinación de boxplot y diagrama de densidad, “superador al boxplot”. Fuente: cátedra UTN-FRT (clase EDA, p. 23).</figcaption>
+  </figure>
+  <p>Cátedra lo define igual que acá (boxplot + densidad) y la anatomía anotada del slide —mediana, rango intercuartílico, intervalo de confianza del 95 %— es la que vas a leer en la Fig. 1 de abajo. Si entendés ese dibujo, entendés el panel de la izquierda.</p>
 
   <h2>2 · KDE: el histograma sin bins</h2>
   <p>El histograma depende de cuántos contenedores elijas: con 3 esconde todo, con 60 muestra ruido.
   La KDE pone una mini-campana sobre cada dato y las suma: una curva suave que <strong>no depende de bins</strong>.
   Ventaja honesta: revela modas y asimetrías; costo honesto: suaviza de más si hay pocos datos, e inventa densidad donde no hay
-  (cerca del 0 €, donde ningún auto existe).</p>
+  (cerca del 0 €, donde ningún auto existe). Cátedra lo llama “gráfico de densidad de kernel” (clase EDA, p. 24):
+  una variación del histograma que “no se ve afectada por el número de contenedores” (o sea, los bins).</p>
   <figure>
     <img src="../assets/img/toyota/0045-violin-densidad-torta-fig1.png" alt="Violín por edad, histograma vs KDE, y torta ilegible">
     <figcaption>Fig. 1 — Izquierda: violines de precio por tramo — los jóvenes (verdes) valen más y se desparraman;
@@ -36,7 +42,7 @@
     Derecha: torta de 8 porciones de Model — ¿cuál porción es cuál? Eso.</figcaption>
   </figure>
   <p>Lectura: <strong>(1)</strong> el violín joven muestra cola larga hacia arriba (premium jóvenes); la caja sola no la contaría.
-  <strong>(2)</strong> La KDE confirma el sesgo a derecha de Price (cola larga, ver <a href="0046-transformaciones-log-discretizar.html">lección 0046</a>).
+  <strong>(2)</strong> La KDE confirma el sesgo a derecha de Price (cola larga, ver <a href="0046-transformaciones-log-discretizar.html">lección 0046</a>, mar 25).
   <strong>(3)</strong> La torta: 8 etiquetas rotadas, porciones indistinguibles. Con 3 porciones zafa; con 8+ es sopa.</p>
   <p>Regenerar la figura (mismo resultado versionado en <code>assets/img/toyota/</code>):</p>
   <pre><code>python scripts/make_figures.py --only violin-densidad-torta</code></pre>
@@ -50,7 +56,8 @@
     <tr><td>Exige el 100 %</td><td>Si falta «otros», las porciones mienten</td><td>«Otros» es la porción mayor</td></tr>
   </table>
   <p>Regla de clase: torta solo con ≤ 4 porciones bien distintas; en todo lo demás, barras horizontales ordenadas
-  (<a href="0009-que-grafico-para-que-dato.html">lección 0009</a>).</p>
+  (<a href="0009-que-grafico-para-que-dato.html">lección 0009</a>). Cátedra coincide en la condición (clase EDA, p. 22):
+  las tortas son “útiles cuando son pocos datos”, que es exactamente lo que dice la regla.</p>
 
   <h2>4 · Los tres en 10 líneas (reproducí la Fig. 1)</h2>
   <pre><code>import pandas as pd, seaborn as sns, matplotlib.pyplot as plt
@@ -97,14 +104,17 @@ plt.show()</code></pre>
   <p><strong>Para profundizar (1 fuente):</strong>
   Wilke, <em>Fundamentals of Data Visualization</em> — cap. 7–9 (distribuciones) y 6 (por qué no tortas).
   Más contexto en <a href="../RESOURCES.md">RESOURCES</a>.</p>
-  <p>Siguiente: <a href="0046-transformaciones-log-discretizar.html">0046 · Transformaciones</a>:
-  log para la asimetría y discretización en tramos con sentido.</p>
+  <p><strong>Cierre Bloque B (25–26 ago):</strong> EDA numérico (0006) → outliers (0007–0008) → transformaciones (0046) →
+  visualización (0009–0012, hoy). Ya sabés describir, cazar rarezas y contar historias con gráficos.</p>
+  <p>Siguiente en el orden del curso (Bloque C, mar 1 sep): <a href="0004-limpieza-datos-toyota.html">0004 Limpieza de datos</a> — detectar la suciedad.</p>
 
   <nav class="lesson-nav">
     <a href="0044-anova-comparar-medias.html">← 0044 ANOVA</a>
-    <a href="../index.html">Índice ↑</a>
-    <a href="0046-transformaciones-log-discretizar.html">0046 Log →</a>
+    <a href="0046-transformaciones-log-discretizar.html">Siguiente: 0046 Log →</a>
   </nav>
+  <p class="meta">Ver también: <a href="../index.html">índice del curso</a> ·
+  <a href="../reference/toyota-data-dictionary.html">diccionario Toyota</a> ·
+  <a href="../reference/analisis-ejemplo-ols.html">análisis OLS de ejemplo</a></p>
 </main>
 <script>
 (function(){

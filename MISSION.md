@@ -6,13 +6,13 @@ Crear una serie de lecciones cortas en español para la materia Introducción al
 ## Success looks like
 - Un visitante puede recorrer el índice en Pages y abrir cada lección como HTML autocontenido.
 - Cada lección deja un win tangible con ejemplo runnable sobre `ToyotaCorolla.csv` y al menos una figura generada con Python.
-- Cualquier figura puede regenerarse con `python scripts/make_figures.py --only <slug>`.
-- Los contenidos cubren las 9 unidades de `PROGRAMA.md` con varias lecciones cortas por unidad (~3 como sugerencia, no límite).
+- Cualquier figura puede regenerarse con `python3 scripts/make_figures.py --only <slug>`.
+- Los contenidos cubren las clases de `PLANIFICACION.md` (bloques A–H de la planificación del profesor) con tantas lecciones cortas como cada tema necesite.
 
 ## Constraints
 - Español. Solo Python. Enfoque "aprender haciendo".
 - Lecciones autocontenidas en `lessons/NNNN-slug.html`, estilo compartido en `assets/styles.css`.
-- Sin backend: HTML + CSS + JS liviano + PNGs versionados en `assets/img/toyota/`.
+- Sin backend: HTML + CSS + JS liviano + PNGs versionados en `assets/img/toyota/` (figuras Python) y `assets/img/catedra/` (slides de cátedra con `figcaption` Fuente UTN-FRT).
 
 ## Out of scope
 - R (el programa lo menciona, pero este curso genera solo Python).

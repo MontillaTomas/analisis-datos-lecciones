@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>0029 · K-Means — Unidad 7</title>
+  <title>0029 · K-Means — Bloque F</title>
   <link rel="stylesheet" href="../assets/styles.css">
 </head>
 <body>
 <main>
   <header class="course">
-    <p class="kicker">Unidad 7 · Agrupamientos (clustering) · Lección 0029</p>
+    <p class="kicker">Bloque F · Clustering · Lección 0029 · mié 28 oct + mar 3 nov</p>
     <h1>K-Means: 3 segmentos de Corolla</h1>
     <p><strong>Win de hoy:</strong> segmentar en 3 con K-Means sobre KM/Price/Edad:
     nuevitos (189: 18.342 €), medios (664: 10.716 €) y veteranos (583: 8.280 €), con centroides visibles.</p>
@@ -23,7 +23,7 @@
   elige k centros (<strong><abbr title="Centroide: promedio del grupo; el auto típico (ideal) de cada segmento">centroides</abbr></strong>),
   asigna cada auto al más cercano, recalcula los centros y repite hasta que nadie se muda. Detalles que importan:
   <code>n_init=10</code> (10 arranques, quedarse con el mejor: el final depende del inicio) y datos
-  <strong>estandarizados</strong> (0028, o KM habla solo).</p>
+  <strong>estandarizados</strong> (0028, mar 27: o KM habla solo).</p>
   <pre><code>from sklearn.cluster import KMeans
 km = KMeans(n_clusters=3, n_init=10, random_state=42).fit(Xs)</code></pre>
 
@@ -39,8 +39,8 @@ km = KMeans(n_clusters=3, n_init=10, random_state=42).fit(Xs)</code></pre>
 
   <h2>3 · Límites honestos (k, esferas, outliers)</h2>
   <ul>
-    <li><strong>k lo ponés vos:</strong> 3 fue elección (negocio + codo en 0031), no verdad revelada.</li>
-    <li><strong>Supone esferas:</strong> grupos alargados o anidados los parte mal (DBSCAN los abraza: 0030).</li>
+    <li><strong>k lo ponés vos:</strong> 3 fue elección (negocio + codo en 0031, mié 4), no verdad revelada.</li>
+    <li><strong>Supone esferas:</strong> grupos alargados o anidados los parte mal (DBSCAN los abraza: 0030, mar 3).</li>
     <li><strong>Outliers tiran centroides:</strong> la media es sensible (el Corolla de 32.500 € arrastra).</li>
   </ul>
 
@@ -88,6 +88,7 @@ km = KMeans(n_clusters=3, n_init=10, random_state=42).fit(Xs)</code></pre>
   Tan, Steinbach &amp; Kumar, <em>Introduction to Data Mining</em> — capítulo de clustering (K-Means)
   (<a href="https://www-users.cs.umn.edu/~kumar001/dmbook/">dmbook</a>, también en
   <a href="../RESOURCES.md">RESOURCES.md</a> del curso).</p>
+  <p>Orden Bloque F: seguí en la <a href="0030-jerarquico-dbscan.html">lección 0030 (mar 3: jerárquico y DBSCAN)</a>.</p>
   <p>¿Algo no quedó claro? <strong>Preguntame al agente</strong>: por qué n_init importa, cómo nombrar segmentos,
   o cuándo K-Means miente. Esa pregunta vale más que releer.</p>
 

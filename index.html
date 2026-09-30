@@ -11,80 +11,162 @@
   <header class="course">
     <p class="kicker"><abbr title="Ingeniería en Sistemas de Información">ISI</abbr> · 5to año · Aprender haciendo · Solo Python</p>
     <h1>Introducción al Análisis de Datos</h1>
-    <p>Lecciones cortas. Un dataset hilo conductor: <code>ToyotaCorolla.csv</code> (1436 autos, 37 columnas).
-    Cada lección incluye al menos una figura <strong>generada con Python</strong> y código runnable.</p>
-    <p class="meta">Programa: <a href="PROGRAMA.md">PROGRAMA.md</a> · Dataset: <a href="ToyotaCorolla.csv">ToyotaCorolla.csv</a> ·
+    <p>Lecciones cortas ordenadas por la <strong>planificación de la materia</strong> (agosto–diciembre).
+    Un dataset hilo conductor: <code>ToyotaCorolla.csv</code> (1436 autos, 37 columnas).
+    Cada lección incluye al menos una figura <strong>generada con Python</strong> y código runnable,
+    más imágenes de la bibliografía de cátedra donde aportan.</p>
+    <p class="meta">Planificación: <a href="PLANIFICACION.md">PLANIFICACION.md</a> ·
+    Programa: <a href="PROGRAMA.md">PROGRAMA.md</a> · Dataset: <a href="ToyotaCorolla.csv">ToyotaCorolla.csv</a> ·
     Referencia: <a href="reference/toyota-data-dictionary.html">diccionario Toyota</a> ·
     <a href="reference/analisis-ejemplo-ols.html">análisis de ejemplo</a></p>
   </header>
 
-  <h2>Recorrido por unidades</h2>
+  <h2>Recorrido por bloques de la planificación</h2>
   <ol class="units">
     <li>
-      <h3>Unidad 1 · ¿Qué son los datos?</h3>
-      <p>Tipos de datos, <abbr title="Muestreo: elegir una parte representativa de los datos para analizar">sampling</abbr>,
-      <abbr title="Análisis exploratorio de datos: mirar los datos con gráficos y resúmenes antes de modelar">EDA</abbr> visual
-      (<abbr title="Gráfico de caja: muestra mediana, cuartiles y valores atípicos">boxplot</abbr>,
-      barras, histogramas) con <code>Price</code>, <code>KM</code>, <code>Fuel_Type</code>.</p>
-      <ul><li><a href="lessons/0001-tipos-de-datos-toyota.html">0001 · Tipos de datos con Toyota Corolla</a></li><li><a href="lessons/0002-niveles-tipos-analisis-tdsp.html">0002 · Niveles, tipos de análisis y metodologías (TDSP)</a></li><li><a href="lessons/0038-muestreo-sesgo.html">0038 · Muestreo y sesgo</a></li></ul>
+      <h3>Bloque A · Presentación e introducción</h3>
+      <ul>
+        <li><strong>mar 18 ago</strong> — Presentación e Introducción al Análisis de Datos; tecnologías:
+          <a href="lessons/0001-tipos-de-datos-toyota.html">0001 · Tipos de datos con Toyota Corolla</a> ·
+          <a href="lessons/0049-tecnologias-stack-clase.html">0049 · El stack de herramientas del curso</a></li>
+        <li><strong>mié 19 ago</strong> — Metodologías para Análisis de Datos; ciclo de vida:
+          <a href="lessons/0002-niveles-tipos-analisis-tdsp.html">0002 · Niveles, tipos de análisis y metodologías (TDSP)</a></li>
+      </ul>
     </li>
     <li>
-      <h3>Unidad 2 · Exploración de datos</h3>
-      <p>Limpieza, <abbr title="Wrangling: transformar datos crudos en un formato limpio y analizable">wrangling</abbr> +
-      <abbr title="Expresiones regulares: patrones para buscar y limpiar texto">regex</abbr> sobre <code>Model</code>,
-      valores nulos y atípicos, <abbr title="Outliers: valores extremos que se alejan del resto">outliers</abbr>.</p>
-      <ul><li><a href="lessons/0004-limpieza-datos-toyota.html">0004 · Limpieza de datos: detectar la suciedad</a></li><li><a href="lessons/0005-wrangling-regex-model.html">0005 · Wrangling y regex sobre Model</a></li><li><a href="lessons/0006-eda-sistematico-toyota.html">0006 · EDA sistemático: describir, agrupar, correlacionar</a></li><li><a href="lessons/0007-outliers-estadisticos-iqr-z.html">0007 · Outliers estadísticos: IQR y z-score</a></li><li><a href="lessons/0008-outliers-multivariados-lof-dbscan.html">0008 · Outliers multivariados: vecinos, grupos, aislamiento</a></li><li><a href="lessons/0046-transformaciones-log-discretizar.html">0046 · Transformaciones: log y discretización</a></li></ul>
+      <h3>Bloque B · Análisis Exploratorio de Datos</h3>
+      <ul>
+        <li><strong>mar 25 ago</strong> — Análisis Exploratorio de Datos:
+          <a href="lessons/0006-eda-sistematico-toyota.html">0006 · EDA sistemático: describir, agrupar, correlacionar</a> ·
+          <a href="lessons/0007-outliers-estadisticos-iqr-z.html">0007 · Outliers estadísticos: IQR y z-score</a> ·
+          <a href="lessons/0008-outliers-multivariados-lof-dbscan.html">0008 · Outliers multivariados: vecinos, grupos, aislamiento</a> ·
+          <a href="lessons/0046-transformaciones-log-discretizar.html">0046 · Transformaciones: log y discretización</a></li>
+        <li><strong>mié 26 ago</strong> — EDA, visualización:
+          <a href="lessons/0009-que-grafico-para-que-dato.html">0009 · Qué gráfico para qué dato</a> ·
+          <a href="lessons/0010-color-con-criterio.html">0010 · Color con criterio</a> ·
+          <a href="lessons/0011-eje-truncado-honestidad.html">0011 · El eje truncado miente</a> ·
+          <a href="lessons/0012-multivariado-burbujas-heatmap.html">0012 · Multivariado: burbujas y heatmaps</a> ·
+          <a href="lessons/0045-violin-densidad-torta.html">0045 · Violín, densidad y torta</a></li>
+      </ul>
     </li>
     <li>
-      <h3>Unidad 3 · Visualización de datos</h3>
-      <p>Principios de visualización, teoría del color, datos uni y multivariados, foco y contexto,
-      grafos y redes, mapas. Todo con <code>Price vs KM</code>.</p>
-      <ul><li><a href="lessons/0009-que-grafico-para-que-dato.html">0009 · Qué gráfico para qué dato</a></li><li><a href="lessons/0010-color-con-criterio.html">0010 · Color con criterio</a></li><li><a href="lessons/0011-eje-truncado-honestidad.html">0011 · El eje truncado miente</a></li><li><a href="lessons/0012-multivariado-burbujas-heatmap.html">0012 · Multivariado: burbujas y heatmaps</a></li><li><a href="lessons/0013-redes-arboles-equipamiento.html">0013 · Redes y árboles</a></li><li><a href="lessons/0014-mapas-texto-dos-visualizaciones.html">0014 · Mapas, texto y dos visualizaciones</a></li><li><a href="lessons/0045-violin-densidad-torta.html">0045 · Violín, densidad y torta</a></li></ul>
+      <h3>Bloque C · Limpieza de Datos</h3>
+      <ul>
+        <li><strong>mar 1 sep</strong> — Limpieza de Datos:
+          <a href="lessons/0004-limpieza-datos-toyota.html">0004 · Limpieza de datos: detectar la suciedad</a> ·
+          <a href="lessons/0005-wrangling-regex-model.html">0005 · Wrangling y regex sobre Model</a> ·
+          <a href="lessons/0015-faltantes-mecanismos-listwise.html">0015 · Faltantes: mecanismos y listwise</a> ·
+          <a href="lessons/0016-relleno-simple-media-razon.html">0016 · Relleno simple y reponderación</a> ·
+          <a href="lessons/0017-hot-deck-cold-deck-knn.html">0017 · Hot deck, cold deck y KNN</a> ·
+          <a href="lessons/0018-imputacion-con-modelos.html">0018 · Imputación con modelos</a> ·
+          <a href="lessons/0055-one-hot-encoding.html">0055 · One-hot encoding</a></li>
+      </ul>
     </li>
     <li>
-      <h3>Unidad 4 · Datos faltantes e imputación</h3>
-      <p><abbr title="Listwise: descartar filas con algún faltante; pairwise: usar los datos disponibles en cada cálculo">Listwise y pairwise</abbr>,
-      sustitución por la media, <abbr title="Hot deck: rellenar un faltante copiando el valor de un caso parecido">hot deck</abbr>,
-      <abbr title="KNN: k vecinos más cercanos, se usa para imputar o clasificar según los casos más parecidos">KNN</abbr>,
-      imputación con modelos.</p>
-      <ul><li><a href="lessons/0015-faltantes-mecanismos-listwise.html">0015 · Faltantes: mecanismos y listwise</a></li><li><a href="lessons/0016-relleno-simple-media-razon.html">0016 · Relleno simple y reponderación</a></li><li><a href="lessons/0017-hot-deck-cold-deck-knn.html">0017 · Hot deck, cold deck y KNN</a></li><li><a href="lessons/0018-imputacion-con-modelos.html">0018 · Imputación con modelos</a></li></ul>
+      <h3>Bloque D · Regresión lineal, selección y regularización</h3>
+      <ul>
+        <li><strong>mié 2 sep</strong> — Hipótesis nula, definición, regresión simple:
+          <a href="lessons/0042-inferencia-pvalor-t.html">0042 · Hipótesis, p-valor y t</a> ·
+          <a href="lessons/0057-errores-tipo-1-2.html">0057 · Errores tipo I y II</a> ·
+          <a href="lessons/0003-regresion-lineal-precio-km.html">0003 · Regresión lineal Price ~ KM (R², residuos, K-Fold 10)</a> ·
+          <a href="lessons/0023-correlacion-vs-regresion.html">0023 · Correlación vs regresión</a></li>
+        <li><strong>mar 8 sep</strong> — Primera parte de la salida:
+          <a href="lessons/0024-regresion-multiple-ols.html">0024 · Regresión múltiple OLS</a></li>
+        <li><strong>mié 9 sep</strong> — Primera y segunda parte de la salida:
+          <a href="lessons/0024-regresion-multiple-ols.html">0024 · Regresión múltiple OLS</a> ·
+          <a href="lessons/0056-intervalos-confianza.html">0056 · Intervalos de confianza</a> ·
+          <a href="lessons/0025-diagnostico-ols-qq-cook.html">0025 · Diagnóstico OLS</a></li>
+        <li><strong>mar 15 sep</strong> — Segunda y tercera parte de la salida; análisis de valores residuales:
+          <a href="lessons/0025-diagnostico-ols-qq-cook.html">0025 · Diagnóstico OLS</a> ·
+          <a href="lessons/0048-salida-tercera-parte-residuales-mse.html">0048 · Tercera parte de la salida: Omnibus, skew, kurtosis, JB + MSE</a> ·
+          <a href="lessons/0043-metricas-split-80-20.html">0043 · Métricas y split 80/20</a></li>
+        <li><strong>mié 16 sep</strong> — Método de remuestreo:
+          <a href="lessons/0047-remuestreo-bootstrap-cv.html">0047 · Remuestreo: validación cruzada y bootstrap</a></li>
+        <li><strong>mar 22 sep</strong> — Stepwise selection (backward, forward):
+          <a href="lessons/0019-por-que-seleccionar.html">0019 · Por qué seleccionar variables</a> ·
+          <a href="lessons/0020-best-subset-stepwise.html">0020 · Best subset y stepwise</a></li>
+        <li><strong>mié 23 sep</strong> — Métodos de contracción:
+          <a href="lessons/0021-ridge-lasso-caminos.html">0021 · Ridge y Lasso</a> ·
+          <a href="lessons/0022-scad-elastic-filtros.html">0022 · SCAD, elastic net y filtros</a></li>
+        <li><strong>mar 29 sep</strong> — Reducción de dimensionalidad:
+          <a href="lessons/0032-pca-biplot-pcr.html">0032 · PCA y biplot</a></li>
+        <li><strong>mié 30 sep</strong> — Parcial:
+          <span class="badge">pendiente</span> sin lección asignada (a decidir: repaso o nada)</li>
+      </ul>
     </li>
     <li>
-      <h3>Unidad 5 · Selección de variables y regularización</h3>
-      <p><abbr title="Best subset: probar combinaciones de variables para quedarse con la mejor">Best subset</abbr>,
-      <abbr title="Lasso: regularización que puede llevar coeficientes a cero y así elegir variables">Lasso</abbr>,
-      <abbr title="Ridge: regularización que achica los coeficientes sin eliminarlos">Ridge</abbr>,
-      <abbr title="SCAD: penalización que castiga menos a los coeficientes grandes">SCAD</abbr>.</p>
-      <ul><li><a href="lessons/0019-por-que-seleccionar.html">0019 · Por qué seleccionar variables</a></li><li><a href="lessons/0020-best-subset-stepwise.html">0020 · Best subset y stepwise</a></li><li><a href="lessons/0021-ridge-lasso-caminos.html">0021 · Ridge y Lasso</a></li><li><a href="lessons/0022-scad-elastic-filtros.html">0022 · SCAD, elastic net y filtros</a></li></ul>
+      <h3>Bloque E · Clasificación</h3>
+      <ul>
+        <li><strong>mar 6 oct</strong> — Introducción y noción básica:
+          <a href="lessons/0033-clasificacion-knn.html">0033 · Clasificación con k-NN</a></li>
+        <li><strong>mié 7 oct</strong> — KNN, regresión logística:
+          <a href="lessons/0033-clasificacion-knn.html">0033 · Clasificación con k-NN</a> ·
+          <a href="lessons/0034-regresion-logistica-roc.html">0034 · Regresión logística y ROC</a></li>
+        <li><strong>mar 13 oct</strong> — Árboles de decisión; evaluación:
+          <a href="lessons/0035-naive-bayes-arboles.html">0035 · Naive Bayes y árboles</a></li>
+        <li><strong>mié 14 oct</strong> — Métodos de ensamble:
+          <a href="lessons/0036-random-forest-boosting.html">0036 · Random forest y boosting</a></li>
+        <li><strong>mar 20 oct</strong> — Métodos de ensamble:
+          <a href="lessons/0036-random-forest-boosting.html">0036 · Random forest y boosting</a> ·
+          <a href="lessons/0037-svm-comparacion.html">0037 · SVM y comparación final</a></li>
+        <li><strong>mié 21 oct</strong> — Parcial:
+          <span class="badge">pendiente</span> sin lección asignada (a decidir: repaso o nada)</li>
+      </ul>
     </li>
     <li>
-      <h3>Unidad 6 · Regresión lineal simple y múltiple</h3>
-      <p>Correlación vs regresión, regresión simple, múltiple y polinomial,
-      <abbr title="GLM: modelos lineales generalizados, extienden la regresión a otros tipos de respuesta">GLM</abbr>,
-      regresión robusta y bayesiana. Réplica por partes del análisis de ejemplo.</p>
-      <ul><li><a href="lessons/0003-regresion-lineal-precio-km.html">0003 · Regresión lineal Price ~ KM (R², residuos, K-Fold 10)</a></li><li><a href="lessons/0023-correlacion-vs-regresion.html">0023 · Correlación vs regresión</a></li><li><a href="lessons/0024-regresion-multiple-ols.html">0024 · Regresión múltiple OLS</a></li><li><a href="lessons/0025-diagnostico-ols-qq-cook.html">0025 · Diagnóstico OLS</a></li><li><a href="lessons/0026-regresion-polinomial.html">0026 · Regresión polinomial</a></li><li><a href="lessons/0027-glm-robusta-bayesiana.html">0027 · GLM, robusta y bayesiana</a></li><li><a href="lessons/0042-inferencia-pvalor-t.html">0042 · Hipótesis, p-valor y t</a></li><li><a href="lessons/0043-metricas-split-80-20.html">0043 · Métricas y split 80/20</a></li><li><a href="lessons/0044-anova-comparar-medias.html">0044 · ANOVA: comparar medias</a></li></ul>
+      <h3>Bloque F · Clustering</h3>
+      <ul>
+        <li><strong>mar 27 oct</strong> — Introducción y noción básica:
+          <a href="lessons/0028-distancias-similaridad.html">0028 · Distancias y similaridad</a></li>
+        <li><strong>mié 28 oct</strong> — Introducción y noción básica; K-means:
+          <a href="lessons/0029-kmeans-segmentos.html">0029 · K-Means</a></li>
+        <li><strong>mar 3 nov</strong> — K-means, K-medoids y otros:
+          <a href="lessons/0029-kmeans-segmentos.html">0029 · K-Means</a> ·
+          <a href="lessons/0030-jerarquico-dbscan.html">0030 · Jerárquico y DBSCAN</a> ·
+          <a href="lessons/0050-kmedoids-medoides-robustos.html">0050 · K-medoids robustos</a></li>
+        <li><strong>mié 4 nov</strong> — Validación de clusters:
+          <a href="lessons/0031-validar-grupos-codo-silueta.html">0031 · Validar grupos</a></li>
+        <li><strong>mar 10 nov</strong> — Calidad de clusters; ventajas:
+          <a href="lessons/0051-calidad-ventajas-cierre.html">0051 · Calidad y ventajas: cierre</a></li>
+        <li><strong>mié 11 nov</strong> — Parcial:
+          <span class="badge">pendiente</span> sin lección asignada (a decidir: repaso o nada)</li>
+      </ul>
     </li>
     <li>
-      <h3>Unidad 7 · Agrupamientos (<abbr title="Clustering: agrupar casos parecidos sin usar etiquetas previas">clustering</abbr>)</h3>
-      <p>Distancias y similaridad, métodos jerárquicos, K-Means, DBSCAN, validación de grupos,
-      <abbr title="PCA: análisis de componentes principales, reduce dimensiones para visualizar">PCA</abbr>.</p>
-      <ul><li><a href="lessons/0028-distancias-similaridad.html">0028 · Distancias y similaridad</a></li><li><a href="lessons/0029-kmeans-segmentos.html">0029 · K-Means</a></li><li><a href="lessons/0030-jerarquico-dbscan.html">0030 · Jerárquico y DBSCAN</a></li><li><a href="lessons/0031-validar-grupos-codo-silueta.html">0031 · Validar grupos</a></li><li><a href="lessons/0032-pca-biplot-pcr.html">0032 · PCA y biplot</a></li></ul>
+      <h3>Bloque G · Frequent Itemsets</h3>
+      <ul>
+        <li><strong>mar 17 nov</strong> — Introducción, noción básica y ejemplo más común:
+          <a href="lessons/0039-soporte-itemsets.html">0039 · Soporte e itemsets</a> ·
+          <a href="lessons/0040-reglas-confianza-lift.html">0040 · Reglas: confianza y lift</a></li>
+        <li><strong>mié 18 nov</strong> — A-priori, FP-Growth, ECLAT:
+          <a href="lessons/0041-algoritmo-apriori.html">0041 · El algoritmo Apriori</a> ·
+          <a href="lessons/0052-fpgrowth-eclat-sin-candidatos.html">0052 · FP-Growth y ECLAT</a></li>
+        <li><strong>mar 24 nov</strong> — Parcial:
+          <span class="badge">pendiente</span> sin lección asignada (a decidir: repaso o nada)</li>
+      </ul>
     </li>
     <li>
-      <h3>Unidad 8 · Clasificación</h3>
-      <p><abbr title="KNN: clasifica según la mayoría de los k casos más parecidos">KNN</abbr>,
-      regresión logística, Naive Bayes, árboles de decisión,
-      <abbr title="Random forest: bosque de muchos árboles que votan">random forest</abbr>,
-      boosting, <abbr title="SVM: máquina de vectores de soporte, busca la mejor frontera entre clases">SVM</abbr>,
-      comparación de algoritmos.</p>
-      <ul><li><a href="lessons/0033-clasificacion-knn.html">0033 · Clasificación con k-NN</a></li><li><a href="lessons/0034-regresion-logistica-roc.html">0034 · Regresión logística y ROC</a></li><li><a href="lessons/0035-naive-bayes-arboles.html">0035 · Naive Bayes y árboles</a></li><li><a href="lessons/0036-random-forest-boosting.html">0036 · Random forest y boosting</a></li><li><a href="lessons/0037-svm-comparacion.html">0037 · SVM y comparación final</a></li></ul>
+      <h3>Bloque H · <abbr title="RNA: redes neuronales artificiales">RNA</abbr> en el análisis de datos</h3>
+      <ul>
+        <li><strong>mié 25 nov</strong> — Introducción y noción básica:
+          <a href="lessons/0053-neurona-mlp-precio.html">0053 · Neurona y MLP sobre Toyota</a></li>
+        <li><strong>mar 1 dic</strong> — Arquitecturas más utilizadas:
+          <a href="lessons/0054-arquitecturas-criterios-cierre.html">0054 · Arquitecturas y criterios: cierre</a></li>
+        <li><strong>mié 2 dic</strong> — Parcial:
+          <span class="badge">pendiente</span> sin lección asignada (a decidir: repaso o nada)</li>
+      </ul>
     </li>
     <li>
-      <h3>Unidad 9 · Ítems frecuentes</h3>
-      <p><abbr title="Soporte: cuántas veces aparece un conjunto de ítems respecto del total">Soporte</abbr>,
-      <abbr title="Monotonicidad: si un conjunto es frecuente, sus subconjuntos también lo son">monotonicidad</abbr>,
-      reglas de asociación, algoritmo Apriori sobre el equipamiento de los autos.</p>
-      <ul><li><a href="lessons/0039-soporte-itemsets.html">0039 · Soporte e itemsets</a></li><li><a href="lessons/0040-reglas-confianza-lift.html">0040 · Reglas: confianza y lift</a></li><li><a href="lessons/0041-algoritmo-apriori.html">0041 · El algoritmo Apriori</a></li></ul>
+      <h3>Anexo · Lecciones sin clase asignada (a decidir)</h3>
+      <p>Temas del programa original que no aparecen en la planificación; se decide si se fusionan, se mantienen como anexo o se eliminan.</p>
+      <ul>
+        <li><a href="lessons/0013-redes-arboles-equipamiento.html">0013 · Redes y árboles</a></li>
+        <li><a href="lessons/0014-mapas-texto-dos-visualizaciones.html">0014 · Mapas, texto y dos visualizaciones</a></li>
+        <li><a href="lessons/0026-regresion-polinomial.html">0026 · Regresión polinomial</a></li>
+        <li><a href="lessons/0027-glm-robusta-bayesiana.html">0027 · GLM, robusta y bayesiana</a></li>
+        <li><a href="lessons/0038-muestreo-sesgo.html">0038 · Muestreo y sesgo</a></li>
+        <li><a href="lessons/0044-anova-comparar-medias.html">0044 · ANOVA: comparar medias</a></li>
+      </ul>
     </li>
   </ol>
 </main>

@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>0044 · ANOVA: comparar medias — Unidad 6</title>
+  <title>0044 · ANOVA: comparar medias — Anexo</title>
   <link rel="stylesheet" href="../assets/styles.css">
 </head>
 <body>
 <main>
   <header class="course">
-    <p class="kicker">Unidad 6 · Regresión lineal simple y múltiple · Lección 0044</p>
+    <p class="kicker">Anexo · Contenido extra · Lección 0044</p>
     <h1>ANOVA: ¿los tres combustibles valen distinto de verdad?</h1>
     <p><strong>Win de hoy:</strong> <strong><abbr title="ANOVA: análisis de varianza; test que compara las medias de 3+ grupos de una sola vez">ANOVA</abbr></strong>
     juzga las 3 medias juntas (nafta 10.679, diésel 11.295, GNC 9.421 €): F = 3,12, p = 0,045 —
@@ -55,7 +55,8 @@
   <pre><code>import pandas as pd
 from scipy import stats
 df = pd.read_csv("../ToyotaCorolla.csv")
-g = [df.loc[df["Fuel_Type"] == f, "Price"] for f in ["Petrol", "Diesel", "CNG"]]
+fuels = ["Petrol", "Diesel", "CNG"]
+g = [df.loc[df["Fuel_Type"] == f, "Price"] for f in fuels]
 print([round(x.mean(), 1) for x in g])  # [10679.3, 11294.6, 9421.2]
 print([len(x) for x in g])              # [1264, 155, 17]
 F, p = stats.f_oneway(*g)

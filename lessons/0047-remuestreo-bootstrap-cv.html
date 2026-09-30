@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>0047 · Remuestreo: validación cruzada y bootstrap — Bloque D</title>
+  <link rel="stylesheet" href="../assets/styles.css">
+</head>
+<body>
+<main>
+  <header class="course">
+    <p class="kicker">Bloque D · Regresión lineal, selección y regularización · Lección 0047 · mié 16 sep</p>
+    <h1>Remuestreo: validación cruzada y bootstrap</h1>
+    <p><strong>Win de hoy:</strong> medir <code>Price ~ KM</code> sin autoengañarte:
+    <abbr title="Validación cruzada: partir los datos en pliegues y rotar cuál es test para promediar el error">validación cruzada</abbr>
+    k=5 da R² <strong>0,315 ± 0,034</strong> (5 tests honestos, no uno),
+    y <abbr title="Bootstrap: remuestreo con reposición; cada réplica sortea n autos pudiendo repetir">bootstrap</abbr>
+    con 1000 réplicas encierra la pendiente KM en <strong>[−0,0606, −0,0507]</strong>: nunca cruza 0.</p>
+    <p class="meta"><a href="../index.html">← Índice</a> ·
+    <a href="../reference/toyota-data-dictionary.html">Diccionario Toyota</a> ·
+    <a href="../ToyotaCorolla.csv">CSV</a></p>
+  </header>
+
+  <h2>1 · Por qué remuestrear: un test no alcanza para elegir</h2>
+  <p>La <a href="0043-metricas-split-80-20.html">lección 0043</a> dejó una regla de oro: el test 20 %
+  no se mira hasta el final, porque si elegís el modelo mirando el test, el test deja de ser honesto.
+  Pero entonces, ¿con qué comparás candidatos <em>antes</em> del veredicto final? ¿Con el train? No:
+  medir en train es preguntarle al alumno con el machete en la mano. La salida de clase es la
+  <strong><abbr title="Remuestreo: reutilizar la muestra para estimar error e incertidumbre; incluye validación cruzada y bootstrap">validación cruzada</abbr></strong>:
+  la misma idea del K-Fold k=10 de la <a href="0003-regresion-lineal-precio-km.html">lección 0003</a>,
+  ahora como método general para <em>elegir</em> modelo, y el <strong>bootstrap</strong> para medir
+  <em>incertidumbre</em> (¿qué tan firme es mi pendiente?). Remuestrear es sacarle más jugo a los 1436 autos
+  sin pedir datos nuevos: reordenás y re-sorteás lo que ya tenés.</p>
+
+  <h2>2 · Validación cruzada: k tests honestos que rotan</h2>
+  <p>El <strong><abbr title="K-Fold: validación cruzada que parte los datos en k pliegues y rota cuál es test">K-Fold</abbr></strong>
+  parte los autos en k grupos (pliegues) del mismo tamaño: entrena en k−1 y prueba en el restante,
+  rota hasta que cada pliegue fue test una vez, y promedia. Con k=5 sobre <code>Price ~ KM</code>
+  (barajado, semilla 42), cada test tiene ≈ 287 autos y el R² por fold sale
+  <strong>0,331 · 0,303 · 0,339 · 0,347 · 0,254</strong>: media <strong>0,315 ± 0,034</strong>,
+  casi idéntica al k=10 de la 0003 (0,315 ± 0,042). El fold 5 flojea (0,254, barra naranja en la figura):
+  con un solo split 80/20 podrías haber ligado justo ese corte y creer que el modelo rinde menos;
+  el promedio de 5 cortes no depende de la suerte de un reparto.</p>
+  <p>Dos parientes: <strong><abbr title="LOOCV: Leave-One-Out; validación cruzada con n pliegues de 1 dato; carísima">LOOCV</abbr></strong>
+  (<em>leave-one-out</em>) es K-Fold con k = n: deja 1 auto afuera, ajusta con los otros 1435, repite 1436 veces.
+  Usa casi todos los datos para entrenar, pero cuesta 1436 ajustes (con modelos lentos, imposible).
+  Y la <strong><abbr title="Estratificación: repartir cada pliegue conservando la proporción de una clase o grupo">estratificación</abbr></strong>
+  reparte cada pliegue conservando proporciones (ej.: mismo % de cada combustible): obligatoria en clasificación
+  con clases raras.</p>
+  <figure>
+    <img src="../assets/img/toyota/0047-remuestreo-bootstrap-cv-fig1.png" alt="R cuadrado por fold en KFold k=5 e histograma bootstrap de la pendiente KM">
+    <figcaption>Fig. 1 — Izquierda: R² por fold (k=5): media 0,315 ± 0,034; el esquema muestra cómo rota el
+    pliegue rojo de test. Derecha: 1000 pendientes bootstrap de KM con su intervalo percentil 95 % sombreado:
+    todo el intervalo vive lejos de 0, la H₁ de la 0003 respira tranquila.</figcaption>
+  </figure>
+  <p>Regenerar la figura (mismo resultado versionado en <code>assets/img/toyota/</code>):</p>
+  <pre><code>python scripts/make_figures.py --only remuestreo-bootstrap-cv</code></pre>
+
+  <h2>3 · Bootstrap: sortear con reposición para medir incertidumbre</h2>
+  <p>El <strong>bootstrap</strong> sortea n autos <em>con reposición</em>: cada réplica toma 1436 autos pudiendo
+  repetir (alguno sale 3 veces, otro ninguna). En cada réplica re-ajusta la recta y anota la pendiente;
+  con 1000 réplicas tenés 1000 pendientes, y el
+  <strong><abbr title="Intervalo percentil: banda entre los percentiles 2,5 y 97,5 de las réplicas bootstrap">intervalo percentil 95 %</abbr></strong>
+  es simplemente la banda entre los percentiles 2,5 y 97,5. Para KM da <strong>[−0,0606, −0,0507]</strong> €/km:
+  1000 sorteos distintos y ninguno —ni de cerca— cruza el 0. Esa es la incertidumbre honesta de β₁ sin fórmulas mágicas.</p>
+  <p>Detalle lindo: en cada réplica ≈ <strong>36,8 %</strong> de los autos nunca sale sorteado
+  (límite de (1 − 1/n)ⁿ): son los
+  <strong><abbr title="Out-of-bag: autos que una réplica bootstrap nunca sorteó; sirven de test gratis">out-of-bag</abbr></strong>,
+  un mini-test gratis por réplica. Los bosques de la
+  <a href="0036-random-forest-boosting.html">lección 0036</a> viven de este truco.</p>
+
+  <h2>4 · Remuestreo en 17 líneas (reproducí la Fig. 1)</h2>
+  <pre><code>import numpy as np, pandas as pd
+from sklearn.model_selection import KFold, cross_val_score
+from sklearn.linear_model import LinearRegression
+df = pd.read_csv("../ToyotaCorolla.csv")  # desde lessons/
+X, y = df[["KM"]], df["Price"]
+kf = KFold(n_splits=5, shuffle=True, random_state=42)
+r2 = cross_val_score(LinearRegression(), X, y, cv=kf, scoring="r2")
+print(np.round(r2, 3), r2.mean().round(3), r2.std().round(3))
+# [0.331 0.303 0.339 0.347 0.254] 0.315 0.034
+rng = np.random.default_rng(42)
+Xv, yv = df["KM"].values, df["Price"].values
+betas = np.empty(1000)
+for i in range(1000):
+    idx = rng.integers(0, len(df), len(df))  # con reposición
+    xb, yb = Xv[idx], yv[idx]
+    xc = xb - xb.mean()
+    betas[i] = (xc * (yb - yb.mean())).sum() / (xc ** 2).sum()
+print(np.percentile(betas, [2.5, 97.5]).round(5))  # [-0.06056 -0.05074]</code></pre>
+  <p><strong>Tu turno:</strong> repetí el bootstrap sobre el intercepto β₀ (precio con 0 km) y reportá su
+  intervalo 95 %: ¿es ancho o angosto comparado con los ≈ 14.508 € puntuales? Si te sobra resto,
+  probá k=10 y verificá que la media casi no se mueve (0,315 ± 0,042, como en la 0003).</p>
+
+  <h2>5 · Quiz (auto-chequeo inmediato)</h2>
+  <p class="meta">Elegí una opción por pregunta: el feedback es inmediato.</p>
+
+  <div class="quiz" id="q1">
+    <strong>P1 · CV k=5 le gana al test único porque…</strong>
+    <label><input type="radio" name="q1" value="0"> CV promedia cinco tests honestos</label>
+    <label><input type="radio" name="q1" value="1"> Test único es más estable</label>
+    <label><input type="radio" name="q1" value="2"> CV ajusta con un pliegue</label>
+    <label><input type="radio" name="q1" value="3"> Test único reemplaza al split</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <div class="quiz" id="q2">
+    <strong>P2 · Bootstrap significa sortear autos…</strong>
+    <label><input type="radio" name="q2" value="0"> Parte en pliegues sin repetir</label>
+    <label><input type="radio" name="q2" value="1"> Sortea con reposición cada vez</label>
+    <label><input type="radio" name="q2" value="2"> Usa solo el test apartado</label>
+    <label><input type="radio" name="q2" value="3"> Borra outliers antes de todo</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <div class="quiz" id="q3">
+    <strong>P3 · LOOCV con n = 1436 duele porque…</strong>
+    <label><input type="radio" name="q3" value="0"> LOOCV sirve solo en test</label>
+    <label><input type="radio" name="q3" value="1"> LOOCV ignora todo el train</label>
+    <label><input type="radio" name="q3" value="2"> LOOCV cuesta n ajustes caros</label>
+    <label><input type="radio" name="q3" value="3"> LOOCV prohíbe usar semilla fija</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <h2>6 · Fuente primaria y cierre</h2>
+  <p><strong>Para profundizar (1 fuente):</strong> James, Witten, Hastie &amp; Tibshirani,
+  <em>An Introduction to Statistical Learning</em> — capítulo 5 (remuestreo: validación cruzada y bootstrap).
+  Texto base del programa
+  (<a href="https://www.statlearning.com/">statlearning.com</a>, PDF libre; también en
+  <a href="../RESOURCES.md">RESOURCES.md</a> del curso). La sintaxis exacta de <code>KFold</code> y
+  <code>cross_val_score</code> sale de la
+  <a href="https://scikit-learn.org/stable/">documentación de scikit-learn</a>.</p>
+  <p>Orden Bloque D: esta lección cierra el bloque hacia arriba (elegir y validar modelos).
+  Para juzgar coeficientes volvé a <a href="0042-inferencia-pvalor-t.html">0042 · Hipótesis, p-valor y t</a>.</p>
+
+  <nav class="lesson-nav">
+    <a href="0046-transformaciones-log-discretizar.html">← 0046 Transformaciones</a>
+    <a href="../index.html">Índice ↑</a>
+    <a href="0048-salida-tercera-parte-residuales-mse.html">0048 Tercera parte →</a>
+  </nav>
+</main>
+<script>
+(function(){
+  var answers = {q1: 0, q2: 1, q3: 2};
+  var msgs = {
+    q1: ["Correcto: 5 tests promedian la suerte del corte.",
+         "No: CV promedia k tests; el único depende del reparto."],
+    q2: ["Correcto: con reposición; 36,8 % queda out-of-bag.",
+         "No: bootstrap repite autos; pliegues sin repetir es CV."],
+    q3: ["Correcto: 1436 ajustes, uno por auto afuera.",
+         "No: LOOCV ajusta n veces; con modelos lentos duele."]
+  };
+  ["q1","q2","q3"].forEach(function(id){
+    var box = document.getElementById(id);
+    var fb = box.querySelector(".feedback");
+    box.addEventListener("change", function(e){
+      var ok = parseInt(e.target.value, 10) === answers[id];
+      fb.textContent = ok ? msgs[id][0] : msgs[id][1];
+      fb.className = "feedback " + (ok ? "ok" : "no");
+    });
+  });
+})();
+</script>
+</body>
+</html>

@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>0020 · Best subset y stepwise — Unidad 5</title>
+  <title>0020 · Best subset y stepwise — Bloque D</title>
   <link rel="stylesheet" href="../assets/styles.css">
 </head>
 <body>
 <main>
   <header class="course">
-    <p class="kicker">Unidad 5 · Selección de variables y regularización · Lección 0020</p>
+    <p class="kicker">Bloque D · Regresión lineal, selección y regularización · Lección 0020 · mar 22 sep</p>
     <h1>Best subset y stepwise: buscar el mejor equipo</h1>
     <p><strong>Win de hoy:</strong> probar los 256 equipos de 8 candidatas: el codo está en k=4
     (CV 0,867), AIC pide 7, BIC 5, y con las 8 un fold se desploma (0,57).</p>
@@ -21,8 +21,10 @@
   <h2>1 · Best subset: probar todo (cuando se puede)</h2>
   <p><strong><abbr title="Best subset: probar las 2^p combinaciones y quedarse con la mejor según un criterio">Best subset</abbr></strong>
   prueba las 2<sup>p</sup> combinaciones: con 8 candidatas son 256 modelos (segundos); con las 37 columnas serían
-  137 mil millones (imposible). Por eso existe lo goloso (paso 3). Pool de hoy:
-  <code>KM, Age, HP, Weight, cc, Tax, Year, Guarantee</code>.</p>
+  137 mil millones (imposible). Por eso existe
+  <strong><abbr title="Greedy (goloso): decidir cada paso por lo mejor inmediato, sin revisar atrás; barato pero sin garantía de óptimo">lo goloso</abbr></strong>
+  (§3): forward y backward son las aproximaciones golosas a esta búsqueda total — 36 ajustes en vez de 256.
+  Pool de hoy: <code>KM, Age, HP, Weight, cc, Tax, Year, Guarantee</code>.</p>
 
   <h2>2 · AIC y BIC: ajuste menos castigo</h2>
   <p>R² siempre premia agregar variables (nunca baja en train), así que se necesita un criterio que <em>castigue</em>
@@ -30,24 +32,38 @@
   resta 2 por parámetro, <strong><abbr title="BIC: criterio bayesiano; castiga más que AIC con n grande (menos es mejor)">BIC</abbr></strong>
   resta log(n) ≈ 7,3. Acá AIC minimiza en k=7, BIC en k=5… y el CV dice que con k=4 (Year, Weight, KM, HP → 0,867)
   ya ameseta. Tres opiniones, un mensaje: <strong>de 4 en más, casi no se gana</strong>.</p>
+  <figure>
+    <img src="../assets/img/catedra/regresion/aic-bic-seleccion.png" alt="Slide de cátedra: AIC y BIC para la selección de modelos">
+    <figcaption>Fig. 1 — AIC/BIC según la cátedra: «usados para la selección de modelos», penalizan agregar variables
+    y «un AIC más bajo implica un mejor modelo». Fuente: cátedra UTN-FRT, clase de regresión lineal.</figcaption>
+  </figure>
+  <p>Mismo mensaje que el nuestro con otras palabras: el criterio castiga la complejidad (la cátedra habla de
+  «penalizar» cada variable nueva; nosotros restamos 2 por parámetro en AIC y log(n) ≈ 7,3 en BIC, por eso BIC
+  pide menos variables que AIC).</p>
 
   <h2>3 · Stepwise: lo goloso (y acierta)</h2>
   <p><strong><abbr title="Forward stepwise: agregar de a una la variable que más mejora, hasta que no mejore">Forward stepwise</abbr></strong>
   agrega de a una la que más mejora el AIC: Year → Weight → KM → HP → Tax → Guarantee → Age → cc. Acá coincide
-  <em>exacto</em> con el óptimo exhaustivo (suerte + estructura limpia; en general lo goloso puede fallar). Su primo
-  <strong><abbr title="Backward: empezar con todas e ir sacando la menos útil">backward</abbr></strong> hace lo inverso:
-  empieza con las 8 y poda. Costo: 8+7+…+1 = 36 ajustes vs 256.</p>
+  <em>exacto</em> con el óptimo exhaustivo (suerte + estructura limpia; en general lo goloso puede fallar).
+  Costo: 8+7+…+1 = 36 ajustes vs 256.</p>
+  <p>Su primo <strong><abbr title="Backward: empezar con todas e ir sacando la menos útil">backward</abbr></strong>
+  hace lo inverso: empieza con las 8 y poda de a una la que menos aporta (la que deja el AIC más bajo al salir).
+  El orden de eliminación medido es cc → Age → Guarantee → Tax → HP → KM → Weight (queda Year sola al final);
+  el AIC minimiza al sacar solo cc (k=7, igual que forward y que best subset). Resultado honesto: acá backward es
+  <em>el espejo exacto</em> de forward — mismo equipo en cada k (en k=4: Year, Weight, KM, HP) — así que los dos
+  golosos aciertan. No siempre pasa: con predictores más enredados, forward y backward toman caminos distintos
+  y ninguno garantiza el óptimo.</p>
   <div class="callout"><strong>Aviso k=8:</strong> con las 8, un fold de CV cae a 0,57 (media 0,805): Age+Year+cc
   redundantes desestabilizan (0019). Más variables no solo no ayudan: a veces rompen.</div>
 
   <h2>4 · Figura: criterios y codo</h2>
   <figure>
     <img src="../assets/img/toyota/0020-best-subset-stepwise-fig1.png" alt="AIC y BIC por cantidad de variables y R cuadrado de validación con codo en 4">
-    <figcaption>Fig. 1 — Izquierda: AIC minimiza en 7, BIC en 5. Derecha: CV-R² se ameseta en k=4 (0,867) y k=8
+    <figcaption>Fig. 2 — Izquierda: AIC minimiza en 7, BIC en 5. Derecha: CV-R² se ameseta en k=4 (0,867) y k=8
     cae por inestabilidad. El equipo ganador: Year, Weight, KM, HP.</figcaption>
   </figure>
   <p>Regenerar la figura (mismo resultado versionado en <code>assets/img/toyota/</code>):</p>
-  <pre><code>python scripts/make_figures.py --only best-subset-stepwise</code></pre>
+  <pre><code>python3 scripts/make_figures.py --only best-subset-stepwise</code></pre>
 
   <h2>5 · Quiz (auto-chequeo inmediato)</h2>
   <p class="meta">Elegí una opción por pregunta: el feedback es inmediato.</p>
@@ -86,6 +102,9 @@
   <a href="../RESOURCES.md">RESOURCES.md</a> del curso).</p>
   <p>¿Algo no quedó claro? <strong>Preguntame al agente</strong>: por qué R² no sirve para elegir, AIC vs BIC,
   o cuándo forward falla. Esa pregunta vale más que releer.</p>
+  <p>Orden Bloque D: siguiente en el bloque,
+  <a href="0021-ridge-lasso-caminos.html">0021 · Ridge y Lasso: achicar vs elegir</a>:
+  mié 23, la contracción (multar coeficientes en vez de elegir equipos).</p>
 
   <nav class="lesson-nav">
     <a href="0019-por-que-seleccionar.html">← 0019 Por qué seleccionar</a>

@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>0013 · Redes y árboles — Unidad 3</title>
+  <title>0013 · Redes y árboles — Anexo</title>
   <link rel="stylesheet" href="../assets/styles.css">
 </head>
 <body>
 <main>
   <header class="course">
-    <p class="kicker">Unidad 3 · Visualización de datos · Lección 0013</p>
+    <p class="kicker">Anexo · Contenido extra · Lección 0013</p>
     <h1>Redes y árboles: equipamiento conectado</h1>
     <p><strong>Win de hoy:</strong> dibujar la red de extras que vienen juntos
     (cierre+vidrios: 54 %) y un árbol de 2 preguntas que adivina caro/barato con 86 % de acierto.</p>
@@ -26,7 +26,7 @@
   Solo se dibujan pares que co-ocurren en ≥40 % de los autos, para que la red respire.</p>
   <p>Lecturas: <code>Central_Lock + Powered_Windows = 54 %</code> (el pack confort: cierre y levanta-vidrios viajan
   juntos) y ABS es el <em>hub</em> (conecta con todo porque casi todos lo traen). Esta red es la puerta visual a la
-  Unidad 9: co-ocurrir 54 % es el “soporte” del algoritmo Apriori.</p>
+  Bloque G: co-ocurrir 54 % es el “soporte” del algoritmo Apriori.</p>
 
   <h2>2 · Árboles: preguntas que separan (¿caro o barato?)</h2>
   <p>Un <strong><abbr title="Árbol de decisión: preguntas sí/no encadenadas que separan casos hasta decidir">árbol de decisión</abbr></strong>
@@ -34,17 +34,18 @@
   (corte en la mediana, 9.900 €) con <strong>86,3 %</strong> de acierto en entrenamiento:</p>
   <pre><code>from sklearn.tree import DecisionTreeClassifier
 y = (df["Price"] > df["Price"].median()).astype(int)  # caro = 1
-t = DecisionTreeClassifier(max_depth=2, random_state=42).fit(df[["KM", "Age_08_04", "HP"]], y)
+X3 = df[["KM", "Age_08_04", "HP"]]
+t = DecisionTreeClassifier(max_depth=2, random_state=42).fit(X3, y)
 # raíz: ¿Edad ≤ 57,5 meses? (los jóvenes van a la rama "caro")</code></pre>
   <p>La raíz pregunta edad (≤ 57,5 meses): tiene sentido, es el gradiente de la 0006. Los árboles completos
-  (poda, bosques, boosting) son Unidad 8; hoy importa la idea visual: <strong>reglas legibles</strong>.</p>
+  (poda, bosques, boosting) son Bloque E; hoy importa la idea visual: <strong>reglas legibles</strong>.</p>
 
   <h2>3 · Red vs árbol (y el primo dendrograma)</h2>
   <ul>
     <li><strong>Red:</strong> para relaciones simétricas (A viene con B). No hay dirección ni jerarquía.</li>
     <li><strong>Árbol:</strong> para decisiones jerárquicas (primero edad, después KM). Se lee de arriba abajo.</li>
     <li><strong><abbr title="Dendrograma: árbol que muestra cómo se agrupan los casos por parecido (clustering jerárquico)">Dendrograma</abbr>:</strong>
-    primo del árbol que muestra agrupamientos por parecido; vuelve en la Unidad 7 con clustering jerárquico.</li>
+    primo del árbol que muestra agrupamientos por parecido; vuelve en el Bloque F con clustering jerárquico.</li>
   </ul>
 
   <h2>4 · Figura: la red de packs y el árbol stump</h2>

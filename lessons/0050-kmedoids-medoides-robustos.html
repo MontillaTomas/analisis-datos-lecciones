@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>0050 · K-medoids: el primo robusto — Bloque F</title>
+  <link rel="stylesheet" href="../assets/styles.css">
+</head>
+<body>
+<main>
+  <header class="course">
+    <p class="kicker">Bloque F · Clustering · Lección 0050 · mar 3 nov</p>
+    <h1>K-medoids: el primo robusto de K-Means</h1>
+    <p><strong>Win de hoy:</strong> segmentar en 3 con medoides (autos reales: filas 75, 515 y 1193; grupos 213/576/647),
+    casi idénticos a K-Means pero inmunes al outlier de 32.500 €.</p>
+    <p class="meta"><a href="../index.html">← Índice</a> ·
+    <a href="../reference/toyota-data-dictionary.html">Diccionario Toyota</a> ·
+    <a href="../ToyotaCorolla.csv">CSV</a></p>
+  </header>
+
+  <h2>1 · Medoide vs centroide: el típico ideal vs el típico real</h2>
+  <p>En la <a href="0029-kmeans-segmentos.html">lección 0029, §2</a> cada segmento se resumía en su
+  <strong>centroide</strong>: el promedio del grupo, "el nuevito típico". Pero ningún auto <em>es</em> ese promedio:
+  el centroide de nuevitos (28.775 km, 18.342 €, 20 meses) no existe en ninguna fila; es un auto ideal calculado.
+  El <strong><abbr title="Medoide: el caso real más central del grupo; minimiza la suma de distancias a sus compañeros">medoide</abbr></strong>
+  es lo contrario: el auto <em>real</em> más central del grupo, la fila cuya suma de distancias a sus compañeros es
+  mínima. Si el centroide es "el promedio de la familia", el medoide es "el primo que mejor la representa".</p>
+  <p><strong><abbr title="K-medoids: particiona en k grupos con medoides (casos reales) en vez de centroides (promedios)">K-medoids</abbr></strong>
+  es K-Means con esa única diferencia: los centros son filas del dataset, no promedios. Todo lo demás se parece:
+  pide k por adelantado (0031: codo y silueta siguen valiendo) y alterna asignar y mejorar hasta converger.</p>
+
+  <h2>2 · PAM en 10 líneas (numpy puro, sin sklearn-extra)</h2>
+  <p>El algoritmo clásico de K-medoids se llama
+  <strong><abbr title="PAM: Partitioning Around Medoids; asigna al medoide más cercano y prueba swaps hasta que el costo deja de bajar">PAM</abbr></strong>
+  (<em>Partitioning Around Medoids</em>): cada auto se asigna a su medoide más cercano, se prueba cambiar
+  (<strong><abbr title="Swap: intercambio de un medoide por un no-medoide; PAM se queda con el que más baja el costo">swap</abbr></strong>)
+  cada medoide por cada no-medoide, y se queda con el cambio que más baja el
+  <strong><abbr title="Costo PAM: suma de distancias de cada caso a su medoide; PAM lo minimiza">costo</abbr></strong>
+  (suma de distancias a los medoides). scikit-learn no trae K-medoids (vive en <code>sklearn-extra</code>, fuera del
+  stack del curso), así que lo escribimos a mano con numpy +
+  <code>pairwise_distances</code>, sobre el mismo <code>Xs</code> estandarizado de 0029 (KM/Price/Edad, seed 42):</p>
+  <pre><code>import numpy as np
+from sklearn.metrics import pairwise_distances
+
+D = pairwise_distances(Xs)            # matriz 1436 × 1436, una sola vez
+rng = np.random.default_rng(42)
+med = np.sort(rng.choice(len(Xs), 3, replace=False))  # 3 medoides al azar
+
+def costo(med):                       # cada auto paga su distancia al medoide más cercano
+    return D[:, med].min(axis=1).sum()
+
+actual = costo(med)
+mejora = True
+while mejora:                         # PAM: probar swaps
+    mejora = False
+    for i, m in enumerate(med):
+        for j in range(len(Xs)):
+            if j in med: continue
+            prueba = med.copy(); prueba[i] = j
+            if costo(prueba) &lt; actual:
+                med, actual, mejora = np.sort(prueba), costo(prueba), True
+grupos = D[:, med].argmin(axis=1)     # filas 75/515/1193 · n = 213/576/647</code></pre>
+  <p>Resultado (computado en vivo, no a mano): medoides en las <strong>filas 75, 515 y 1193</strong>, costo total
+  <strong>1.246,98</strong> y tamaños <strong>213/576/647</strong> — nuevitos (17.815 €, 29.992 km, 22 meses),
+  medios (10.820 €, 51.568 km, 53 meses) y veteranos (8.320 €, 96.325 km, 69 meses). Casi los mismos 3 segmentos de
+  K-Means (189/664/583): cuando dos métodos distintos cuentan la misma historia, la historia es sólida. Y los
+  medoides se pueden señalar con el dedo: la fila 75 (28.000 km, 16.950 €, 23 meses), la 515 (52.149 km,
+  10.750 €, 55 meses) y la 1193 (89.983 km, 8.450 €, 70 meses).</p>
+
+  <h2>3 · Robustez (y su precio)</h2>
+  <p>El Corolla de 32.500 € (fila 109) arrastra el centroide de nuevitos hacia arriba: la media suma ese precio y lo
+  reparte. Al medoide no lo mueve: sigue siendo la fila 75, un auto real típico, porque cambiar de medoide exigiría
+  que el outlier fuera central para cientos de autos, y no lo es. En la figura se ve: la X roja (centroide) y la
+  ★ negra (medoide) casi coinciden salvo donde el outlier tira.</p>
+  <p>Costo honesto: PAM prueba ~k·n swaps por pasada (acá 3 × 1436 ≈ 4.300 costos por vuelta), mucho más caro que
+  recalcular 3 promedios. Para n grande existe
+  <strong><abbr title="CLARA: K-medoids sobre muestras; corre PAM en submuestras y se queda con el mejor resultado">CLARA</abbr></strong>:
+  correr PAM sobre varias muestras chicas y quedarse con el mejor resultado.</p>
+
+  <h2>4 · Figura: centroides (X) vs medoides (★)</h2>
+  <figure>
+    <img src="../assets/img/toyota/0050-kmedoids-medoides-robustos-fig1.png" alt="Scatter KM-Precio con clusters PAM, centroides K-Means y medoides PAM">
+    <figcaption>Fig. 1 — PAM k=3: los ★ negros (medoides, autos reales) caen casi sobre las X rojas (centroides
+    K-Means de 0029). Anotado: el Corolla de 32.500 €, que tira de la media pero no del medoide.</figcaption>
+  </figure>
+  <p>Regenerar la figura (mismo resultado versionado en <code>assets/img/toyota/</code>):</p>
+  <pre><code>python3 scripts/make_figures.py --only kmedoids-medoides-robustos</code></pre>
+
+  <h2>5 · Quiz (auto-chequeo inmediato)</h2>
+  <p class="meta">Elegí una opción por pregunta: el feedback es inmediato.</p>
+
+  <div class="quiz" id="q1">
+    <strong>P1 · El medoide de un grupo es…</strong>
+    <label><input type="radio" name="q1" value="0"> El promedio ideal calculado</label>
+    <label><input type="radio" name="q1" value="1"> Un centro inventado cualquiera</label>
+    <label><input type="radio" name="q1" value="2"> El auto real central</label>
+    <label><input type="radio" name="q1" value="3"> El outlier más extremo</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <div class="quiz" id="q2">
+    <strong>P2 · El outlier no mueve al medoide porque…</strong>
+    <label><input type="radio" name="q2" value="0"> Sigue siendo auto típico</label>
+    <label><input type="radio" name="q2" value="1"> Promedia todos los precios</label>
+    <label><input type="radio" name="q2" value="2"> Borra outliers del dataset</label>
+    <label><input type="radio" name="q2" value="3"> Ignora todas las distancias</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <div class="quiz" id="q3">
+    <strong>P3 · PAM es más caro que K-Means porque…</strong>
+    <label><input type="radio" name="q3" value="0"> PAM ordena todos los datos</label>
+    <label><input type="radio" name="q3" value="1"> PAM prueba miles de swaps</label>
+    <label><input type="radio" name="q3" value="2"> K-Means promedia grupos enteros siempre</label>
+    <label><input type="radio" name="q3" value="3"> Ambos cuestan exactamente lo mismo</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <h2>6 · Fuente primaria y cierre</h2>
+  <p><strong>Para profundizar (1 fuente):</strong>
+  Tan, Steinbach &amp; Kumar, <em>Introduction to Data Mining</em> — capítulo de clustering (métodos particionales)
+  (<a href="https://www-users.cs.umn.edu/~kumar001/dmbook/">dmbook</a>, también en
+  <a href="../RESOURCES.md">RESOURCES.md</a> del curso). Como segunda referencia, la
+  <a href="https://scikit-learn.org/stable/modules/generated/sklearn.metrics.pairwise_distances.html">documentación de
+  <code>pairwise_distances</code> en scikit-learn</a>.</p>
+  <p>Orden Bloque F: seguí en la <a href="0031-validar-grupos-codo-silueta.html">lección 0031 (mié 4: validar con codo y silueta)</a>.</p>
+  <p>¿Algo no quedó claro? <strong>Preguntame al agente</strong>: medoide vs centroide en tu dato, por qué PAM converge,
+  o cuándo pagar su costo. Esa pregunta vale más que releer.</p>
+
+  <nav class="lesson-nav">
+    <a href="0049-tecnologias-stack-clase.html">← 0049 El stack</a>
+    <a href="../index.html">Índice ↑</a>
+    <a href="0051-calidad-ventajas-cierre.html">0051 Calidad →</a>
+  </nav>
+  <p class="meta">Ver también: <a href="../index.html">índice del curso</a> ·
+  <a href="../reference/toyota-data-dictionary.html">diccionario Toyota</a> ·
+  <a href="../reference/analisis-ejemplo-ols.html">análisis OLS de ejemplo</a></p>
+</main>
+<script>
+(function(){
+  var answers = {q1: 2, q2: 0, q3: 1};
+  var msgs = {
+    q1: ["Correcto: el medoide es una fila real, la más central.",
+         "No: el medoide es un auto real, no un promedio."],
+    q2: ["Correcto: el medoide típico no se corre por un extremo.",
+         "No: PAM no promedia ni borra; elige un caso típico."],
+    q3: ["Correcto: miles de swaps cuestan más que 3 promedios.",
+         "No: PAM evalúa swaps; K-Means solo promedia."]
+  };
+  ["q1","q2","q3"].forEach(function(id){
+    var box = document.getElementById(id);
+    var fb = box.querySelector(".feedback");
+    box.addEventListener("change", function(e){
+      var ok = parseInt(e.target.value, 10) === answers[id];
+      fb.textContent = ok ? msgs[id][0] : msgs[id][1];
+      fb.className = "feedback " + (ok ? "ok" : "no");
+    });
+  });
+})();
+</script>
+</body>
+</html>

@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>0014 · Mapas, texto y dos visualizaciones — Unidad 3</title>
+  <title>0014 · Mapas, texto y dos visualizaciones — Anexo</title>
   <link rel="stylesheet" href="../assets/styles.css">
 </head>
 <body>
 <main>
   <header class="course">
-    <p class="kicker">Unidad 3 · Visualización de datos · Lección 0014</p>
+    <p class="kicker">Anexo · Contenido extra · Lección 0014</p>
     <h1>Mapas, texto y dos visualizaciones</h1>
     <p><strong>Win de hoy:</strong> distinguir visualización de información vs científica, entender qué piden los
     mapas (y por qué Toyota no da), y convertir el texto de <code>Model</code> en barras contables.</p>
@@ -21,7 +21,7 @@
   <h2>1 · Dos visualizaciones: abstracta vs física</h2>
   <ul>
     <li><strong><abbr title="Info-vis: visualización de información; datos abstractos sin forma física (tablas, redes)">Visualización de información</abbr>:</strong>
-    datos abstractos, sin forma física: tablas, redes, jerarquías. Todo lo hecho en U3 (barras, scatters, heatmaps,
+    datos abstractos, sin forma física: tablas, redes, jerarquías. Todo lo hecho en Bloque B (barras, scatters, heatmaps,
     la red 0013) vive acá: el diseñador elige la geometría.</li>
     <li><strong><abbr title="Sci-vis: visualización científica; datos con geometría real (mapas, volúmenes, superficies)">Visualización científica</abbr>:</strong>
     datos <em>con</em> geometría real: un mapa respeta continentes, un corte médico respeta el cuerpo. Acá la
@@ -38,7 +38,7 @@
   <code>groupby("ciudad") → coroplético</code>. Dos primos del programa, en una línea cada uno:</p>
   <ul>
     <li><strong><abbr title="SOM/Kohonen: red que aplana datos de muchas dimensiones a una grilla 2D preservando vecinos">Mapas de Kohonen (SOM)</abbr>:</strong>
-    red neuronal que aplana muchas dimensiones a una grilla 2D donde vecinos = parecidos. Idea prima de PCA (U7).</li>
+    red neuronal que aplana muchas dimensiones a una grilla 2D donde vecinos = parecidos. Idea prima de PCA (Bloque D).</li>
     <li><strong><abbr title="Galaxias de noticias: documentos como estrellas; cerca = tema parecido">Galaxias (de noticias)</abbr>:</strong>
     documentos como estrellas: cerca = tema parecido. La misma idea que la red 0013, con textos.</li>
   </ul>
@@ -63,9 +63,9 @@ print(c.most_common(5))  # 16V, 1.6, TERRA, 4/5-Doors, LINEA</code></pre>
   </figure>
   <p>Regenerar la figura (mismo resultado versionado en <code>assets/img/toyota/</code>):</p>
   <pre><code>python scripts/make_figures.py --only mapas-texto-dos-visualizaciones</code></pre>
-  <div class="callout"><strong>Cierre de Unidad 3.</strong> 0009 eligió gráficos por tipo, 0010 les dio color,
+  <div class="callout"><strong>Cierre visual.</strong> 0009 eligió gráficos por tipo, 0010 les dio color,
   0011 los hizo honestos, 0012 los volvió multivariados, 0013 dibujó relaciones y reglas, y hoy cerró el mapa
-  conceptual. Lo que sigue (U4): qué hacer cuando los datos <em>faltan</em>.</div>
+  conceptual. Lo que sigue (Bloque C): qué hacer cuando los datos <em>faltan</em>.</div>
 
   <h2>5 · Quiz (auto-chequeo inmediato)</h2>
   <p class="meta">Elegí una opción por pregunta: el feedback es inmediato.</p>

@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>0054 · Arquitecturas y criterios: cierre RNA — Bloque H</title>
+  <link rel="stylesheet" href="../assets/styles.css">
+</head>
+<body>
+<main>
+  <header class="course">
+    <p class="kicker">Bloque H · RNA en el análisis de datos · Lección 0054 · mar 1 dic</p>
+    <h1>Arquitecturas y criterios: cuándo la red, cuándo otra cosa</h1>
+    <p><strong>Win de hoy:</strong> más neuronas = más <strong>capacidad</strong> (de (5,) a (100,50) el R² train sube
+    0,77 → 0,84 mientras el test se estanca en 0,83): esa brecha es el <strong>sobreajuste</strong> naciendo. Mapa de
+    arquitecturas + tabla de criterios para elegir MLP, lineal o bosques sin adivinar.</p>
+    <p class="meta"><a href="../index.html">← Índice</a> ·
+    <a href="../reference/toyota-data-dictionary.html">Diccionario Toyota</a> ·
+    <a href="../ToyotaCorolla.csv">CSV</a></p>
+  </header>
+
+  <h2>1 · De MLP chico a red profunda: el mapa de arquitecturas</h2>
+  <p>El MLP de la <a href="0053-neurona-mlp-precio.html">lección 0053</a> era 2 → 20 → 1. Si agregás neuronas o capas
+  llegás a una <strong><abbr title="Red profunda: red con varias capas ocultas; cada capa aprende rasgos más abstractos">red profunda</abbr></strong>,
+  y con ella crece su <strong><abbr title="Capacidad: qué tan complicadas pueden ser las curvas que una red aprende">capacidad</abbr></strong>:
+  qué tan complicadas pueden ser las curvas que aprende. Cuántas capas, cuántas neuronas, qué activación: todo eso son
+  <strong><abbr title="Hiperparámetro: ajuste que elegís vos antes de entrenar (capas, neuronas, alpha); no se aprende solo">hiperparámetros</abbr></strong>
+  (los elegís vos; los pesos los aprende la red). Mapa de las arquitecturas más usadas, una línea cada una:</p>
+  <table>
+    <tr><th>Arquitectura</th><th>Idea en una línea</th><th>Dato típico</th></tr>
+    <tr><td>MLP</td><td>Capas densas: cada neurona ve todo lo anterior (la de 0053)</td><td>Tabular (Toyota)</td></tr>
+    <tr><td>CNN</td><td>Filtros que barren buscando patrones locales (bordes, texturas)</td><td>Imágenes</td></tr>
+    <tr><td>RNN / LSTM</td><td>Conexiones que miran atrás: memoria de lo que vino antes</td><td>Secuencias, texto</td></tr>
+    <tr><td>Autoencoders</td><td>Comprimen y reconstruyen: lo que no reconstruye bien es raro</td><td>Compresión, anomalías</td></tr>
+  </table>
+  <p>Línea honesta: en este curso <strong>solo corre el MLP</strong> (tabular Toyota, sklearn en stack); CNN, RNN y
+  autoencoders quedan como mapa — saber que existen y para qué dato sirve cada una (§2–§3 vuelven al MLP con
+  números).</p>
+
+  <h2>2 · Overfitting con números: la brecha que se abre</h2>
+  <p>Mismo MLP de 0053 (mismo split 80/20, semilla 42, mismos Xs), cambiando solo la capacidad. Train sube siempre;
+  test sube al principio y después se estanca (+0,069, +0,011, +0,002): la red gigante compra 0,002 de test con
+  cien veces más parámetros. Esa divergencia es la firma del
+  <strong><abbr title="Overfitting (sobreajuste): train sube y validación se estanca o cae; la red memoriza ruido">overfitting</abbr></strong>
+  (sobreajuste). Su espejo, red tan chica que ni train aprende, es el
+  <strong><abbr title="Underfitting (subajuste): ni train aprende; el modelo es demasiado simple para el dato">underfitting</abbr></strong>
+  (subajuste).</p>
+  <table>
+    <tr><th>Capas ocultas</th><th>R² train</th><th>R² test</th><th>Lectura</th></tr>
+    <tr><td>(5,)</td><td>0,7742</td><td>0,7491</td><td>Chica: aprende poco (casi subajuste)</td></tr>
+    <tr><td>(20,)</td><td>0,8263</td><td>0,8185</td><td>La de 0053: punto dulce</td></tr>
+    <tr><td>(100,)</td><td>0,8376</td><td>0,8292</td><td>Más train, test casi igual</td></tr>
+    <tr><td>(100, 50)</td><td>0,8428</td><td>0,8315</td><td>Gigante: +0,002 de test, sobreajuste naciendo</td></tr>
+  </table>
+  <p>Ojo honesto: acá el test no <em>cae</em> porque los defaults nos cuidan — <code>alpha=0.0001</code> ya regulariza
+  y adam frena solo por tolerancia (la (100,50) frenó a las 85 de 2000 iters). Los remedios formales en sklearn son
+  tres: <strong>1)</strong> subir <code>alpha</code> (regularización L2, la misma idea del ridge de la
+  <a href="0021-ridge-lasso-caminos.html">lección 0021</a>); <strong>2)</strong> <code>early_stopping=True</code>
+  (frena cuando un 10% reservado deja de mejorar: la (100,50) frenó a las 41 iters con R² 0,84/0,83, casi idéntico
+  gastando la mitad); <strong>3)</strong> menos neuronas (volver a la (20,) del punto dulce).</p>
+
+  <h2>3 · Criterios de uso: MLP vs lineal vs árboles/bosques</h2>
+  <p>El corazón de hoy: con el mismo Toyota pasaron el lineal
+  (<a href="0003-regresion-lineal-precio-km.html">0003</a>), los árboles y bosques
+  (<a href="0035-naive-bayes-arboles.html">0035</a>/<a href="0036-random-forest-boosting.html">0036</a>) y ahora el MLP.
+  ¿Cuándo cada uno?</p>
+  <table>
+    <tr><th>Criterio</th><th>Lineal (0003)</th><th>Árboles / bosques (0035/0036)</th><th>MLP (0053)</th></tr>
+    <tr><td>n chico</td><td>Gana: pocos parámetros, estable</td><td>Bien (bosques estabilizan)</td><td>Pierde: se come el ruido</td></tr>
+    <tr><td>No-linealidad</td><td>Pierde: solo rectas</td><td>Bien: cortes por tramos</td><td>Gana: curvas suaves</td></tr>
+    <tr><td>Interpretabilidad</td><td>Total: un β por variable</td><td>Media: importancias</td><td>Nula: caja negra</td></tr>
+    <tr><td>Costo de tuning</td><td>Cero: corre y listo</td><td>Bajo: profundidad y listo</td><td>Alto: capas, alpha, escala</td></tr>
+    <tr><td>Escala obligatoria</td><td>No</td><td>No</td><td>Sí (0053 §3 o explota)</td></tr>
+  </table>
+  <p>Cierre: no hay campeón, hay herramienta para cada dato — el eco del
+  <a href="0051-calidad-ventajas-cierre.html">§2 de la lección 0051</a>, ahora con la fila RNA completa. Pocos datos y
+  explicar por qué → lineal; tabular ruidoso sin tuning → bosques; curva suave con datos de sobra → MLP.</p>
+
+  <h2>4 · Figura: capacidad vs overfitting</h2>
+  <figure>
+    <img src="../assets/img/toyota/0054-arquitecturas-criterios-cierre-fig1.png" alt="R² train y test por tamaño de capa oculta">
+    <figcaption>Fig. 1 — R² train vs test (split 80/20, semilla 42) al crecer la capa oculta: train sube siempre
+    (0,77 → 0,84), test se estanca (0,75 → 0,83): la brecha que se abre es el sobreajuste del §2.</figcaption>
+  </figure>
+  <p>Regenerar la figura (mismo resultado versionado en <code>assets/img/toyota/</code>):</p>
+  <pre><code>python3 scripts/make_figures.py --only arquitecturas-criterios-cierre</code></pre>
+
+  <h2>5 · Quiz (auto-chequeo inmediato)</h2>
+  <p class="meta">Elegí una opción por pregunta: el feedback es inmediato.</p>
+
+  <div class="quiz" id="q1">
+    <strong>P1 · Según el mapa (§1), ¿qué va con qué?</strong>
+    <label><input type="radio" name="q1" value="0"> CNN fotos, RNN series, MLP tabla</label>
+    <label><input type="radio" name="q1" value="1"> MLP todo: una red universal siempre</label>
+    <label><input type="radio" name="q1" value="2"> RNN fotos, CNN series, MLP texto</label>
+    <label><input type="radio" name="q1" value="3"> Autoencoder para todo lo demás obsoleto</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <div class="quiz" id="q2">
+    <strong>P2 · Sobreajuste es cuando…</strong>
+    <label><input type="radio" name="q2" value="0"> Train sube y validación se estanca</label>
+    <label><input type="radio" name="q2" value="1"> Train y test suben siempre parejos</label>
+    <label><input type="radio" name="q2" value="2"> Train baja y validación siempre sube</label>
+    <label><input type="radio" name="q2" value="3"> El loss llega exactamente a cero</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <div class="quiz" id="q3">
+    <strong>P3 · Contra el sobreajuste, en sklearn…</strong>
+    <label><input type="radio" name="q3" value="0"> Subir alpha o frenar temprano</label>
+    <label><input type="radio" name="q3" value="1"> Agregar neuronas sin límite alguno</label>
+    <label><input type="radio" name="q3" value="2"> Quitar la semilla aleatoria fija</label>
+    <label><input type="radio" name="q3" value="3"> Mezclar train con test junto</label>
+    <div class="feedback" aria-live="polite"></div>
+  </div>
+
+  <h2>6 · Fuente primaria y cierre del Bloque H (y del curso)</h2>
+  <p><strong>Para profundizar (1 fuente + 1 secundaria):</strong>
+  Géron, <em>Hands-On Machine Learning</em> — caps. de redes neuronales y arquitecturas (lectura conceptual: el código
+  del curso sigue en sklearn). Secundaria: Hastie, Tibshirani &amp; Friedman,
+  <em>The Elements of Statistical Learning</em> — cap. 11 (redes neuronales).
+  Más contexto en <a href="../RESOURCES.md">RESOURCES</a>.</p>
+  <p>Cierre Bloque H (25 nov–1 dic): neurona (<a href="0053-neurona-mlp-precio.html">0053</a>) → MLP sobre Toyota
+  (<a href="0053-neurona-mlp-precio.html">0053</a>) → arquitecturas + criterios (hoy). Cierre del curso enseñado:
+  del Bloque A (presentación y stack) al Bloque H (RNA), pasando por limpieza, visualización, missingness, selección,
+  regresión, clustering, clasificación, inferencia, muestreo y reglas. Parcial mié 2 dic (sin lección, regla
+  general).</p>
+
+  <nav class="lesson-nav">
+    <a href="0053-neurona-mlp-precio.html">← 0053 Neurona</a>
+    <a href="../index.html">Índice ↑</a>
+    <a href="0055-one-hot-encoding.html">0055 One-hot →</a>
+  </nav>
+</main>
+<script>
+(function(){
+  var answers = {q1: 0, q2: 0, q3: 0};
+  var msgs = {
+    q1: ["Correcto: cada dato pide su arquitectura.",
+         "No: repasá el mapa del §1."],
+    q2: ["Correcto: train↑ con test estancado.",
+         "No: sobreajuste = brecha train-test."],
+    q3: ["Correcto: regularizar o frenar, no agrandar.",
+         "No: más neuronas empeora (§2)."]
+  };
+  ["q1","q2","q3"].forEach(function(id){
+    var box = document.getElementById(id);
+    var fb = box.querySelector(".feedback");
+    box.addEventListener("change", function(e){
+      var ok = parseInt(e.target.value, 10) === answers[id];
+      fb.textContent = ok ? msgs[id][0] : msgs[id][1];
+      fb.className = "feedback " + (ok ? "ok" : "no");
+    });
+  });
+})();
+</script>
+</body>
+</html>

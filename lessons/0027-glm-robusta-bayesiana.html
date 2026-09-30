@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>0027 · GLM, robusta y bayesiana — Unidad 6</title>
+  <title>0027 · GLM, robusta y bayesiana — Anexo</title>
   <link rel="stylesheet" href="../assets/styles.css">
 </head>
 <body>
 <main>
   <header class="course">
-    <p class="kicker">Unidad 6 · Regresión lineal simple y múltiple · Lección 0027</p>
+    <p class="kicker">Anexo · Contenido extra · Lección 0027</p>
     <h1>Más allá de OLS: GLM, robusta y bayesiana</h1>
     <p><strong>Win de hoy:</strong> generalizar OLS en 3 direcciones: <strong><abbr title="GLM: modelo lineal generalizado; familia de error + link (ej. Gamma-log para precios)">GLM</abbr></strong>
     Gamma-log (respeta precio &gt; 0), <strong><abbr title="Robusta: regresión que pesa menos a los extremos (Huber)">robusta</abbr></strong>
@@ -36,17 +36,17 @@
   <p>La regresión bayesiana trata cada coeficiente como distribución: combina <em>prior</em> (lo que creías) con datos
   y entrega <strong><abbr title="Intervalo creíble: rango con 95 % de probabilidad de contener al valor (lectura bayesiana)">intervalo creíble</abbr></strong>
   directo: P(−0,059 &lt; β_KM &lt; −0,051) = 95 %. Bonus teórico: Ridge (0021) <em>es</em> Bayes con prior gaussiano —
-  U5 y U6 eran la misma colina.</p>
+  Ridge y Bayes eran la misma colina.</p>
 
-  <h2>4 · Usos de la regresión (y cierre U6)</h2>
+  <h2>4 · Usos de la regresión (y cierre)</h2>
   <ul>
     <li><strong>Predecir:</strong> tasar el próximo Corolla que entre (0003, 0024).</li>
     <li><strong>Explicar:</strong> “10 mil km ≈ −456 €, aislado” (0024–0025).</li>
     <li><strong>Controlar:</strong> comparar precios <em>a igual</em> edad/peso (parcial, 0025).</li>
     <li><strong>Simular:</strong> ¿y si baja 20 mil km? (what-if con la fórmula).</li>
   </ul>
-  <div class="callout"><strong>Cierre de Unidad 6.</strong> 0003 simple, 0023 correlación, 0024 múltiple, 0025
-  diagnóstico, 0026 polinomial, hoy extensiones. Lo que sigue (U7): agrupar sin target — clustering.</div>
+  <div class="callout"><strong>Cierre de regresión.</strong> 0003 simple, 0023 correlación, 0024 múltiple, 0025
+  diagnóstico, 0026 polinomial, hoy extensiones. Lo que sigue (Bloque F): agrupar sin target — clustering.</div>
 
   <h2>5 · Figura: tres pendientes</h2>
   <figure>

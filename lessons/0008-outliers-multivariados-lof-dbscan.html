@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>0008 · Outliers multivariados — Unidad 2</title>
+  <title>0008 · Outliers multivariados — Bloque B</title>
   <link rel="stylesheet" href="../assets/styles.css">
 </head>
 <body>
 <main>
   <header class="course">
-    <p class="kicker">Unidad 2 · Exploración de datos · Lección 0008</p>
+    <p class="kicker">Bloque B · Análisis Exploratorio de Datos · Lección 0008 · mar 25 ago</p>
     <h1>Outliers multivariados: vecinos, grupos y aislamiento</h1>
     <p><strong>Win de hoy:</strong> cazar raros en <em>combinación</em> (<code>KM+Price+Edad</code>) con tres
     detectores: <abbr title="LOF: local outlier factor; marca puntos más aislados que sus vecinos">LOF</abbr> (31),
@@ -52,7 +52,7 @@ print(lof.sum())  # 31 (la fila 43 está entre ellos)</code></pre>
   <pre><code>from sklearn.cluster import DBSCAN
 db = DBSCAN(eps=0.35, min_samples=10).fit(X).labels_ == -1
 print(db.sum())  # 167 ruidos en 3 grupos</code></pre>
-  <p class="meta">DBSCAN vuelve en la Unidad 7 como algoritmo de clustering; hoy lo usamos solo como detector.</p>
+  <p class="meta">DBSCAN vuelve en el Bloque F como algoritmo de clustering; hoy lo usamos solo como detector.</p>
 
   <h2>5 · Por aislamiento: Isolation Forest, lo raro se aísla rápido (72)</h2>
   <p><strong>Isolation Forest</strong> hace lo inverso: corta el espacio al azar una y otra vez. Un auto normal,
@@ -70,9 +70,11 @@ print(iso.sum())  # 72 (la fila 43 también está)</code></pre>
     <tr><td>Isolation Forest</td><td>72</td><td>Raro = se aísla con pocos cortes</td></tr>
   </table>
   <p>Solo <strong>16 autos están en las tres listas</strong> (la fila 43 es uno): cada método mira distinto y
-  sospecha distinto. No hay “el” detector correcto; hay consenso y criterio. Cierre de Unidad 2: limpiar (0004),
-  dar forma (0005), explorar (0006) y cazar rarezas (0007–0008). Recién ahora los datos están listos para contar
-  historias (U3) y modelar (U5–U9).</p>
+  sospecha distinto. No hay “el” detector correcto; hay consenso y criterio.</p>
+  <p><strong>Cierre EDA mar 25:</strong> explorar (0006) + cazar rarezas (0007–0008). Contar historias con gráficos es mié 26
+  (0009–0012, 0045) y modelar es Bloque D en adelante. La limpieza y el wrangling (0004–0005) se ven en Bloque C
+  (mar 1 sep): acá exploramos el dataset tal como viene.</p>
+  <p>Siguiente en el orden del Bloque B (misma clase, mar 25): <a href="0046-transformaciones-log-discretizar.html">0046 Transformaciones</a> — log y discretización.</p>
 
   <h2>7 · Figura: los 72 de Isolation Forest y el conteo</h2>
   <figure>

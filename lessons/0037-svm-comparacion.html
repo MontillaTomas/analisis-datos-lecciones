@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>0037 · SVM y comparación final — Unidad 8</title>
+  <title>0037 · SVM y comparación final — Bloque E</title>
   <link rel="stylesheet" href="../assets/styles.css">
 </head>
 <body>
 <main>
   <header class="course">
-    <p class="kicker">Unidad 8 · Clasificación · Lección 0037</p>
+    <p class="kicker">Bloque E · Clasificación · Lección 0037 · mar 20 oct</p>
     <h1>SVM y comparación final: el torneo de los 7 algoritmos</h1>
     <p><strong>Win de hoy:</strong> la
     <strong><abbr title="SVM: busca la frontera que deja el mayor margen libre entre las dos clases">SVM</abbr></strong>
@@ -43,7 +43,7 @@
   <p>Regenerar la figura (mismo resultado versionado en <code>assets/img/toyota/</code>):</p>
   <pre><code>python scripts/make_figures.py --only svm-comparacion</code></pre>
 
-  <h2>3 · Torneo final U8 (CV 5-fold, mismos folds, mismo target)</h2>
+  <h2>3 · Torneo final Bloque E (CV 5-fold, mismos folds, mismo target)</h2>
   <table>
     <tr><th>#</th><th>Modelo</th><th>CV accuracy</th><th>Lección</th><th>Veredicto en 5 palabras</th></tr>
     <tr><td>1</td><td>SVM RBF (C=5)</td><td><strong>87,7 %</strong></td><td>0037 (hoy)</td><td>Gana por nariz técnica</td></tr>
@@ -107,8 +107,9 @@ print(cross_val_score(SVC(kernel="rbf", C=5.0), X, y, cv=cv).mean().round(4))  #
   <p><strong>Para profundizar (1 fuente):</strong>
   James et al., <em>An Introduction to Statistical Learning</em> — cap. 9 (SVM).
   Más contexto en <a href="../RESOURCES.md">RESOURCES</a>.</p>
-  <p>Cierre U8: k-NN (0033) → logística (0034) → NB+árboles (0035) → bosques (0036) → SVM+torneo (0037).
-  Siguiente unidad: <a href="0038-muestreo-sesgo.html">0038 · Muestreo y sesgo (cierre U1)</a>.</p>
+  <p>Cierre Bloque E (6–20 oct): k-NN (0033) → logística (0034) → NB+árboles (0035) →
+  bosques (0036) → SVM+torneo (hoy); techo del problema ~87–88 %.
+  Siguiente en el orden: <a href="0028-distancias-similaridad.html">0028 · Distancias y similaridad</a> (Bloque F, mar 27 oct: distancias).</p>
 
   <nav class="lesson-nav">
     <a href="0036-random-forest-boosting.html">← 0036 Bosques</a>

@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>0035 · Naive Bayes y árboles — Unidad 8</title>
+  <title>0035 · Naive Bayes y árboles — Bloque E</title>
   <link rel="stylesheet" href="../assets/styles.css">
 </head>
 <body>
 <main>
   <header class="course">
-    <p class="kicker">Unidad 8 · Clasificación · Lección 0035</p>
+    <p class="kicker">Bloque E · Clasificación · Lección 0035 · mar 13 oct</p>
     <h1>Naive Bayes y árboles: el ingenuo que funciona y las reglas sí/no</h1>
     <p><strong>Win de hoy:</strong>
     <strong><abbr title="Naive Bayes: clasificador probabilístico que supone (ingenuamente) independencia entre variables">Naive Bayes</abbr></strong>
@@ -25,7 +25,7 @@
   <p>Bayes dice: <code>P(caro | datos) ∝ P(datos | caro) · P(caro)</code>. El problema es
   <code>P(datos | caro)</code>: la chance conjunta de (edad, KM, HP, cc, peso) es imposible de estimar directo.
   El truco <em>naive</em> (ingenuo): suponer que las variables son <strong>independientes</strong> y multiplicar
-  las chances una por una. Sabemos que es falso (edad y KM van juntas, <a href="0023-correlacion-vs-regresion.html">lección 0023</a>),
+  las chances una por una. Sabemos que es falso (edad y KM van juntas, <a href="0023-correlacion-vs-regresion.html">lección 0023</a> (Bloque D)),
   pero igual da <strong>83,5 %</strong> (CV): para <em>ordenar</em> clases alcanza con que los errores se compensen.
   Rápido, sin perillas, gran baseline.</p>
 
@@ -37,14 +37,14 @@
   <figure>
     <img src="../assets/img/toyota/0035-naive-bayes-arboles-fig1.png" alt="Train vs CV por profundidad y árbol de decisión dibujado">
     <figcaption>Fig. 1 — Izquierda: train trepa a ~100 % con la profundidad (memoriza); CV tiene techo en d=5 (87,3 %).
-    Derecha: árbol depth=2 — la raíz pregunta edad ≤ 57,5 (el mismo corte de la lección 0013).</figcaption>
+    Derecha: árbol depth=2 — la raíz pregunta edad ≤ 57,5 (el mismo corte de la lección 0013 (Anexo)).</figcaption>
   </figure>
   <p>Lectura triple: <strong>(1)</strong> d=5 gana (CV 0,8725), empatado con k-NN y logística (~87 %):
   tres algoritmos distintos, mismo techo del problema. <strong>(2)</strong> Sin límite, train 99,9 % pero CV 83,7 %:
   <strong><abbr title="Sobreajuste: memorizar el train (ruido incluido) y fallar en datos nuevos">sobreajuste</abbr></strong>
-  de manual. <strong>(3)</strong> La raíz (edad ≤ 57,5) coincide con el árbol de la lección 0013: la señal es robusta.</p>
+  de manual. <strong>(3)</strong> La raíz (edad ≤ 57,5) coincide con el árbol de la lección 0013 (Anexo): la señal es robusta.</p>
   <p>Regenerar la figura (mismo resultado versionado en <code>assets/img/toyota/</code>):</p>
-  <pre><code>python scripts/make_figures.py --only naive-bayes-arboles</code></pre>
+  <pre><code>python3 scripts/make_figures.py --only naive-bayes-arboles</code></pre>
 
   <h2>3 · Tabla del partido (CV 5-fold, mismo target y folds)</h2>
   <table>
@@ -107,7 +107,7 @@ print(export_text(DecisionTreeClassifier(max_depth=2, random_state=42).fit(X, y)
   <p><strong>Para profundizar (1 fuente):</strong>
   James et al., <em>An Introduction to Statistical Learning</em> — cap. 4.4 (NB) y 8.1 (árboles).
   Más contexto en <a href="../RESOURCES.md">RESOURCES</a>.</p>
-  <p>Siguiente: <a href="0036-random-forest-boosting.html">0036 · Random forest y boosting</a>:
+  <p>Siguiente en el orden del Bloque E: <a href="0036-random-forest-boosting.html">0036 · Random forest y boosting</a> (mié 14):
   si un árbol memoriza, ¿qué tal un bosque que vota?</p>
 
   <nav class="lesson-nav">

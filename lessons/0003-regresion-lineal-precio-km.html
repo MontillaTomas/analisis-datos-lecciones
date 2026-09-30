@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>0003 · Regresión lineal Price ~ KM — Unidad 6</title>
+  <title>0003 · Regresión lineal Price ~ KM — Bloque D</title>
   <link rel="stylesheet" href="../assets/styles.css">
 </head>
 <body>
 <main>
   <header class="course">
-    <p class="kicker">Unidad 6 · Regresión lineal simple y múltiple · Lección 0003</p>
+    <p class="kicker">Bloque D · Regresión lineal, selección y regularización · Lección 0003 · mié 2 sep</p>
     <h1>Regresión lineal: la recta que explica el precio por KM</h1>
     <p><strong>Win de hoy:</strong> ajustar <code>Price ~ KM</code> con
     <abbr title="OLS: Ordinary Least Squares, mínimos cuadrados ordinarios; elige la recta que minimiza los errores al cuadrado">OLS</abbr>,
@@ -40,9 +40,21 @@
   <strong><abbr title="Dispersión: nube de puntos que muestra cómo se reparten dos variables en el plano">dispersión de los datos</abbr></strong>:
   cada auto es un punto en el plano precio–kilómetro. Si la nube baja hacia la derecha, H₁ tiene chances; si es una nube
   redonda sin dirección, H₀ sobrevive. En Toyota la nube baja: correlación <strong>r = −0,57</strong>.</p>
+  <p>El ejemplo de clase antes de Toyota: cigarrillos vs mortalidad. Primero la nube sola (¿ves dirección?),
+  después la misma nube con su recta de regresión: así se ve “H₁ tiene chances”.</p>
+  <figure>
+    <img src="../assets/img/catedra/regresion/cigarrillos-mortalidad-dispersion.png" alt="Dispersión de cigarrillos contra mortalidad sin recta">
+    <figcaption>Fig. 1 — Cigarrillos vs mortalidad: la nube antes de ajustar.
+    Fuente: cátedra UTN-FRT, clase de regresión lineal.</figcaption>
+  </figure>
+  <figure>
+    <img src="../assets/img/catedra/regresion/cigarrillos-mortalidad-recta.png" alt="Dispersión de cigarrillos contra mortalidad con recta de regresión">
+    <figcaption>Fig. 2 — La misma nube con su recta: relación positiva a la vista.
+    Fuente: cátedra UTN-FRT, clase de regresión lineal.</figcaption>
+  </figure>
   <figure>
     <img src="../assets/img/toyota/0003-regresion-lineal-precio-km-fig1.png" alt="Dispersión de precio contra kilómetros con recta OLS">
-    <figcaption>Fig. 1 — <abbr title="Scatterplot: gráfico de dispersión; cada punto es un auto con su KM y su precio">Dispersión</abbr>
+    <figcaption>Fig. 3 — <abbr title="Scatterplot: gráfico de dispersión; cada punto es un auto con su KM y su precio">Dispersión</abbr>
     <code>Price</code> vs <code>KM</code> (1436 autos) con la recta
     <abbr title="OLS: mínimos cuadrados ordinarios; minimiza la suma de errores al cuadrado">OLS</abbr>:
     <code>precio ≈ 14.508 − 0,0551 × KM</code>. Cada 10.000 km restan ≈ 551 €.
@@ -71,6 +83,14 @@ print(df["Price"].corr(df["KM"]))  # -0.57</code></pre>
   es una recta que busca describir el comportamiento de los puntos en el plano (estos puntos pueden ser precio–kilómetro).
   Su ecuación poblacional es:</p>
   <p><strong>Price = β₀ + β₁ · KM + ε</strong></p>
+  <p>En la notación del pizarrón: <strong>y = b₀ + b₁·(x + e)</strong>, donde e es la variable de error
+  con <strong>E(e) = 0</strong> (los errores se cancelan en promedio: a veces sumás de más, a veces de menos).
+  b₀/b₁ son los mismos β₀/β₁ de arriba con otro sombrero.</p>
+  <figure>
+    <img src="../assets/img/catedra/regresion/minimos-cuadrados-esquema.png" alt="Esquema de mínimos cuadrados: recta y desvíos">
+    <figcaption>Fig. 4 — Mínimos cuadrados: la recta que minimiza los desvíos al cuadrado.
+    Fuente: cátedra UTN-FRT, clase de regresión lineal.</figcaption>
+  </figure>
   <ul>
     <li><strong>β₀ (<abbr title="Intercepto: precio predicho cuando KM = 0; la base de la recta">intercepto</abbr>)</strong>: la base. Estimado ≈ <strong>14.508 €</strong>: lo que valdría un Corolla con 0 km según la recta (extrapolación, ningún auto tiene 0 km reales salvo los <code>KM=1</code> sospechosos).</li>
     <li><strong>β₁ (<abbr title="Pendiente: cuánto cambia el precio por cada kilómetro extra">pendiente</abbr>)</strong>: el efecto. Estimada ≈ <strong>−0,0551 €/km</strong> (≈ −551 € cada 10.000 km). Negativa, como pedía H₁.</li>
@@ -102,7 +122,18 @@ print(res.summary())
   <p>El <strong><abbr title="R²: proporción de la variación de la respuesta que explica el modelo; 1 − RSS/TSS">R²</abbr></strong>
   dice qué tan bien ajustan los puntos vs la regresión. Más alto, mejor… hasta cierto punto. Nuestro modelo simple da
   <strong>R² = 0,325</strong>: explica el 32,5 % de las diferencias de precio; el 67,5 % queda en el error (edad, peso,
-  equipamiento, ruido). El modelo múltiple del análisis de ejemplo llega a 0,741 porque suma esas variables.</p>
+  equipamiento, ruido). El modelo múltiple del análisis de ejemplo llega a 0,741 porque suma esas variables.
+  La idea en un esquema: la variación total (SST) se parte en explicada por la recta (SSR) y no explicada (SSE).</p>
+  <figure>
+    <img src="../assets/img/catedra/regresion/sst-ssr-sse-esquema.png" alt="Esquema de SST, SSR y SSE sobre la recta">
+    <figcaption>Fig. 5 — SST = SSR + SSE: total = explicada + no explicada.
+    Fuente: cátedra UTN-FRT, clase de regresión lineal.</figcaption>
+  </figure>
+  <figure>
+    <img src="../assets/img/catedra/regresion/r2-tss-rss-formulas.png" alt="Fórmulas de TSS, RSS y R cuadrado">
+    <figcaption>Fig. 6 — TSS, RSS y R² = 1 − RSS/TSS con fórmulas.
+    Fuente: cátedra UTN-FRT, clase de regresión lineal.</figcaption>
+  </figure>
   <p>Reglas de pulgar de la pizarra (no leyes físicas): el rango de valores “cómodos” está entre <strong>0,65 y 0,95</strong>
   (según la pizarra, entre <strong>0,7 y 0,98</strong>). Si <strong>R² = 1</strong>, el modelo es determinista (predice perfecto:
   sospechá). Si es <strong>0</strong>, la regresión casi no explica la variabilidad de la respuesta. Pero ojo con los matices:</p>
@@ -126,8 +157,13 @@ print(res.summary())
   <strong>RSS ≈ 12.744.882.944</strong> (12,7 mil millones de €²; las unidades al cuadrado suenan raras, por eso en la práctica
   se reporta su raíz como <abbr title="RMSE: Root Mean Squared Error; error típico en las unidades originales">RMSE ≈ 2.979 €</abbr> en muestra).</p>
   <figure>
+    <img src="../assets/img/catedra/regresion/rss-formulas.png" alt="Fórmulas de residuos y RSS">
+    <figcaption>Fig. 7 — Residuos êᵢ y RSS = Σêᵢ²: lo que OLS minimiza.
+    Fuente: cátedra UTN-FRT, clase de regresión lineal.</figcaption>
+  </figure>
+  <figure>
     <img src="../assets/img/toyota/0003-regresion-lineal-precio-km-fig2.png" alt="Residuos contra predicciones e histograma de residuos">
-    <figcaption>Fig. 2 — Diagnóstico de residuos. Izq.: residuos vs predichos, nube centrada en 0 pero con forma de abanico
+    <figcaption>Fig. 8 — Diagnóstico de residuos. Izq.: residuos vs predichos, nube centrada en 0 pero con forma de abanico
     (los caros se predicen peor) y cola alta: falta peso, edad y equipamiento. Der.: histograma con pico en 0 y cola derecha
     (sesgo 1,39): los errores no son una campana perfecta.</figcaption>
   </figure>
@@ -145,7 +181,7 @@ print((resid**2).mean()**0.5)  # RMSE ≈ 2979.1 (en muestra)</code></pre>
   es inestable; si es parejo, es creíble.</p>
   <figure>
     <img src="../assets/img/toyota/0003-regresion-lineal-precio-km-fig3.png" alt="R cuadrado por fold en validación cruzada de 10 pliegues">
-    <figcaption>Fig. 3 — R² por fold (k=10, barajado, semilla 42): entre 0,256 y 0,391, media <strong>0,315 ± 0,042</strong>,
+    <figcaption>Fig. 9 — R² por fold (k=10, barajado, semilla 42): entre 0,256 y 0,391, media <strong>0,315 ± 0,042</strong>,
     <abbr title="RMSE: error típico en CV ≈ 2.973 € ± 265 €">RMSE ≈ 2.973 ± 265 €</abbr> en CV. Estable y parecido al 0,325 en muestra: no hay overfitting grave.</figcaption>
   </figure>
   <pre><code>from sklearn.model_selection import KFold, cross_val_score
@@ -155,7 +191,9 @@ r2 = cross_val_score(m, X, y, cv=kf, scoring="r2")
 print(np.round(r2, 3))
 # [0.366 0.301 0.299 0.305 0.33  0.35  0.391 0.296 0.258 0.256]
 print(r2.mean().round(3), r2.std().round(3))  # 0.315 0.042</code></pre>
-  <div class="callout"><strong>Regla de trabajo.</strong> Reportá siempre el par: R² en muestra (0,325) + R² en K-Fold (0,315 ± 0,042).
+  <div class="callout"><strong>Regla de trabajo.</strong> Para CV general y bootstrap, ver
+  <a href="0047-remuestreo-bootstrap-cv.html">0047 · Remuestreo</a>.
+  Reportá siempre el par: R² en muestra (0,325) + R² en K-Fold (0,315 ± 0,042).
   Si el primero es mucho mayor que el segundo, sospechá overfitting (volvé a la U de la lección 0001). Si ambos son bajos pero la
   pendiente es significativa, tenés un efecto real pero chico: pedí más variables (camino al modelo múltiple).</div>
 

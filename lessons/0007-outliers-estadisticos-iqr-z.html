@@ -3,18 +3,18 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>0007 · Outliers estadísticos: IQR y z — Unidad 2</title>
+  <title>0007 · Outliers estadísticos: IQR y z — Bloque B</title>
   <link rel="stylesheet" href="../assets/styles.css">
 </head>
 <body>
 <main>
   <header class="course">
-    <p class="kicker">Unidad 2 · Exploración de datos · Lección 0007</p>
+    <p class="kicker">Bloque B · Análisis Exploratorio de Datos · Lección 0007 · mar 25 ago</p>
     <h1>Outliers estadísticos: IQR y z-score</h1>
     <p><strong>Win de hoy:</strong> cazar outliers de <code>Price</code> con dos reglas clásicas
     (<abbr title="IQR: rango intercuartílico; Q3 menos Q1, el ancho de la mitad central">IQR</abbr> caza 110,
     <abbr title="z-score: distancia a la media medida en desvíos estándar">z-score</abbr> solo 26) y entender
-    por qué ninguna ve los <code>KM ≤ 100</code> de la 0004.</p>
+    por qué ninguna ve los <code>KM ≤ 100</code> de la 0004 (Bloque C).</p>
     <p class="meta"><a href="../index.html">← Índice</a> ·
     <a href="../reference/toyota-data-dictionary.html">Diccionario Toyota</a> ·
     <a href="../ToyotaCorolla.csv">CSV</a></p>
@@ -23,7 +23,7 @@
   <h2>1 · Outlier: el que se desvía (¿error o rareza real?)</h2>
   <p>Un <strong><abbr title="Outlier: valor que se aleja mucho del resto; puede ser error de carga o un caso real pero raro">outlier</abbr></strong>
   es un valor que se desvía tanto del resto que parece venir de otro mecanismo. La distinción que importa, ya vista
-  en la 0004: <code>cc = 16000</code> es casi seguro un <strong>error</strong> (un cero de más), mientras que
+  en la 0004 (Bloque C): <code>cc = 16000</code> es casi seguro un <strong>error</strong> (un cero de más), mientras que
   <code>Doors = 2</code> puede ser una <strong>rareza real</strong>. La estadística detecta; el analista decide.
   Hoy, dos detectores de una sola columna (<abbr title="Univariado: que mira una sola columna a la vez">univariados</abbr>).</p>
 
@@ -36,6 +36,7 @@ iqr = q3 - q1
 lo, hi = q1 - 1.5*iqr, q3 + 1.5*iqr   # 3200 – 17200
 out_iqr = (df["Price"] &lt; lo) | (df["Price"] &gt; hi)
 print(out_iqr.sum())  # 110 (el más barato: 17.250 €)</code></pre>
+  <p>Cátedra define el boxplot igual (clase EDA, p. 18): mediana, percentiles 25/75, mínimo y máximo, y “valores atípicos (outliers)” afuera. Las vallas 3.200/17.200 son esa misma idea con el factor 1,5·IQR.</p>
   <div class="callout"><strong>Punto ciego:</strong> en <code>KM</code> la valla baja da <strong>−23.031</strong>
   (¡kilometraje negativo!). Como ningún auto tiene KM negativo, el IQR es ciego por abajo: los 9
   <code>KM ≤ 100</code> de la 0004 <strong>no</strong> saltan. La regla supone distribución pareja; <code>KM</code>
@@ -110,6 +111,7 @@ print(df.loc[~out_iqr, "Price"].mean())  # 9945 (sin ellos: −786 €)</code></
   <a href="../RESOURCES.md">RESOURCES.md</a> del curso).</p>
   <p>¿Algo no quedó claro? <strong>Preguntame al agente</strong>: por qué 1,5·IQR, cuándo z miente con sesgo,
   o cómo decidir entre corregir, marcar o excluir. Esa pregunta vale más que releer.</p>
+  <p>Siguiente en el orden del Bloque B (misma clase, mar 25): <a href="0008-outliers-multivariados-lof-dbscan.html">0008 Outliers multivariados</a> — raros en combinación.</p>
 
   <nav class="lesson-nav">
     <a href="0006-eda-sistematico-toyota.html">← 0006 EDA sistemático</a>
